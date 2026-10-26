@@ -65,6 +65,8 @@ RUSTC_ENV = {
 run_binary(
     name = "alert_handler_rust_regs",
     srcs = select({
+        # Scafi_Deprecated has no alert handler; use Egret's register layout.
+        "//hw/top:scafi_deprecated": ["//hw/top_egret/ip_autogen/alert_handler/data:alert_handler.hjson"],
         "//hw/top:egret": ["//hw/top_egret/ip_autogen/alert_handler/data:alert_handler.hjson"],
         "//hw/top:dragonfly": ["//hw/top_dragonfly/ip_autogen/alert_handler/data:alert_handler.hjson"],
     }),
@@ -74,6 +76,7 @@ run_binary(
         "--outfile",
         "$(location :src/otp/alert_handler_regs.rs)",
     ] + select({
+        "//hw/top:scafi_deprecated": ["$(location //hw/top_egret/ip_autogen/alert_handler/data:alert_handler.hjson)"],
         "//hw/top:egret": ["$(location //hw/top_egret/ip_autogen/alert_handler/data:alert_handler.hjson)"],
         "//hw/top:dragonfly": ["$(location //hw/top_dragonfly/ip_autogen/alert_handler/data:alert_handler.hjson)"],
     }),
@@ -247,6 +250,11 @@ rust_library(
         ":ottf",
         "//sw/host/opentitanlib/bindgen:rom_error_enum",
     ] + select({
+        # Scafi_Deprecated has no rv_dm or lc_ctrl TAP; Egret's configs are placeholders.
+        "//hw/top:scafi_deprecated": [
+            "//util/openocd/target:lowrisc-egret.cfg",
+            "//util/openocd/target:lowrisc-egret-lc.cfg",
+        ],
         "//hw/top:egret": [
             "//util/openocd/target:lowrisc-egret.cfg",
             "//util/openocd/target:lowrisc-egret-lc.cfg",
@@ -267,6 +275,13 @@ rust_library(
         "//sw/host/opentitanlib/opentitantool_derive",
     ],
     rustc_env = select({
+        "//hw/top:scafi_deprecated": dicts.add(
+            RUSTC_ENV,
+            {
+                "openocd_riscv_target_cfg": "$(location //util/openocd/target:lowrisc-egret.cfg)",
+                "openocd_lc_target_cfg": "$(location //util/openocd/target:lowrisc-egret-lc.cfg)",
+            },
+        ),
         "//hw/top:egret": dicts.add(
             RUSTC_ENV,
             {

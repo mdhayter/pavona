@@ -7,9 +7,6 @@ load("@rules_rust_bindgen//:defs.bzl", "rust_bindgen", "rust_bindgen_library")
 
 package(default_visibility = ["//visibility:public"])
 
-# NOTE: This variable is modified during scafi_deprecated SW build from prepare_sw.py.
-_TOPLEVEL = "egret"
-
 _SCAFI_DEPRECATED_DEPS = [
     "//sw/device/lib/dif:aon_timer",
     "//sw/device/lib/dif:clkmgr",
@@ -79,7 +76,8 @@ _DRAGONFLY_DEPS = [
     "//sw/device/lib/dif:uart",
 ]
 
-_DEPS = _SCAFI_DEPRECATED_DEPS if _TOPLEVEL == "scafi_deprecated" else select({
+_DEPS = select({
+    "//hw/top:scafi_deprecated": _SCAFI_DEPRECATED_DEPS,
     "//hw/top:egret": _EGRET_DEPS,
     "//hw/top:dragonfly": _DRAGONFLY_DEPS,
 })
@@ -154,10 +152,12 @@ rust_bindgen_library(
         "--allowlist-var=USBDEV_.*_REG_OFFSET",
     ],
     cc_lib = ":difs",
-    clang_flags = [
-        "-DOT_IS_SCAFI_DEPRECATED_REDUCED_SUPPORT_FOR_INTERNAL_USE_ONLY_",
-    ] if _TOPLEVEL == "scafi_deprecated" else [
-    ],
+    clang_flags = select({
+        "//hw/top:scafi_deprecated": [
+            "-DOT_IS_SCAFI_DEPRECATED_REDUCED_SUPPORT_FOR_INTERNAL_USE_ONLY_",
+        ],
+        "//conditions:default": [],
+    }),
     crate_name = "ot_bindgen_dif",
     header = "difs.h",
     rustc_flags = [
@@ -243,6 +243,7 @@ rust_library_group(
         ":dif",
         ":multibits",
     ] + select({
+        "//hw/top:scafi_deprecated": [],
         "//hw/top:egret": [":egret"],
         "//hw/top:dragonfly": [":dragonfly"],
     }),

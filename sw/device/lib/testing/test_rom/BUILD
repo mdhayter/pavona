@@ -43,6 +43,7 @@ pavona_binary(
         "//hw/top_egret:sim_verilator_base",
         "//hw/top_dragonfly:sim_dv_base",
         "//hw/top_dragonfly:sim_verilator_base",
+        "//hw/top_scafi_deprecated:sim_verilator_base",
     ],
     features = ["use_lld"],
     kind = "rom",

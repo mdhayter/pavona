@@ -19,6 +19,7 @@ pavona_test(
         "//hw/top_dragonfly:sim_dv": None,
         "//hw/top_dragonfly:sim_verilator": None,
         "//hw/top_dragonfly:sim_verilator_rom_with_fake_keys": None,
+        "//hw/top_scafi_deprecated:sim_verilator": None,
     },
     verilator = verilator_params(timeout = "long"),
     deps = [

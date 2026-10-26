@@ -56,6 +56,7 @@ rust_library(
         "@crate_index//:strum",
         "@crate_index//:thiserror",
     ] + select({
+        "//sw/device:is_scafi_deprecated": [],
         "//hw/top:egret": ["//hw/top_egret/sw/autogen/chip:top_egret"],
         "//hw/top:dragonfly": ["//hw/top_dragonfly/sw/autogen/chip:top_dragonfly"],
     }),
