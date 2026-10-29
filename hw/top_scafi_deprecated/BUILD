@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -10,6 +11,7 @@ filegroup(
         ["**"],
     ) + [
         "//hw/top_egret:rtl_files",  # Add Egret RTL files for alert_handler_pkg and top_pkg
+        "//hw/top_scafi_deprecated/data:all_files",
         "//hw/top_scafi_deprecated/dv/verilator:all_files",
         "//hw/top_scafi_deprecated/ip:rtl_files",
     ],
@@ -26,6 +28,8 @@ filegroup(
         ],
         allow_empty = True,
         exclude_directories = 0,
-    ),
+    ) + [
+        "//hw/top_scafi_deprecated/data:doc_files",
+    ],
     visibility = ["//visibility:public"],
 )

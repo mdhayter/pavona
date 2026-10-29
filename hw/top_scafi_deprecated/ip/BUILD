@@ -1,4 +1,6 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -19,5 +21,14 @@ filegroup(
         "//hw/top_scafi_deprecated/ip_autogen/rstmgr:rtl_files",
         "//hw/top_scafi_deprecated/ip_autogen/rv_core_ibex:rtl_files",
         "//hw/top_scafi_deprecated/ip_autogen/rv_plic:rtl_files",
+    ],
+)
+
+# Copied and modified from hw/top_egret/ip/BUILD.
+filegroup(
+    name = "block_descriptions",
+    srcs = [
+        "//hw/top_scafi_deprecated/ip/ast/data:ast.hjson",
+        "//hw/top_scafi_deprecated/ip/sensor_ctrl/data:sensor_ctrl.hjson",
     ],
 )
