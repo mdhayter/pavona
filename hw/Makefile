@@ -1,5 +1,6 @@
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -97,6 +98,7 @@ $(tops_gen): %_gen:
 	${PRJ_DIR}/util/gen_top_sv.py -t $(top_complete_hjson) -s $(top_complete_seed_hjson)
 	${PRJ_DIR}/util/gen_top_docs.py -t $(top_complete_hjson)
 	${PRJ_DIR}/util/gen_top_sw.py -t $(top_complete_hjson)
+	${PRJ_DIR}/util/gen_top_host.py -t $(top_complete_hjson)
 
 # This runs cmdgen on all md files of the repo using xargs for parallelism
 cmdgen: top
