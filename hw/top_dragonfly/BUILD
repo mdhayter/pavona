@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -50,6 +51,7 @@ filegroup(
     name = "generated",
     srcs = [
         "//hw/top_dragonfly/data:completecfg",
+        "//hw/top_dragonfly/data:host_desc",
     ] + [ip.attrs.get("regs", None) for ip in DRAGONFLY_IPS],
 )
 
@@ -57,6 +59,7 @@ filegroup(
     name = "gen",
     srcs = [
         "//hw/top_dragonfly/data:gen_completecfg",
+        "//hw/top_dragonfly/data:gen_host_desc",
     ] + [ip.attrs.get("regs", "").replace("regs", "gen_regs") for ip in DRAGONFLY_IPS],
     data = [":generated"],
 )

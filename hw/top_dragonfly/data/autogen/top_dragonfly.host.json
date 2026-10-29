@@ -1,0 +1,679 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "generator": "util/gen_top_host.py",
+  "name": "dragonfly",
+  "addr_spaces": {
+    "hart": {
+      "devices": {
+        "uart0": {
+          "base_addr": 805371904,
+          "size_bytes": 64
+        },
+        "gpio": {
+          "base_addr": 805306368,
+          "size_bytes": 256
+        },
+        "spi_device": {
+          "base_addr": 808517632,
+          "size_bytes": 8192
+        },
+        "i2c0": {
+          "base_addr": 805830656,
+          "size_bytes": 128
+        },
+        "rv_timer": {
+          "base_addr": 806354944,
+          "size_bytes": 512
+        },
+        "otp_ctrl_core": {
+          "base_addr": 806551552,
+          "size_bytes": 65536
+        },
+        "otp_macro_prim": {
+          "base_addr": 806617088,
+          "size_bytes": 32
+        },
+        "lc_ctrl_regs": {
+          "base_addr": 806682624,
+          "size_bytes": 256
+        },
+        "alert_handler": {
+          "base_addr": 806748160,
+          "size_bytes": 2048
+        },
+        "spi_host0": {
+          "base_addr": 808452096,
+          "size_bytes": 64
+        },
+        "pwrmgr_aon": {
+          "base_addr": 809500672,
+          "size_bytes": 128
+        },
+        "rstmgr_aon": {
+          "base_addr": 809566208,
+          "size_bytes": 128
+        },
+        "clkmgr_aon": {
+          "base_addr": 809631744,
+          "size_bytes": 64
+        },
+        "pinmux_aon": {
+          "base_addr": 809893888,
+          "size_bytes": 2048
+        },
+        "aon_timer_aon": {
+          "base_addr": 809959424,
+          "size_bytes": 64
+        },
+        "ast": {
+          "base_addr": 810024960,
+          "size_bytes": 1024
+        },
+        "soc_proxy_core": {
+          "base_addr": 570621952,
+          "size_bytes": 8
+        },
+        "sram_ctrl_ret_aon_regs": {
+          "base_addr": 810549248,
+          "size_bytes": 64
+        },
+        "rv_dm_regs": {
+          "base_addr": 555745280,
+          "size_bytes": 16
+        },
+        "rv_dm_mem": {
+          "base_addr": 262144,
+          "size_bytes": 4096
+        },
+        "rv_plic": {
+          "base_addr": 671088640,
+          "size_bytes": 134217728
+        },
+        "acc": {
+          "base_addr": 571473920,
+          "size_bytes": 131072
+        },
+        "aes": {
+          "base_addr": 554696704,
+          "size_bytes": 256
+        },
+        "hmac": {
+          "base_addr": 554762240,
+          "size_bytes": 8192
+        },
+        "kmac": {
+          "base_addr": 554827776,
+          "size_bytes": 4096
+        },
+        "keymgr_dpe": {
+          "base_addr": 554958848,
+          "size_bytes": 256
+        },
+        "csrng": {
+          "base_addr": 555024384,
+          "size_bytes": 128
+        },
+        "entropy_src": {
+          "base_addr": 555089920,
+          "size_bytes": 256
+        },
+        "edn0": {
+          "base_addr": 555155456,
+          "size_bytes": 128
+        },
+        "edn1": {
+          "base_addr": 555220992,
+          "size_bytes": 128
+        },
+        "sram_ctrl_main_regs": {
+          "base_addr": 555483136,
+          "size_bytes": 64
+        },
+        "sram_ctrl_mbox_regs": {
+          "base_addr": 555548672,
+          "size_bytes": 64
+        },
+        "rom_ctrl0_regs": {
+          "base_addr": 555614208,
+          "size_bytes": 128
+        },
+        "rom_ctrl1_regs": {
+          "base_addr": 555618304,
+          "size_bytes": 128
+        },
+        "dma": {
+          "base_addr": 570490880,
+          "size_bytes": 512
+        },
+        "mbx0_core": {
+          "base_addr": 570425344,
+          "size_bytes": 128
+        },
+        "mbx1_core": {
+          "base_addr": 570425600,
+          "size_bytes": 128
+        },
+        "mbx2_core": {
+          "base_addr": 570425856,
+          "size_bytes": 128
+        },
+        "mbx3_core": {
+          "base_addr": 570426112,
+          "size_bytes": 128
+        },
+        "mbx4_core": {
+          "base_addr": 570426368,
+          "size_bytes": 128
+        },
+        "mbx5_core": {
+          "base_addr": 570426624,
+          "size_bytes": 128
+        },
+        "mbx6_core": {
+          "base_addr": 570426880,
+          "size_bytes": 128
+        },
+        "mbx_jtag_core": {
+          "base_addr": 570427392,
+          "size_bytes": 128
+        },
+        "mbx_pcie0_core": {
+          "base_addr": 570687488,
+          "size_bytes": 128
+        },
+        "mbx_pcie1_core": {
+          "base_addr": 570687744,
+          "size_bytes": 128
+        },
+        "soc_dbg_ctrl_core": {
+          "base_addr": 806813696,
+          "size_bytes": 32
+        },
+        "rv_core_ibex_cfg": {
+          "base_addr": 555679744,
+          "size_bytes": 2048
+        }
+      },
+      "memories": {
+        "soc_proxy_ctn": {
+          "base_addr": 1073741824,
+          "size_bytes": 2147483648
+        },
+        "sram_ctrl_ret_aon_ram": {
+          "base_addr": 811597824,
+          "size_bytes": 4096
+        },
+        "sram_ctrl_main_ram": {
+          "base_addr": 268435456,
+          "size_bytes": 65536
+        },
+        "sram_ctrl_mbox_ram": {
+          "base_addr": 285212672,
+          "size_bytes": 4096
+        },
+        "rom_ctrl0_rom": {
+          "base_addr": 32768,
+          "size_bytes": 32768
+        },
+        "rom_ctrl1_rom": {
+          "base_addr": 131072,
+          "size_bytes": 65536
+        }
+      },
+      "subranges": {
+        "mmio": {
+          "base_addr": 554696704,
+          "size_bytes": 256905216
+        }
+      }
+    },
+    "soc_mbx": {
+      "devices": {
+        "mbx0_soc": {
+          "base_addr": 21385216,
+          "size_bytes": 32
+        },
+        "mbx1_soc": {
+          "base_addr": 21385472,
+          "size_bytes": 32
+        },
+        "mbx2_soc": {
+          "base_addr": 21385728,
+          "size_bytes": 32
+        },
+        "mbx3_soc": {
+          "base_addr": 21385984,
+          "size_bytes": 32
+        },
+        "mbx4_soc": {
+          "base_addr": 21386240,
+          "size_bytes": 32
+        },
+        "mbx5_soc": {
+          "base_addr": 21386496,
+          "size_bytes": 32
+        },
+        "mbx6_soc": {
+          "base_addr": 21585920,
+          "size_bytes": 32
+        },
+        "mbx_pcie0_soc": {
+          "base_addr": 21364992,
+          "size_bytes": 32
+        },
+        "mbx_pcie1_soc": {
+          "base_addr": 21365248,
+          "size_bytes": 32
+        },
+        "racl_ctrl": {
+          "base_addr": 21372672,
+          "size_bytes": 256
+        },
+        "ac_range_check": {
+          "base_addr": 21381120,
+          "size_bytes": 1024
+        }
+      },
+      "memories": {},
+      "subranges": {}
+    },
+    "soc_dbg": {
+      "devices": {
+        "lc_ctrl_dmi": {
+          "base_addr": 12288,
+          "size_bytes": 4096
+        },
+        "rv_dm_dbg": {
+          "base_addr": 0,
+          "size_bytes": 512
+        },
+        "mbx_jtag_soc": {
+          "base_addr": 8704,
+          "size_bytes": 32
+        },
+        "soc_dbg_ctrl_jtag": {
+          "base_addr": 8960,
+          "size_bytes": 32
+        }
+      },
+      "memories": {},
+      "subranges": {}
+    }
+  },
+  "alert_handler": {
+    "peripherals": {
+      "External": 0,
+      "Uart0": 1,
+      "Gpio": 2,
+      "SpiDevice": 3,
+      "I2c0": 4,
+      "RvTimer": 5,
+      "OtpCtrl": 6,
+      "LcCtrl": 7,
+      "SpiHost0": 8,
+      "PwrmgrAon": 9,
+      "RstmgrAon": 10,
+      "ClkmgrAon": 11,
+      "PinmuxAon": 12,
+      "AonTimerAon": 13,
+      "SocProxy": 14,
+      "SramCtrlRetAon": 15,
+      "RvDm": 16,
+      "RvPlic": 17,
+      "Acc": 18,
+      "Aes": 19,
+      "Hmac": 20,
+      "Kmac": 21,
+      "KeymgrDpe": 22,
+      "Csrng": 23,
+      "EntropySrc": 24,
+      "Edn0": 25,
+      "Edn1": 26,
+      "SramCtrlMain": 27,
+      "SramCtrlMbox": 28,
+      "RomCtrl0": 29,
+      "RomCtrl1": 30,
+      "Dma": 31,
+      "Mbx0": 32,
+      "Mbx1": 33,
+      "Mbx2": 34,
+      "Mbx3": 35,
+      "Mbx4": 36,
+      "Mbx5": 37,
+      "Mbx6": 38,
+      "MbxJtag": 39,
+      "MbxPcie0": 40,
+      "MbxPcie1": 41,
+      "SocDbgCtrl": 42,
+      "RaclCtrl": 43,
+      "AcRangeCheck": 44,
+      "RvCoreIbex": 45
+    },
+    "alerts": {
+      "Uart0FatalFault": 0,
+      "GpioFatalFault": 1,
+      "SpiDeviceFatalFault": 2,
+      "I2c0FatalFault": 3,
+      "RvTimerFatalFault": 4,
+      "OtpCtrlFatalMacroError": 5,
+      "OtpCtrlFatalCheckError": 6,
+      "OtpCtrlFatalBusIntegError": 7,
+      "OtpCtrlFatalPrimOtpAlert": 8,
+      "OtpCtrlRecovPrimOtpAlert": 9,
+      "LcCtrlFatalProgError": 10,
+      "LcCtrlFatalStateError": 11,
+      "LcCtrlFatalBusIntegError": 12,
+      "SpiHost0FatalFault": 13,
+      "PwrmgrAonFatalFault": 14,
+      "RstmgrAonFatalFault": 15,
+      "RstmgrAonFatalCnstyFault": 16,
+      "ClkmgrAonRecovFault": 17,
+      "ClkmgrAonFatalFault": 18,
+      "PinmuxAonFatalFault": 19,
+      "AonTimerAonFatalFault": 20,
+      "SocProxyFatalAlertIntg": 21,
+      "SramCtrlRetAonFatalError": 22,
+      "RvDmFatalFault": 23,
+      "RvPlicFatalFault": 24,
+      "AccFatal": 25,
+      "AccRecov": 26,
+      "AesRecovCtrlUpdateErr": 27,
+      "AesFatalFault": 28,
+      "HmacFatalFault": 29,
+      "KmacRecovOperationErr": 30,
+      "KmacFatalFaultErr": 31,
+      "KeymgrDpeRecovOperationErr": 32,
+      "KeymgrDpeFatalFaultErr": 33,
+      "CsrngRecovAlert": 34,
+      "CsrngFatalAlert": 35,
+      "EntropySrcRecovAlert": 36,
+      "EntropySrcFatalAlert": 37,
+      "Edn0RecovAlert": 38,
+      "Edn0FatalAlert": 39,
+      "Edn1RecovAlert": 40,
+      "Edn1FatalAlert": 41,
+      "SramCtrlMainFatalError": 42,
+      "SramCtrlMboxFatalError": 43,
+      "RomCtrl0Fatal": 44,
+      "RomCtrl1Fatal": 45,
+      "DmaFatalFault": 46,
+      "Mbx0FatalFault": 47,
+      "Mbx0RecovFault": 48,
+      "Mbx1FatalFault": 49,
+      "Mbx1RecovFault": 50,
+      "Mbx2FatalFault": 51,
+      "Mbx2RecovFault": 52,
+      "Mbx3FatalFault": 53,
+      "Mbx3RecovFault": 54,
+      "Mbx4FatalFault": 55,
+      "Mbx4RecovFault": 56,
+      "Mbx5FatalFault": 57,
+      "Mbx5RecovFault": 58,
+      "Mbx6FatalFault": 59,
+      "Mbx6RecovFault": 60,
+      "MbxJtagFatalFault": 61,
+      "MbxJtagRecovFault": 62,
+      "MbxPcie0FatalFault": 63,
+      "MbxPcie0RecovFault": 64,
+      "MbxPcie1FatalFault": 65,
+      "MbxPcie1RecovFault": 66,
+      "SocDbgCtrlFatalFault": 67,
+      "SocDbgCtrlRecovCtrlUpdateErr": 68,
+      "RaclCtrlFatalFault": 69,
+      "RaclCtrlRecovCtrlUpdateErr": 70,
+      "AcRangeCheckRecovCtrlUpdateErr": 71,
+      "AcRangeCheckFatalFault": 72,
+      "RvCoreIbexFatalSwErr": 73,
+      "RvCoreIbexRecovSwErr": 74,
+      "RvCoreIbexFatalHwErr": 75,
+      "RvCoreIbexRecovHwErr": 76
+    },
+    "alert_to_peripheral": {
+      "Uart0FatalFault": "Uart0",
+      "GpioFatalFault": "Gpio",
+      "SpiDeviceFatalFault": "SpiDevice",
+      "I2c0FatalFault": "I2c0",
+      "RvTimerFatalFault": "RvTimer",
+      "OtpCtrlFatalMacroError": "OtpCtrl",
+      "OtpCtrlFatalCheckError": "OtpCtrl",
+      "OtpCtrlFatalBusIntegError": "OtpCtrl",
+      "OtpCtrlFatalPrimOtpAlert": "OtpCtrl",
+      "OtpCtrlRecovPrimOtpAlert": "OtpCtrl",
+      "LcCtrlFatalProgError": "LcCtrl",
+      "LcCtrlFatalStateError": "LcCtrl",
+      "LcCtrlFatalBusIntegError": "LcCtrl",
+      "SpiHost0FatalFault": "SpiHost0",
+      "PwrmgrAonFatalFault": "PwrmgrAon",
+      "RstmgrAonFatalFault": "RstmgrAon",
+      "RstmgrAonFatalCnstyFault": "RstmgrAon",
+      "ClkmgrAonRecovFault": "ClkmgrAon",
+      "ClkmgrAonFatalFault": "ClkmgrAon",
+      "PinmuxAonFatalFault": "PinmuxAon",
+      "AonTimerAonFatalFault": "AonTimerAon",
+      "SocProxyFatalAlertIntg": "SocProxy",
+      "SramCtrlRetAonFatalError": "SramCtrlRetAon",
+      "RvDmFatalFault": "RvDm",
+      "RvPlicFatalFault": "RvPlic",
+      "AccFatal": "Acc",
+      "AccRecov": "Acc",
+      "AesRecovCtrlUpdateErr": "Aes",
+      "AesFatalFault": "Aes",
+      "HmacFatalFault": "Hmac",
+      "KmacRecovOperationErr": "Kmac",
+      "KmacFatalFaultErr": "Kmac",
+      "KeymgrDpeRecovOperationErr": "KeymgrDpe",
+      "KeymgrDpeFatalFaultErr": "KeymgrDpe",
+      "CsrngRecovAlert": "Csrng",
+      "CsrngFatalAlert": "Csrng",
+      "EntropySrcRecovAlert": "EntropySrc",
+      "EntropySrcFatalAlert": "EntropySrc",
+      "Edn0RecovAlert": "Edn0",
+      "Edn0FatalAlert": "Edn0",
+      "Edn1RecovAlert": "Edn1",
+      "Edn1FatalAlert": "Edn1",
+      "SramCtrlMainFatalError": "SramCtrlMain",
+      "SramCtrlMboxFatalError": "SramCtrlMbox",
+      "RomCtrl0Fatal": "RomCtrl0",
+      "RomCtrl1Fatal": "RomCtrl1",
+      "DmaFatalFault": "Dma",
+      "Mbx0FatalFault": "Mbx0",
+      "Mbx0RecovFault": "Mbx0",
+      "Mbx1FatalFault": "Mbx1",
+      "Mbx1RecovFault": "Mbx1",
+      "Mbx2FatalFault": "Mbx2",
+      "Mbx2RecovFault": "Mbx2",
+      "Mbx3FatalFault": "Mbx3",
+      "Mbx3RecovFault": "Mbx3",
+      "Mbx4FatalFault": "Mbx4",
+      "Mbx4RecovFault": "Mbx4",
+      "Mbx5FatalFault": "Mbx5",
+      "Mbx5RecovFault": "Mbx5",
+      "Mbx6FatalFault": "Mbx6",
+      "Mbx6RecovFault": "Mbx6",
+      "MbxJtagFatalFault": "MbxJtag",
+      "MbxJtagRecovFault": "MbxJtag",
+      "MbxPcie0FatalFault": "MbxPcie0",
+      "MbxPcie0RecovFault": "MbxPcie0",
+      "MbxPcie1FatalFault": "MbxPcie1",
+      "MbxPcie1RecovFault": "MbxPcie1",
+      "SocDbgCtrlFatalFault": "SocDbgCtrl",
+      "SocDbgCtrlRecovCtrlUpdateErr": "SocDbgCtrl",
+      "RaclCtrlFatalFault": "RaclCtrl",
+      "RaclCtrlRecovCtrlUpdateErr": "RaclCtrl",
+      "AcRangeCheckRecovCtrlUpdateErr": "AcRangeCheck",
+      "AcRangeCheckFatalFault": "AcRangeCheck",
+      "RvCoreIbexFatalSwErr": "RvCoreIbex",
+      "RvCoreIbexRecovSwErr": "RvCoreIbex",
+      "RvCoreIbexFatalHwErr": "RvCoreIbex",
+      "RvCoreIbexRecovHwErr": "RvCoreIbex"
+    }
+  },
+  "pinmux": {
+    "num_mio_pads": 12,
+    "num_dio_pads": 73,
+    "peripheral_in": {
+      "SocProxySocGpi12": 0,
+      "SocProxySocGpi13": 1,
+      "SocProxySocGpi14": 2,
+      "SocProxySocGpi15": 3
+    },
+    "insel": {
+      "ConstantZero": 0,
+      "ConstantOne": 1,
+      "Mio0": 2,
+      "Mio1": 3,
+      "Mio2": 4,
+      "Mio3": 5,
+      "Mio4": 6,
+      "Mio5": 7,
+      "Mio6": 8,
+      "Mio7": 9,
+      "Mio8": 10,
+      "Mio9": 11,
+      "Mio10": 12,
+      "Mio11": 13
+    },
+    "mio_out": {
+      "Mio0": 0,
+      "Mio1": 1,
+      "Mio2": 2,
+      "Mio3": 3,
+      "Mio4": 4,
+      "Mio5": 5,
+      "Mio6": 6,
+      "Mio7": 7,
+      "Mio8": 8,
+      "Mio9": 9,
+      "Mio10": 10,
+      "Mio11": 11
+    },
+    "outsel": {
+      "ConstantZero": 0,
+      "ConstantOne": 1,
+      "ConstantHighZ": 2,
+      "SocProxySocGpo12": 3,
+      "SocProxySocGpo13": 4,
+      "SocProxySocGpo14": 5,
+      "SocProxySocGpo15": 6,
+      "OtpMacroTest0": 7
+    },
+    "direct_pads": {
+      "SpiHost0Sd0": 0,
+      "SpiHost0Sd1": 1,
+      "SpiHost0Sd2": 2,
+      "SpiHost0Sd3": 3,
+      "SpiDeviceSd0": 4,
+      "SpiDeviceSd1": 5,
+      "SpiDeviceSd2": 6,
+      "SpiDeviceSd3": 7,
+      "I2c0Scl": 8,
+      "I2c0Sda": 9,
+      "GpioGpio0": 10,
+      "GpioGpio1": 11,
+      "GpioGpio2": 12,
+      "GpioGpio3": 13,
+      "GpioGpio4": 14,
+      "GpioGpio5": 15,
+      "GpioGpio6": 16,
+      "GpioGpio7": 17,
+      "GpioGpio8": 18,
+      "GpioGpio9": 19,
+      "GpioGpio10": 20,
+      "GpioGpio11": 21,
+      "GpioGpio12": 22,
+      "GpioGpio13": 23,
+      "GpioGpio14": 24,
+      "GpioGpio15": 25,
+      "GpioGpio16": 26,
+      "GpioGpio17": 27,
+      "GpioGpio18": 28,
+      "GpioGpio19": 29,
+      "GpioGpio20": 30,
+      "GpioGpio21": 31,
+      "GpioGpio22": 32,
+      "GpioGpio23": 33,
+      "GpioGpio24": 34,
+      "GpioGpio25": 35,
+      "GpioGpio26": 36,
+      "GpioGpio27": 37,
+      "GpioGpio28": 38,
+      "GpioGpio29": 39,
+      "GpioGpio30": 40,
+      "GpioGpio31": 41,
+      "SpiDeviceSck": 42,
+      "SpiDeviceCsb": 43,
+      "SpiDeviceTpmCsb": 44,
+      "Uart0Rx": 45,
+      "SocProxySocGpi0": 46,
+      "SocProxySocGpi1": 47,
+      "SocProxySocGpi2": 48,
+      "SocProxySocGpi3": 49,
+      "SocProxySocGpi4": 50,
+      "SocProxySocGpi5": 51,
+      "SocProxySocGpi6": 52,
+      "SocProxySocGpi7": 53,
+      "SocProxySocGpi8": 54,
+      "SocProxySocGpi9": 55,
+      "SocProxySocGpi10": 56,
+      "SocProxySocGpi11": 57,
+      "SpiHost0Sck": 58,
+      "SpiHost0Csb": 59,
+      "Uart0Tx": 60,
+      "SocProxySocGpo0": 61,
+      "SocProxySocGpo1": 62,
+      "SocProxySocGpo2": 63,
+      "SocProxySocGpo3": 64,
+      "SocProxySocGpo4": 65,
+      "SocProxySocGpo5": 66,
+      "SocProxySocGpo6": 67,
+      "SocProxySocGpo7": 68,
+      "SocProxySocGpo8": 69,
+      "SocProxySocGpo9": 70,
+      "SocProxySocGpo10": 71,
+      "SocProxySocGpo11": 72
+    },
+    "muxed_pads": {
+      "Mio0": 0,
+      "Mio1": 1,
+      "Mio2": 2,
+      "Mio3": 3,
+      "Mio4": 4,
+      "Mio5": 5,
+      "Mio6": 6,
+      "Mio7": 7,
+      "Mio8": 8,
+      "Mio9": 9,
+      "Mio10": 10,
+      "Mio11": 11
+    }
+  },
+  "pwrmgr": {
+    "wakeups": {
+      "PinmuxAonPinWkupReq": 0,
+      "AonTimerAonWkupReq": 1,
+      "SocProxyWkupExternalReq": 2
+    },
+    "reset_requests": {
+      "AonTimerAonAonTimerRstReq": 0,
+      "SocProxyRstReqExternal": 1
+    }
+  },
+  "rstmgr": {
+    "sw_resets": {
+      "SpiDevice": 0,
+      "SpiHost0": 1,
+      "I2c0": 2
+    }
+  },
+  "clkmgr": {
+    "gateable_clocks": {
+      "IoPeri": 0
+    },
+    "hintable_clocks": {
+      "MainAcc": 0,
+      "MainAes": 1,
+      "MainHmac": 2,
+      "MainKmac": 3
+    }
+  }
+}

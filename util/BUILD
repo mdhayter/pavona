@@ -1,5 +1,6 @@
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -85,6 +86,39 @@ py_binary(
         "//util/reggen",
         "//util/tlgen",
         "//util/topgen",
+    ],
+)
+
+py_binary(
+    name = "gen_top_host",
+    srcs = ["gen_top_host.py"],
+    imports = ["."],
+    deps = ["//util/topgen"],
+)
+
+py_test(
+    name = "gen_top_host_test",
+    srcs = [
+        "gen_top_host.py",
+        "gen_top_host_test.py",
+    ],
+    data = [
+        "//hw/top_dragonfly/data:host_desc_inputs",
+        "//hw/top_dragonfly/data/autogen:top_dragonfly.gen.hjson",
+        "//hw/top_dragonfly/sw/autogen/chip:top_dragonfly.rs",
+        "//hw/top_dragonfly/sw/autogen/chip:top_dragonfly_soc_dbg.rs",
+        "//hw/top_dragonfly/sw/autogen/chip:top_dragonfly_soc_mbx.rs",
+        "//hw/top_egret/data:host_desc_inputs",
+        "//hw/top_egret/data/autogen:top_egret.gen.hjson",
+        "//hw/top_egret/sw/autogen/chip:top_egret.rs",
+        "//hw/top_scafi_deprecated/data:host_desc_inputs",
+        "//hw/top_scafi_deprecated/data/autogen:top_scafi_deprecated.gen.hjson",
+        "//hw/top_scafi_deprecated/sw/autogen/chip:top_scafi_deprecated.rs",
+    ],
+    imports = ["."],
+    deps = [
+        "//util/topgen",
+        requirement("pytest"),
     ],
 )
 

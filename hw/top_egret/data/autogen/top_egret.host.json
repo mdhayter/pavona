@@ -1,0 +1,757 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "generator": "util/gen_top_host.py",
+  "name": "egret",
+  "addr_spaces": {
+    "hart": {
+      "devices": {
+        "uart0": {
+          "base_addr": 1073741824,
+          "size_bytes": 64
+        },
+        "uart1": {
+          "base_addr": 1073807360,
+          "size_bytes": 64
+        },
+        "uart2": {
+          "base_addr": 1073872896,
+          "size_bytes": 64
+        },
+        "uart3": {
+          "base_addr": 1073938432,
+          "size_bytes": 64
+        },
+        "gpio": {
+          "base_addr": 1074003968,
+          "size_bytes": 128
+        },
+        "spi_device": {
+          "base_addr": 1074069504,
+          "size_bytes": 8192
+        },
+        "i2c0": {
+          "base_addr": 1074266112,
+          "size_bytes": 128
+        },
+        "i2c1": {
+          "base_addr": 1074331648,
+          "size_bytes": 128
+        },
+        "i2c2": {
+          "base_addr": 1074397184,
+          "size_bytes": 128
+        },
+        "pattgen": {
+          "base_addr": 1074659328,
+          "size_bytes": 64
+        },
+        "rv_timer": {
+          "base_addr": 1074790400,
+          "size_bytes": 512
+        },
+        "otp_ctrl_core": {
+          "base_addr": 1074987008,
+          "size_bytes": 4096
+        },
+        "otp_macro_prim": {
+          "base_addr": 1075019776,
+          "size_bytes": 32
+        },
+        "lc_ctrl_regs": {
+          "base_addr": 1075052544,
+          "size_bytes": 256
+        },
+        "lc_ctrl_dmi": {
+          "base_addr": 0,
+          "size_bytes": 4096
+        },
+        "alert_handler": {
+          "base_addr": 1075118080,
+          "size_bytes": 2048
+        },
+        "spi_host0": {
+          "base_addr": 1076887552,
+          "size_bytes": 64
+        },
+        "spi_host1": {
+          "base_addr": 1076953088,
+          "size_bytes": 64
+        },
+        "usbdev": {
+          "base_addr": 1077018624,
+          "size_bytes": 4096
+        },
+        "pwrmgr_aon": {
+          "base_addr": 1077936128,
+          "size_bytes": 128
+        },
+        "rstmgr_aon": {
+          "base_addr": 1078001664,
+          "size_bytes": 128
+        },
+        "clkmgr_aon": {
+          "base_addr": 1078067200,
+          "size_bytes": 128
+        },
+        "sysrst_ctrl_aon": {
+          "base_addr": 1078132736,
+          "size_bytes": 256
+        },
+        "adc_ctrl_aon": {
+          "base_addr": 1078198272,
+          "size_bytes": 128
+        },
+        "pwm_aon": {
+          "base_addr": 1078263808,
+          "size_bytes": 128
+        },
+        "pinmux_aon": {
+          "base_addr": 1078329344,
+          "size_bytes": 4096
+        },
+        "aon_timer_aon": {
+          "base_addr": 1078394880,
+          "size_bytes": 64
+        },
+        "ast": {
+          "base_addr": 1078460416,
+          "size_bytes": 1024
+        },
+        "sensor_ctrl_aon": {
+          "base_addr": 1078525952,
+          "size_bytes": 128
+        },
+        "sram_ctrl_ret_aon_regs": {
+          "base_addr": 1078984704,
+          "size_bytes": 64
+        },
+        "flash_ctrl_core": {
+          "base_addr": 1090519040,
+          "size_bytes": 512
+        },
+        "flash_macro_wrapper": {
+          "base_addr": 1090551808,
+          "size_bytes": 128
+        },
+        "rv_dm_regs": {
+          "base_addr": 1092616192,
+          "size_bytes": 16
+        },
+        "rv_dm_mem": {
+          "base_addr": 65536,
+          "size_bytes": 4096
+        },
+        "rv_dm_dbg": {
+          "base_addr": 4096,
+          "size_bytes": 512
+        },
+        "rv_plic": {
+          "base_addr": 1207959552,
+          "size_bytes": 134217728
+        },
+        "acc": {
+          "base_addr": 1093664768,
+          "size_bytes": 131072
+        },
+        "aes": {
+          "base_addr": 1091567616,
+          "size_bytes": 256
+        },
+        "hmac": {
+          "base_addr": 1091633152,
+          "size_bytes": 8192
+        },
+        "kmac": {
+          "base_addr": 1091698688,
+          "size_bytes": 4096
+        },
+        "keymgr": {
+          "base_addr": 1091829760,
+          "size_bytes": 256
+        },
+        "csrng": {
+          "base_addr": 1091895296,
+          "size_bytes": 128
+        },
+        "entropy_src": {
+          "base_addr": 1091960832,
+          "size_bytes": 256
+        },
+        "edn0": {
+          "base_addr": 1092026368,
+          "size_bytes": 128
+        },
+        "edn1": {
+          "base_addr": 1092091904,
+          "size_bytes": 128
+        },
+        "sram_ctrl_main_regs": {
+          "base_addr": 1092354048,
+          "size_bytes": 64
+        },
+        "rom_ctrl_regs": {
+          "base_addr": 1092485120,
+          "size_bytes": 128
+        },
+        "rv_core_ibex_cfg": {
+          "base_addr": 1092550656,
+          "size_bytes": 256
+        }
+      },
+      "memories": {
+        "sram_ctrl_ret_aon_ram": {
+          "base_addr": 1080033280,
+          "size_bytes": 4096
+        },
+        "flash_ctrl_mem": {
+          "base_addr": 536870912,
+          "size_bytes": 1048576
+        },
+        "sram_ctrl_main_ram": {
+          "base_addr": 268435456,
+          "size_bytes": 131072
+        },
+        "rom_ctrl_rom": {
+          "base_addr": 32768,
+          "size_bytes": 32768
+        }
+      },
+      "subranges": {
+        "mmio": {
+          "base_addr": 1073741824,
+          "size_bytes": 268435456
+        }
+      }
+    }
+  },
+  "alert_handler": {
+    "peripherals": {
+      "External": 0,
+      "Uart0": 1,
+      "Uart1": 2,
+      "Uart2": 3,
+      "Uart3": 4,
+      "Gpio": 5,
+      "SpiDevice": 6,
+      "I2c0": 7,
+      "I2c1": 8,
+      "I2c2": 9,
+      "Pattgen": 10,
+      "RvTimer": 11,
+      "OtpCtrl": 12,
+      "LcCtrl": 13,
+      "SpiHost0": 14,
+      "SpiHost1": 15,
+      "Usbdev": 16,
+      "PwrmgrAon": 17,
+      "RstmgrAon": 18,
+      "ClkmgrAon": 19,
+      "SysrstCtrlAon": 20,
+      "AdcCtrlAon": 21,
+      "PwmAon": 22,
+      "PinmuxAon": 23,
+      "AonTimerAon": 24,
+      "SensorCtrlAon": 25,
+      "SramCtrlRetAon": 26,
+      "FlashCtrl": 27,
+      "RvDm": 28,
+      "RvPlic": 29,
+      "Acc": 30,
+      "Aes": 31,
+      "Hmac": 32,
+      "Kmac": 33,
+      "Keymgr": 34,
+      "Csrng": 35,
+      "EntropySrc": 36,
+      "Edn0": 37,
+      "Edn1": 38,
+      "SramCtrlMain": 39,
+      "RomCtrl": 40,
+      "RvCoreIbex": 41
+    },
+    "alerts": {
+      "Uart0FatalFault": 0,
+      "Uart1FatalFault": 1,
+      "Uart2FatalFault": 2,
+      "Uart3FatalFault": 3,
+      "GpioFatalFault": 4,
+      "SpiDeviceFatalFault": 5,
+      "I2c0FatalFault": 6,
+      "I2c1FatalFault": 7,
+      "I2c2FatalFault": 8,
+      "PattgenFatalFault": 9,
+      "RvTimerFatalFault": 10,
+      "OtpCtrlFatalMacroError": 11,
+      "OtpCtrlFatalCheckError": 12,
+      "OtpCtrlFatalBusIntegError": 13,
+      "OtpCtrlFatalPrimOtpAlert": 14,
+      "OtpCtrlRecovPrimOtpAlert": 15,
+      "LcCtrlFatalProgError": 16,
+      "LcCtrlFatalStateError": 17,
+      "LcCtrlFatalBusIntegError": 18,
+      "SpiHost0FatalFault": 19,
+      "SpiHost1FatalFault": 20,
+      "UsbdevFatalFault": 21,
+      "PwrmgrAonFatalFault": 22,
+      "RstmgrAonFatalFault": 23,
+      "RstmgrAonFatalCnstyFault": 24,
+      "ClkmgrAonRecovFault": 25,
+      "ClkmgrAonFatalFault": 26,
+      "SysrstCtrlAonFatalFault": 27,
+      "AdcCtrlAonFatalFault": 28,
+      "PwmAonFatalFault": 29,
+      "PinmuxAonFatalFault": 30,
+      "AonTimerAonFatalFault": 31,
+      "SensorCtrlAonRecovAlert": 32,
+      "SensorCtrlAonFatalAlert": 33,
+      "SramCtrlRetAonFatalError": 34,
+      "FlashCtrlRecovErr": 35,
+      "FlashCtrlFatalStdErr": 36,
+      "FlashCtrlFatalErr": 37,
+      "FlashCtrlFatalPrimFlashAlert": 38,
+      "FlashCtrlRecovPrimFlashAlert": 39,
+      "RvDmFatalFault": 40,
+      "RvPlicFatalFault": 41,
+      "AccFatal": 42,
+      "AccRecov": 43,
+      "AesRecovCtrlUpdateErr": 44,
+      "AesFatalFault": 45,
+      "HmacFatalFault": 46,
+      "KmacRecovOperationErr": 47,
+      "KmacFatalFaultErr": 48,
+      "KeymgrRecovOperationErr": 49,
+      "KeymgrFatalFaultErr": 50,
+      "CsrngRecovAlert": 51,
+      "CsrngFatalAlert": 52,
+      "EntropySrcRecovAlert": 53,
+      "EntropySrcFatalAlert": 54,
+      "Edn0RecovAlert": 55,
+      "Edn0FatalAlert": 56,
+      "Edn1RecovAlert": 57,
+      "Edn1FatalAlert": 58,
+      "SramCtrlMainFatalError": 59,
+      "RomCtrlFatal": 60,
+      "RvCoreIbexFatalSwErr": 61,
+      "RvCoreIbexRecovSwErr": 62,
+      "RvCoreIbexFatalHwErr": 63,
+      "RvCoreIbexRecovHwErr": 64
+    },
+    "alert_to_peripheral": {
+      "Uart0FatalFault": "Uart0",
+      "Uart1FatalFault": "Uart1",
+      "Uart2FatalFault": "Uart2",
+      "Uart3FatalFault": "Uart3",
+      "GpioFatalFault": "Gpio",
+      "SpiDeviceFatalFault": "SpiDevice",
+      "I2c0FatalFault": "I2c0",
+      "I2c1FatalFault": "I2c1",
+      "I2c2FatalFault": "I2c2",
+      "PattgenFatalFault": "Pattgen",
+      "RvTimerFatalFault": "RvTimer",
+      "OtpCtrlFatalMacroError": "OtpCtrl",
+      "OtpCtrlFatalCheckError": "OtpCtrl",
+      "OtpCtrlFatalBusIntegError": "OtpCtrl",
+      "OtpCtrlFatalPrimOtpAlert": "OtpCtrl",
+      "OtpCtrlRecovPrimOtpAlert": "OtpCtrl",
+      "LcCtrlFatalProgError": "LcCtrl",
+      "LcCtrlFatalStateError": "LcCtrl",
+      "LcCtrlFatalBusIntegError": "LcCtrl",
+      "SpiHost0FatalFault": "SpiHost0",
+      "SpiHost1FatalFault": "SpiHost1",
+      "UsbdevFatalFault": "Usbdev",
+      "PwrmgrAonFatalFault": "PwrmgrAon",
+      "RstmgrAonFatalFault": "RstmgrAon",
+      "RstmgrAonFatalCnstyFault": "RstmgrAon",
+      "ClkmgrAonRecovFault": "ClkmgrAon",
+      "ClkmgrAonFatalFault": "ClkmgrAon",
+      "SysrstCtrlAonFatalFault": "SysrstCtrlAon",
+      "AdcCtrlAonFatalFault": "AdcCtrlAon",
+      "PwmAonFatalFault": "PwmAon",
+      "PinmuxAonFatalFault": "PinmuxAon",
+      "AonTimerAonFatalFault": "AonTimerAon",
+      "SensorCtrlAonRecovAlert": "SensorCtrlAon",
+      "SensorCtrlAonFatalAlert": "SensorCtrlAon",
+      "SramCtrlRetAonFatalError": "SramCtrlRetAon",
+      "FlashCtrlRecovErr": "FlashCtrl",
+      "FlashCtrlFatalStdErr": "FlashCtrl",
+      "FlashCtrlFatalErr": "FlashCtrl",
+      "FlashCtrlFatalPrimFlashAlert": "FlashCtrl",
+      "FlashCtrlRecovPrimFlashAlert": "FlashCtrl",
+      "RvDmFatalFault": "RvDm",
+      "RvPlicFatalFault": "RvPlic",
+      "AccFatal": "Acc",
+      "AccRecov": "Acc",
+      "AesRecovCtrlUpdateErr": "Aes",
+      "AesFatalFault": "Aes",
+      "HmacFatalFault": "Hmac",
+      "KmacRecovOperationErr": "Kmac",
+      "KmacFatalFaultErr": "Kmac",
+      "KeymgrRecovOperationErr": "Keymgr",
+      "KeymgrFatalFaultErr": "Keymgr",
+      "CsrngRecovAlert": "Csrng",
+      "CsrngFatalAlert": "Csrng",
+      "EntropySrcRecovAlert": "EntropySrc",
+      "EntropySrcFatalAlert": "EntropySrc",
+      "Edn0RecovAlert": "Edn0",
+      "Edn0FatalAlert": "Edn0",
+      "Edn1RecovAlert": "Edn1",
+      "Edn1FatalAlert": "Edn1",
+      "SramCtrlMainFatalError": "SramCtrlMain",
+      "RomCtrlFatal": "RomCtrl",
+      "RvCoreIbexFatalSwErr": "RvCoreIbex",
+      "RvCoreIbexRecovSwErr": "RvCoreIbex",
+      "RvCoreIbexFatalHwErr": "RvCoreIbex",
+      "RvCoreIbexRecovHwErr": "RvCoreIbex"
+    }
+  },
+  "pinmux": {
+    "num_mio_pads": 47,
+    "num_dio_pads": 16,
+    "peripheral_in": {
+      "GpioGpio0": 0,
+      "GpioGpio1": 1,
+      "GpioGpio2": 2,
+      "GpioGpio3": 3,
+      "GpioGpio4": 4,
+      "GpioGpio5": 5,
+      "GpioGpio6": 6,
+      "GpioGpio7": 7,
+      "GpioGpio8": 8,
+      "GpioGpio9": 9,
+      "GpioGpio10": 10,
+      "GpioGpio11": 11,
+      "GpioGpio12": 12,
+      "GpioGpio13": 13,
+      "GpioGpio14": 14,
+      "GpioGpio15": 15,
+      "GpioGpio16": 16,
+      "GpioGpio17": 17,
+      "GpioGpio18": 18,
+      "GpioGpio19": 19,
+      "GpioGpio20": 20,
+      "GpioGpio21": 21,
+      "GpioGpio22": 22,
+      "GpioGpio23": 23,
+      "GpioGpio24": 24,
+      "GpioGpio25": 25,
+      "GpioGpio26": 26,
+      "GpioGpio27": 27,
+      "GpioGpio28": 28,
+      "GpioGpio29": 29,
+      "GpioGpio30": 30,
+      "GpioGpio31": 31,
+      "I2c0Sda": 32,
+      "I2c0Scl": 33,
+      "I2c1Sda": 34,
+      "I2c1Scl": 35,
+      "I2c2Sda": 36,
+      "I2c2Scl": 37,
+      "SpiHost1Sd0": 38,
+      "SpiHost1Sd1": 39,
+      "SpiHost1Sd2": 40,
+      "SpiHost1Sd3": 41,
+      "Uart0Rx": 42,
+      "Uart1Rx": 43,
+      "Uart2Rx": 44,
+      "Uart3Rx": 45,
+      "SpiDeviceTpmCsb": 46,
+      "FlashMacroWrapperTck": 47,
+      "FlashMacroWrapperTms": 48,
+      "FlashMacroWrapperTdi": 49,
+      "SysrstCtrlAonAcPresent": 50,
+      "SysrstCtrlAonKey0In": 51,
+      "SysrstCtrlAonKey1In": 52,
+      "SysrstCtrlAonKey2In": 53,
+      "SysrstCtrlAonPwrbIn": 54,
+      "SysrstCtrlAonLidOpen": 55,
+      "UsbdevSense": 56
+    },
+    "insel": {
+      "ConstantZero": 0,
+      "ConstantOne": 1,
+      "Ioa0": 2,
+      "Ioa1": 3,
+      "Ioa2": 4,
+      "Ioa3": 5,
+      "Ioa4": 6,
+      "Ioa5": 7,
+      "Ioa6": 8,
+      "Ioa7": 9,
+      "Ioa8": 10,
+      "Iob0": 11,
+      "Iob1": 12,
+      "Iob2": 13,
+      "Iob3": 14,
+      "Iob4": 15,
+      "Iob5": 16,
+      "Iob6": 17,
+      "Iob7": 18,
+      "Iob8": 19,
+      "Iob9": 20,
+      "Iob10": 21,
+      "Iob11": 22,
+      "Iob12": 23,
+      "Ioc0": 24,
+      "Ioc1": 25,
+      "Ioc2": 26,
+      "Ioc3": 27,
+      "Ioc4": 28,
+      "Ioc5": 29,
+      "Ioc6": 30,
+      "Ioc7": 31,
+      "Ioc8": 32,
+      "Ioc9": 33,
+      "Ioc10": 34,
+      "Ioc11": 35,
+      "Ioc12": 36,
+      "Ior0": 37,
+      "Ior1": 38,
+      "Ior2": 39,
+      "Ior3": 40,
+      "Ior4": 41,
+      "Ior5": 42,
+      "Ior6": 43,
+      "Ior7": 44,
+      "Ior10": 45,
+      "Ior11": 46,
+      "Ior12": 47,
+      "Ior13": 48
+    },
+    "mio_out": {
+      "Ioa0": 0,
+      "Ioa1": 1,
+      "Ioa2": 2,
+      "Ioa3": 3,
+      "Ioa4": 4,
+      "Ioa5": 5,
+      "Ioa6": 6,
+      "Ioa7": 7,
+      "Ioa8": 8,
+      "Iob0": 9,
+      "Iob1": 10,
+      "Iob2": 11,
+      "Iob3": 12,
+      "Iob4": 13,
+      "Iob5": 14,
+      "Iob6": 15,
+      "Iob7": 16,
+      "Iob8": 17,
+      "Iob9": 18,
+      "Iob10": 19,
+      "Iob11": 20,
+      "Iob12": 21,
+      "Ioc0": 22,
+      "Ioc1": 23,
+      "Ioc2": 24,
+      "Ioc3": 25,
+      "Ioc4": 26,
+      "Ioc5": 27,
+      "Ioc6": 28,
+      "Ioc7": 29,
+      "Ioc8": 30,
+      "Ioc9": 31,
+      "Ioc10": 32,
+      "Ioc11": 33,
+      "Ioc12": 34,
+      "Ior0": 35,
+      "Ior1": 36,
+      "Ior2": 37,
+      "Ior3": 38,
+      "Ior4": 39,
+      "Ior5": 40,
+      "Ior6": 41,
+      "Ior7": 42,
+      "Ior10": 43,
+      "Ior11": 44,
+      "Ior12": 45,
+      "Ior13": 46
+    },
+    "outsel": {
+      "ConstantZero": 0,
+      "ConstantOne": 1,
+      "ConstantHighZ": 2,
+      "GpioGpio0": 3,
+      "GpioGpio1": 4,
+      "GpioGpio2": 5,
+      "GpioGpio3": 6,
+      "GpioGpio4": 7,
+      "GpioGpio5": 8,
+      "GpioGpio6": 9,
+      "GpioGpio7": 10,
+      "GpioGpio8": 11,
+      "GpioGpio9": 12,
+      "GpioGpio10": 13,
+      "GpioGpio11": 14,
+      "GpioGpio12": 15,
+      "GpioGpio13": 16,
+      "GpioGpio14": 17,
+      "GpioGpio15": 18,
+      "GpioGpio16": 19,
+      "GpioGpio17": 20,
+      "GpioGpio18": 21,
+      "GpioGpio19": 22,
+      "GpioGpio20": 23,
+      "GpioGpio21": 24,
+      "GpioGpio22": 25,
+      "GpioGpio23": 26,
+      "GpioGpio24": 27,
+      "GpioGpio25": 28,
+      "GpioGpio26": 29,
+      "GpioGpio27": 30,
+      "GpioGpio28": 31,
+      "GpioGpio29": 32,
+      "GpioGpio30": 33,
+      "GpioGpio31": 34,
+      "I2c0Sda": 35,
+      "I2c0Scl": 36,
+      "I2c1Sda": 37,
+      "I2c1Scl": 38,
+      "I2c2Sda": 39,
+      "I2c2Scl": 40,
+      "SpiHost1Sd0": 41,
+      "SpiHost1Sd1": 42,
+      "SpiHost1Sd2": 43,
+      "SpiHost1Sd3": 44,
+      "Uart0Tx": 45,
+      "Uart1Tx": 46,
+      "Uart2Tx": 47,
+      "Uart3Tx": 48,
+      "PattgenPda0Tx": 49,
+      "PattgenPcl0Tx": 50,
+      "PattgenPda1Tx": 51,
+      "PattgenPcl1Tx": 52,
+      "SpiHost1Sck": 53,
+      "SpiHost1Csb": 54,
+      "FlashMacroWrapperTdo": 55,
+      "SensorCtrlAonAstDebugOut0": 56,
+      "SensorCtrlAonAstDebugOut1": 57,
+      "SensorCtrlAonAstDebugOut2": 58,
+      "SensorCtrlAonAstDebugOut3": 59,
+      "SensorCtrlAonAstDebugOut4": 60,
+      "SensorCtrlAonAstDebugOut5": 61,
+      "SensorCtrlAonAstDebugOut6": 62,
+      "SensorCtrlAonAstDebugOut7": 63,
+      "SensorCtrlAonAstDebugOut8": 64,
+      "PwmAonPwm0": 65,
+      "PwmAonPwm1": 66,
+      "PwmAonPwm2": 67,
+      "PwmAonPwm3": 68,
+      "PwmAonPwm4": 69,
+      "PwmAonPwm5": 70,
+      "OtpMacroTest0": 71,
+      "SysrstCtrlAonBatDisable": 72,
+      "SysrstCtrlAonKey0Out": 73,
+      "SysrstCtrlAonKey1Out": 74,
+      "SysrstCtrlAonKey2Out": 75,
+      "SysrstCtrlAonPwrbOut": 76,
+      "SysrstCtrlAonZ3Wakeup": 77
+    },
+    "direct_pads": {
+      "UsbdevUsbDp": 0,
+      "UsbdevUsbDn": 1,
+      "SpiHost0Sd0": 2,
+      "SpiHost0Sd1": 3,
+      "SpiHost0Sd2": 4,
+      "SpiHost0Sd3": 5,
+      "SpiDeviceSd0": 6,
+      "SpiDeviceSd1": 7,
+      "SpiDeviceSd2": 8,
+      "SpiDeviceSd3": 9,
+      "SysrstCtrlAonEcRstL": 10,
+      "SysrstCtrlAonFlashWpL": 11,
+      "SpiDeviceSck": 12,
+      "SpiDeviceCsb": 13,
+      "SpiHost0Sck": 14,
+      "SpiHost0Csb": 15
+    },
+    "muxed_pads": {
+      "Ioa0": 0,
+      "Ioa1": 1,
+      "Ioa2": 2,
+      "Ioa3": 3,
+      "Ioa4": 4,
+      "Ioa5": 5,
+      "Ioa6": 6,
+      "Ioa7": 7,
+      "Ioa8": 8,
+      "Iob0": 9,
+      "Iob1": 10,
+      "Iob2": 11,
+      "Iob3": 12,
+      "Iob4": 13,
+      "Iob5": 14,
+      "Iob6": 15,
+      "Iob7": 16,
+      "Iob8": 17,
+      "Iob9": 18,
+      "Iob10": 19,
+      "Iob11": 20,
+      "Iob12": 21,
+      "Ioc0": 22,
+      "Ioc1": 23,
+      "Ioc2": 24,
+      "Ioc3": 25,
+      "Ioc4": 26,
+      "Ioc5": 27,
+      "Ioc6": 28,
+      "Ioc7": 29,
+      "Ioc8": 30,
+      "Ioc9": 31,
+      "Ioc10": 32,
+      "Ioc11": 33,
+      "Ioc12": 34,
+      "Ior0": 35,
+      "Ior1": 36,
+      "Ior2": 37,
+      "Ior3": 38,
+      "Ior4": 39,
+      "Ior5": 40,
+      "Ior6": 41,
+      "Ior7": 42,
+      "Ior10": 43,
+      "Ior11": 44,
+      "Ior12": 45,
+      "Ior13": 46
+    }
+  },
+  "pwrmgr": {
+    "wakeups": {
+      "SysrstCtrlAonWkupReq": 0,
+      "AdcCtrlAonWkupReq": 1,
+      "PinmuxAonPinWkupReq": 2,
+      "PinmuxAonUsbWkupReq": 3,
+      "AonTimerAonWkupReq": 4,
+      "SensorCtrlAonWkupReq": 5
+    },
+    "reset_requests": {
+      "SysrstCtrlAonRstReq": 0,
+      "AonTimerAonAonTimerRstReq": 1
+    }
+  },
+  "rstmgr": {
+    "sw_resets": {
+      "SpiDevice": 0,
+      "SpiHost0": 1,
+      "SpiHost1": 2,
+      "Usb": 3,
+      "UsbAon": 4,
+      "I2c0": 5,
+      "I2c1": 6,
+      "I2c2": 7
+    }
+  },
+  "clkmgr": {
+    "gateable_clocks": {
+      "IoDiv4Peri": 0,
+      "IoDiv2Peri": 1,
+      "IoPeri": 2,
+      "UsbPeri": 3
+    },
+    "hintable_clocks": {
+      "MainAcc": 0,
+      "MainAes": 1,
+      "MainHmac": 2,
+      "MainKmac": 3
+    }
+  }
+}
