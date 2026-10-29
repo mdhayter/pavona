@@ -1,0 +1,21 @@
+# Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+# Copied and modified from hw/top_egret/sw/autogen/chip/BUILD.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["**"]),
+)
+
+rust_library(
+    name = "top_scafi_deprecated",
+    srcs = [":all_files"],
+    crate_root = "mod.rs",
+)
