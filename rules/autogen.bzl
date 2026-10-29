@@ -1,5 +1,6 @@
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -76,6 +77,68 @@ def pavona_completecfg(name, top, seed, data = [], **kwargs):
         topcfg = top,
         seedcfg = seed,
         data = data,
+        **kwargs
+    )
+
+def _pavona_top_host_desc_impl(ctx):
+    # The completecfg target also produces the secrets file; pick the complete config.
+    completecfgs = [
+        f
+        for f in ctx.files.completecfg
+        if f.basename.endswith(".gen.hjson") and ".secrets." not in f.basename
+    ]
+    if len(completecfgs) != 1:
+        fail("Expected one complete config in {}, got {}".format(ctx.attr.completecfg.label, completecfgs))
+    completecfg = completecfgs[0]
+
+    topname = completecfg.basename.removesuffix(".gen.hjson")
+    host_desc = ctx.actions.declare_file("autogen/" + topname + ".host.json")
+
+    # The IP block descriptions are staged at their source paths, so the
+    # generator finds them under the execution root.
+    ctx.actions.run(
+        outputs = [host_desc],
+        inputs = [completecfg] + ctx.files.ip_descriptions,
+        arguments = [
+            "--completecfg",
+            completecfg.path,
+            "--outdir",
+            host_desc.dirname,
+            "--repo-top",
+            ".",
+        ],
+        executable = ctx.executable._gen_top_host,
+    )
+
+    return [DefaultInfo(files = depset([host_desc]))]
+
+pavona_top_host_desc_rule = rule(
+    implementation = _pavona_top_host_desc_impl,
+    doc = "Generate the host-side description of a top with gen_top_host.py",
+    attrs = {
+        "completecfg": attr.label(allow_files = True, doc = "Complete top config (a completecfg target)"),
+        "ip_descriptions": attr.label_list(allow_files = True, doc = "Hjson descriptions of the top's IP blocks"),
+        "_gen_top_host": attr.label(
+            default = "//util:gen_top_host",
+            executable = True,
+            cfg = "exec",
+        ),
+    },
+)
+
+def pavona_top_host_desc(name, completecfg, ip_descriptions, **kwargs):
+    """
+    Macro around `pavona_top_host_desc_rule`, which generates
+    `top_<topname>.host.json`, the description of a top that host tools load at
+    run time.
+
+    `ip_descriptions` must include the Hjson description of every IP block type
+    in the top, at the path where topgen expects it.
+    """
+    pavona_top_host_desc_rule(
+        name = name,
+        completecfg = completecfg,
+        ip_descriptions = ip_descriptions,
         **kwargs
     )
 

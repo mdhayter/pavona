@@ -1,5 +1,6 @@
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -74,6 +75,7 @@ filegroup(
     name = "generated",
     srcs = [
         "//hw/top_egret/data:completecfg",
+        "//hw/top_egret/data:host_desc",
     ] + [ip.attrs.get("regs", None) for ip in EGRET_IPS],
 )
 
@@ -81,6 +83,7 @@ filegroup(
     name = "gen",
     srcs = [
         "//hw/top_egret/data:gen_completecfg",
+        "//hw/top_egret/data:gen_host_desc",
     ] + [ip.attrs.get("regs", "").replace("regs", "gen_regs") for ip in EGRET_IPS],
     data = [":generated"],
 )
