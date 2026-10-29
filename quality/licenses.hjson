@@ -1,4 +1,5 @@
 // Copyright zeroRISC Inc.
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 {
@@ -148,6 +149,47 @@
         '''
         Copyright zeroRISC Inc.
         Copyright Ruben Niederhagen and Hoang Nguyen Hien Pham.
+        Licensed under the Apache License, Version 2.0, see LICENSE for details.
+        SPDX-License-Identifier: Apache-2.0
+        ''',
+      match_regex: "false",
+    },
+    // Individual contributor: Mark Hayter
+    {
+      licence:
+        '''
+        Copyright Mark Hayter.
+        Licensed under the Apache License, Version 2.0, see LICENSE for details.
+        SPDX-License-Identifier: Apache-2.0
+        ''',
+      match_regex: "false",
+    },
+    {
+      licence:
+        '''
+        Copyright lowRISC contributors (OpenTitan project).
+        Copyright Mark Hayter.
+        Licensed under the Apache License, Version 2.0, see LICENSE for details.
+        SPDX-License-Identifier: Apache-2.0
+        ''',
+      match_regex: "false",
+    },
+    {
+      licence:
+        '''
+        Copyright lowRISC contributors (OpenTitan project).
+        Copyright zeroRISC Inc.
+        Copyright Mark Hayter.
+        Licensed under the Apache License, Version 2.0, see LICENSE for details.
+        SPDX-License-Identifier: Apache-2.0
+        ''',
+      match_regex: "false",
+    },
+    {
+      licence:
+        '''
+        Copyright zeroRISC Inc.
+        Copyright Mark Hayter.
         Licensed under the Apache License, Version 2.0, see LICENSE for details.
         SPDX-License-Identifier: Apache-2.0
         ''',
