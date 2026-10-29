@@ -1,11 +1,13 @@
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("//rules:autogen.bzl", "pavona_completecfg")
+load("//hw/top_dragonfly/data/autogen:defs.bzl", "DRAGONFLY_IPS")
+load("//rules:autogen.bzl", "pavona_completecfg", "pavona_top_host_desc")
 load("//rules:files.bzl", "copy_files")
 
 filegroup(
@@ -38,6 +40,27 @@ pavona_completecfg(
 copy_files(
     name = "gen_completecfg",
     srcs = [":completecfg"],
+    dest = "hw/top_dragonfly/data/autogen",
+    tags = ["manual"],
+)
+
+# Hjson descriptions of the top's IP blocks, as gen_top_host.py expects them.
+filegroup(
+    name = "host_desc_inputs",
+    srcs = [ip.attrs["hjson"] for ip in DRAGONFLY_IPS] + [
+        "//hw/top_dragonfly/ip:block_descriptions",
+    ],
+)
+
+pavona_top_host_desc(
+    name = "host_desc",
+    completecfg = ":completecfg",
+    ip_descriptions = [":host_desc_inputs"],
+)
+
+copy_files(
+    name = "gen_host_desc",
+    srcs = [":host_desc"],
     dest = "hw/top_dragonfly/data/autogen",
     tags = ["manual"],
 )

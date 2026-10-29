@@ -1,0 +1,384 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "generator": "util/gen_top_host.py",
+  "name": "scafi_deprecated",
+  "addr_spaces": {
+    "hart": {
+      "devices": {
+        "uart0": {
+          "base_addr": 1073741824,
+          "size_bytes": 64
+        },
+        "uart1": {
+          "base_addr": 1073807360,
+          "size_bytes": 64
+        },
+        "gpio": {
+          "base_addr": 1074003968,
+          "size_bytes": 128
+        },
+        "spi_device": {
+          "base_addr": 1074069504,
+          "size_bytes": 8192
+        },
+        "spi_host0": {
+          "base_addr": 1074135040,
+          "size_bytes": 64
+        },
+        "rv_timer": {
+          "base_addr": 1074790400,
+          "size_bytes": 512
+        },
+        "usbdev": {
+          "base_addr": 1077018624,
+          "size_bytes": 4096
+        },
+        "pwrmgr_aon": {
+          "base_addr": 1077936128,
+          "size_bytes": 128
+        },
+        "rstmgr_aon": {
+          "base_addr": 1078001664,
+          "size_bytes": 64
+        },
+        "clkmgr_aon": {
+          "base_addr": 1078067200,
+          "size_bytes": 128
+        },
+        "pinmux_aon": {
+          "base_addr": 1078329344,
+          "size_bytes": 4096
+        },
+        "aon_timer_aon": {
+          "base_addr": 1078394880,
+          "size_bytes": 64
+        },
+        "ast": {
+          "base_addr": 1078460416,
+          "size_bytes": 1024
+        },
+        "flash_ctrl_core": {
+          "base_addr": 1090519040,
+          "size_bytes": 512
+        },
+        "flash_macro_wrapper": {
+          "base_addr": 1090551808,
+          "size_bytes": 128
+        },
+        "rv_plic": {
+          "base_addr": 1207959552,
+          "size_bytes": 134217728
+        },
+        "aes": {
+          "base_addr": 1091567616,
+          "size_bytes": 256
+        },
+        "sram_ctrl_main_regs": {
+          "base_addr": 1092354048,
+          "size_bytes": 64
+        },
+        "rom_ctrl_regs": {
+          "base_addr": 1092485120,
+          "size_bytes": 128
+        },
+        "rv_core_ibex_cfg": {
+          "base_addr": 1092550656,
+          "size_bytes": 256
+        }
+      },
+      "memories": {
+        "flash_ctrl_mem": {
+          "base_addr": 536870912,
+          "size_bytes": 65536
+        },
+        "sram_ctrl_main_ram": {
+          "base_addr": 268435456,
+          "size_bytes": 131072
+        },
+        "rom_ctrl_rom": {
+          "base_addr": 32768,
+          "size_bytes": 32768
+        }
+      },
+      "subranges": {
+        "mmio": {
+          "base_addr": 1073741824,
+          "size_bytes": 268435456
+        }
+      }
+    }
+  },
+  "pinmux": {
+    "num_mio_pads": 47,
+    "num_dio_pads": 14,
+    "peripheral_in": {
+      "GpioGpio0": 0,
+      "GpioGpio1": 1,
+      "GpioGpio2": 2,
+      "GpioGpio3": 3,
+      "GpioGpio4": 4,
+      "GpioGpio5": 5,
+      "GpioGpio6": 6,
+      "GpioGpio7": 7,
+      "GpioGpio8": 8,
+      "GpioGpio9": 9,
+      "GpioGpio10": 10,
+      "GpioGpio11": 11,
+      "GpioGpio12": 12,
+      "GpioGpio13": 13,
+      "GpioGpio14": 14,
+      "GpioGpio15": 15,
+      "GpioGpio16": 16,
+      "GpioGpio17": 17,
+      "GpioGpio18": 18,
+      "GpioGpio19": 19,
+      "GpioGpio20": 20,
+      "GpioGpio21": 21,
+      "GpioGpio22": 22,
+      "GpioGpio23": 23,
+      "GpioGpio24": 24,
+      "GpioGpio25": 25,
+      "GpioGpio26": 26,
+      "GpioGpio27": 27,
+      "GpioGpio28": 28,
+      "GpioGpio29": 29,
+      "GpioGpio30": 30,
+      "GpioGpio31": 31,
+      "Uart0Rx": 32,
+      "Uart1Rx": 33,
+      "UsbdevSense": 34
+    },
+    "insel": {
+      "ConstantZero": 0,
+      "ConstantOne": 1,
+      "Ioa0": 2,
+      "Ioa1": 3,
+      "Ioa2": 4,
+      "Ioa3": 5,
+      "Ioa4": 6,
+      "Ioa5": 7,
+      "Ioa6": 8,
+      "Ioa7": 9,
+      "Ioa8": 10,
+      "Iob0": 11,
+      "Iob1": 12,
+      "Iob2": 13,
+      "Iob3": 14,
+      "Iob4": 15,
+      "Iob5": 16,
+      "Iob6": 17,
+      "Iob7": 18,
+      "Iob8": 19,
+      "Iob9": 20,
+      "Iob10": 21,
+      "Iob11": 22,
+      "Iob12": 23,
+      "Ioc0": 24,
+      "Ioc1": 25,
+      "Ioc2": 26,
+      "Ioc3": 27,
+      "Ioc4": 28,
+      "Ioc5": 29,
+      "Ioc6": 30,
+      "Ioc7": 31,
+      "Ioc8": 32,
+      "Ioc9": 33,
+      "Ioc10": 34,
+      "Ioc11": 35,
+      "Ioc12": 36,
+      "Ior0": 37,
+      "Ior1": 38,
+      "Ior2": 39,
+      "Ior3": 40,
+      "Ior4": 41,
+      "Ior5": 42,
+      "Ior6": 43,
+      "Ior7": 44,
+      "Ior10": 45,
+      "Ior11": 46,
+      "Ior12": 47,
+      "Ior13": 48
+    },
+    "mio_out": {
+      "Ioa0": 0,
+      "Ioa1": 1,
+      "Ioa2": 2,
+      "Ioa3": 3,
+      "Ioa4": 4,
+      "Ioa5": 5,
+      "Ioa6": 6,
+      "Ioa7": 7,
+      "Ioa8": 8,
+      "Iob0": 9,
+      "Iob1": 10,
+      "Iob2": 11,
+      "Iob3": 12,
+      "Iob4": 13,
+      "Iob5": 14,
+      "Iob6": 15,
+      "Iob7": 16,
+      "Iob8": 17,
+      "Iob9": 18,
+      "Iob10": 19,
+      "Iob11": 20,
+      "Iob12": 21,
+      "Ioc0": 22,
+      "Ioc1": 23,
+      "Ioc2": 24,
+      "Ioc3": 25,
+      "Ioc4": 26,
+      "Ioc5": 27,
+      "Ioc6": 28,
+      "Ioc7": 29,
+      "Ioc8": 30,
+      "Ioc9": 31,
+      "Ioc10": 32,
+      "Ioc11": 33,
+      "Ioc12": 34,
+      "Ior0": 35,
+      "Ior1": 36,
+      "Ior2": 37,
+      "Ior3": 38,
+      "Ior4": 39,
+      "Ior5": 40,
+      "Ior6": 41,
+      "Ior7": 42,
+      "Ior10": 43,
+      "Ior11": 44,
+      "Ior12": 45,
+      "Ior13": 46
+    },
+    "outsel": {
+      "ConstantZero": 0,
+      "ConstantOne": 1,
+      "ConstantHighZ": 2,
+      "GpioGpio0": 3,
+      "GpioGpio1": 4,
+      "GpioGpio2": 5,
+      "GpioGpio3": 6,
+      "GpioGpio4": 7,
+      "GpioGpio5": 8,
+      "GpioGpio6": 9,
+      "GpioGpio7": 10,
+      "GpioGpio8": 11,
+      "GpioGpio9": 12,
+      "GpioGpio10": 13,
+      "GpioGpio11": 14,
+      "GpioGpio12": 15,
+      "GpioGpio13": 16,
+      "GpioGpio14": 17,
+      "GpioGpio15": 18,
+      "GpioGpio16": 19,
+      "GpioGpio17": 20,
+      "GpioGpio18": 21,
+      "GpioGpio19": 22,
+      "GpioGpio20": 23,
+      "GpioGpio21": 24,
+      "GpioGpio22": 25,
+      "GpioGpio23": 26,
+      "GpioGpio24": 27,
+      "GpioGpio25": 28,
+      "GpioGpio26": 29,
+      "GpioGpio27": 30,
+      "GpioGpio28": 31,
+      "GpioGpio29": 32,
+      "GpioGpio30": 33,
+      "GpioGpio31": 34,
+      "Uart0Tx": 35,
+      "Uart1Tx": 36
+    },
+    "direct_pads": {
+      "SpiHost0Sd0": 0,
+      "SpiHost0Sd1": 1,
+      "SpiHost0Sd2": 2,
+      "SpiHost0Sd3": 3,
+      "SpiDeviceSd0": 4,
+      "SpiDeviceSd1": 5,
+      "SpiDeviceSd2": 6,
+      "SpiDeviceSd3": 7,
+      "UsbdevUsbDp": 8,
+      "UsbdevUsbDn": 9,
+      "SpiDeviceSck": 10,
+      "SpiDeviceCsb": 11,
+      "SpiHost0Sck": 12,
+      "SpiHost0Csb": 13
+    },
+    "muxed_pads": {
+      "Ioa0": 0,
+      "Ioa1": 1,
+      "Ioa2": 2,
+      "Ioa3": 3,
+      "Ioa4": 4,
+      "Ioa5": 5,
+      "Ioa6": 6,
+      "Ioa7": 7,
+      "Ioa8": 8,
+      "Iob0": 9,
+      "Iob1": 10,
+      "Iob2": 11,
+      "Iob3": 12,
+      "Iob4": 13,
+      "Iob5": 14,
+      "Iob6": 15,
+      "Iob7": 16,
+      "Iob8": 17,
+      "Iob9": 18,
+      "Iob10": 19,
+      "Iob11": 20,
+      "Iob12": 21,
+      "Ioc0": 22,
+      "Ioc1": 23,
+      "Ioc2": 24,
+      "Ioc3": 25,
+      "Ioc4": 26,
+      "Ioc5": 27,
+      "Ioc6": 28,
+      "Ioc7": 29,
+      "Ioc8": 30,
+      "Ioc9": 31,
+      "Ioc10": 32,
+      "Ioc11": 33,
+      "Ioc12": 34,
+      "Ior0": 35,
+      "Ior1": 36,
+      "Ior2": 37,
+      "Ior3": 38,
+      "Ior4": 39,
+      "Ior5": 40,
+      "Ior6": 41,
+      "Ior7": 42,
+      "Ior10": 43,
+      "Ior11": 44,
+      "Ior12": 45,
+      "Ior13": 46
+    }
+  },
+  "pwrmgr": {
+    "wakeups": {
+      "PinmuxAonPinWkupReq": 0,
+      "PinmuxAonUsbWkupReq": 1,
+      "AonTimerAonWkupReq": 2
+    },
+    "reset_requests": {
+      "AonTimerAonAonTimerRstReq": 0
+    }
+  },
+  "rstmgr": {
+    "sw_resets": {
+      "SpiDevice": 0,
+      "SpiHost0": 1,
+      "Usb": 2
+    }
+  },
+  "clkmgr": {
+    "gateable_clocks": {
+      "IoDiv4Peri": 0,
+      "IoDiv2Peri": 1,
+      "IoPeri": 2,
+      "UsbPeri": 3
+    },
+    "hintable_clocks": {
+      "MainAes": 0
+    }
+  }
+}
