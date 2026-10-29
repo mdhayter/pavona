@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """Generate top-specific C, Rust, and/or Bazel software files
@@ -31,7 +32,7 @@ Bazel files generated (relative to <outdir>):
 import argparse
 from pathlib import Path
 import logging as log
-from topgen.lib import load_cfg, find_module, get_ip_hjson_path, get_addr_space_suffix
+from topgen.lib import find_module, get_addr_space_suffix, load_completecfg_and_blocks
 from mako.lookup import TemplateLookup
 from mako.template import Template
 from mako import exceptions
@@ -41,9 +42,6 @@ from topgen.typing import IpBlocksT
 from topgen.rust import TopGenRust
 from topgen.c_test import TopGenCTest
 import version_file
-from reggen.ip_block import IpBlock
-from topgen.clocks import Clocks
-from topgen.resets import Resets
 
 
 REPO_TOP = Path(__file__).parents[1].resolve()
@@ -259,21 +257,8 @@ def main():
                         type=bool)
     args = parser.parse_args()
 
-    completecfg = load_cfg(args.completecfg)
+    completecfg, name_to_block = load_completecfg_and_blocks(args.completecfg, REPO_TOP)
     outdir = args.outdir or args.completecfg.parents[2].resolve()
-
-    name_to_block = {}
-    for module in completecfg["module"]:
-        block_type = module["type"]
-        ip_hjson = get_ip_hjson_path(block_type, completecfg, REPO_TOP)
-        name_to_block[block_type] = IpBlock.from_path(str(ip_hjson), [])
-
-        # fix translation between Python None and value "null" in Hjson
-        if "null" in module["base_addrs"]:
-            module["base_addrs"][None] = module["base_addrs"]["null"]
-
-    completecfg["clocks"] = Clocks(completecfg["clocks"])
-    completecfg["resets"] = Resets(completecfg["resets"], completecfg["clocks"])
 
     # The C files needs some complex information, so we initialize this
     # object to store it.

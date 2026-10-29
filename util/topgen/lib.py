@@ -1,4 +1,6 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -26,6 +28,8 @@ from .intermodule import im_portname, im_defname, im_netname  # noqa : F401 # is
 from .intermodule import get_direction  # noqa : F401 # isort:skip
 from .intermodule import get_dangling_im_def  # noqa : F401 # isort:skip
 from .typing import IpBlocksT
+from .clocks import Clocks
+from .resets import Resets
 
 
 class CEnum(object):
@@ -392,6 +396,34 @@ def get_ip_hjson_path(ip_name_snake: str, topcfg: ConfigT,
     else:
         data_dir = repotop / "hw/ip/{}/data".format(ip_name_snake)
     return data_dir / "{}.hjson".format(ip_name_snake)
+
+
+def load_completecfg_and_blocks(completecfg_path: Path,
+                                repotop: Path) -> Tuple[ConfigT, IpBlocksT]:
+    """Load a complete top configuration and the IP block of each module type.
+
+    The IP block descriptions are found with get_ip_hjson_path() under
+    repotop. The configuration is prepared for the software generators: a
+    "null" base address key gets a None alias, and the clocks and resets are
+    converted to Clocks and Resets objects.
+    """
+    # Moved from util/gen_top_sw.py (main).
+    completecfg = load_cfg(completecfg_path)
+
+    name_to_block = {}
+    for module in completecfg["module"]:
+        block_type = module["type"]
+        ip_hjson = get_ip_hjson_path(block_type, completecfg, repotop)
+        name_to_block[block_type] = IpBlock.from_path(str(ip_hjson), [])
+
+        # fix translation between Python None and value "null" in Hjson
+        if "null" in module["base_addrs"]:
+            module["base_addrs"][None] = module["base_addrs"]["null"]
+
+    completecfg["clocks"] = Clocks(completecfg["clocks"])
+    completecfg["resets"] = Resets(completecfg["resets"], completecfg["clocks"])
+
+    return completecfg, name_to_block
 
 
 def is_xbarcfg(xbar_obj: ConfigT) -> bool:
