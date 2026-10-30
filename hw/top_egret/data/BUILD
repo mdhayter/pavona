@@ -55,6 +55,7 @@ pavona_top_host_desc(
     name = "host_desc",
     completecfg = ":completecfg",
     ip_descriptions = [":host_desc_inputs"],
+    jtag_id_pkg = "//hw/top_egret:rtl/jtag_id_pkg.sv",
 )
 
 copy_files(

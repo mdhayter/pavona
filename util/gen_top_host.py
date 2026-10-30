@@ -15,11 +15,16 @@ device register block, memory and subrange (such as "mmio"). It also contains th
 top's enumerations, using the same names as the generated Rust code: alert handler
 peripherals and alerts, pinmux selections and pads, power manager wakeups and reset
 requests, reset manager software resets and clock manager clocks.
+
+If the top has a JTAG ID package (hw/top_<topname>/rtl/jtag_id_pkg.sv), the description
+also gives the JTAG IDCODEs of the debug module TAP (dm_idcode) and the life cycle
+controller TAP (lc_idcode); on a top with one combined TAP they are the same.
 """
 import argparse
 import json
+import re
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Optional, Tuple
 
 from basegen.typing import ConfigT
 from topgen.lib import (RustArrayMapping, RustEnum, TopGen, find_module,
@@ -27,6 +32,19 @@ from topgen.lib import (RustArrayMapping, RustEnum, TopGen, find_module,
 from topgen.typing import IpBlocksT
 
 REPO_TOP = Path(__file__).parents[1].resolve()
+
+# A localparam in a JTAG ID package, such as
+#   localparam logic [3:0] JTAG_VERSION = 4'h1;
+LOCALPARAM_RE = re.compile(
+    r"localparam\s+logic\s*\[\s*(\d+)\s*:\s*(\d+)\s*\]\s*(\w+)\s*=\s*([^;]*);")
+# A sized literal, such as 4'h1, 4'd12 or 7'b110_1111.
+LITERAL_RE = re.compile(r"(\d+)\s*'\s*([bBoOdDhH])\s*([0-9a-fA-F_]+)")
+LITERAL_BASES = {"b": 2, "o": 8, "d": 10, "h": 16}
+# Bits of the TAP type field (bits 15:12 of an IDCODE) that mark a debug module TAP and a
+# life cycle controller TAP.
+IDCODE_TAP_TYPE_SHIFT = 12
+IDCODE_TAP_TYPE_DM = 1 << 0
+IDCODE_TAP_TYPE_LC = 1 << 1
 
 
 def enum_dict(enum: RustEnum) -> Dict[str, int]:
@@ -46,7 +64,82 @@ def region_dict(region) -> Dict[str, int]:
     return {"base_addr": int(region.base_addr), "size_bytes": int(region.size_bytes)}
 
 
-def host_description(completecfg: ConfigT, name_to_block: IpBlocksT) -> Dict[str, object]:
+def split_concatenation(expr: str) -> List[str]:
+    """Split the inside of a {...} concatenation at its top-level commas."""
+    parts, depth, start = [], 0, 0
+    for i, char in enumerate(expr):
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+        elif char == "," and depth == 0:
+            parts.append(expr[start:i])
+            start = i + 1
+    parts.append(expr[start:])
+    return [part.strip() for part in parts]
+
+
+def eval_param_expr(expr: str, params: Dict[str, Tuple[int, int]]) -> Tuple[int, int]:
+    """Evaluate a localparam value: a sized literal, an earlier localparam, or a
+    concatenation of those. Returns (value, width in bits)."""
+    expr = expr.strip()
+    if expr.startswith("{") and expr.endswith("}"):
+        value, width = 0, 0
+        for part in split_concatenation(expr[1:-1]):
+            part_value, part_width = eval_param_expr(part, params)
+            value = (value << part_width) | part_value
+            width += part_width
+        return value, width
+    match = LITERAL_RE.fullmatch(expr)
+    if match:
+        width = int(match.group(1))
+        value = int(match.group(3).replace("_", ""), LITERAL_BASES[match.group(2).lower()])
+        if value >> width:
+            raise ValueError(f"{expr} does not fit in {width} bits")
+        return value, width
+    if expr in params:
+        return params[expr]
+    raise ValueError(f"Cannot evaluate {expr!r}: not a sized literal, an earlier "
+                     "localparam or a concatenation")
+
+
+def parse_localparams(text: str) -> Dict[str, Tuple[int, int]]:
+    """Return the `localparam logic [msb:lsb]` values of a package, in declaration
+    order, as {name: (value, width)}. Only the forms used by the JTAG ID packages are
+    supported."""
+    text = re.sub(r"//[^\n]*", "", text)
+    params: Dict[str, Tuple[int, int]] = {}
+    for msb, lsb, name, expr in LOCALPARAM_RE.findall(text):
+        width = int(msb) - int(lsb) + 1
+        value, value_width = eval_param_expr(expr, params)
+        if value_width != width:
+            raise ValueError(f"{name} is {width} bits wide but its value has {value_width}")
+        params[name] = (value, width)
+    return params
+
+
+def jtag_idcodes(text: str) -> Dict[str, int]:
+    """Return the debug module and life cycle controller IDCODEs of a JTAG ID package.
+
+    Each is the first `*IDCODE` localparam whose TAP type field has the DM or the LC bit
+    set. A package with no such IDCODE gives no entry.
+    """
+    idcodes: Dict[str, int] = {}
+    for name, (value, width) in parse_localparams(text).items():
+        if not name.endswith("IDCODE"):
+            continue
+        if width != 32:
+            raise ValueError(f"{name} is {width} bits wide, not 32")
+        tap_type = (value >> IDCODE_TAP_TYPE_SHIFT) & 0xf
+        if tap_type & IDCODE_TAP_TYPE_DM:
+            idcodes.setdefault("dm_idcode", value)
+        if tap_type & IDCODE_TAP_TYPE_LC:
+            idcodes.setdefault("lc_idcode", value)
+    return idcodes
+
+
+def host_description(completecfg: ConfigT, name_to_block: IpBlocksT,
+                     jtag_id_pkg: Optional[str] = None) -> Dict[str, object]:
     """Build the host description of a top from its loaded complete configuration."""
     helper = TopGen(completecfg, name_to_block, RustEnum, RustArrayMapping)
     modules = completecfg["module"]
@@ -56,6 +149,8 @@ def host_description(completecfg: ConfigT, name_to_block: IpBlocksT) -> Dict[str
         "generator": "util/gen_top_host.py",
         "name": completecfg["name"],
     }
+    if jtag_id_pkg is not None:
+        desc.update(jtag_idcodes(jtag_id_pkg))
 
     addr_spaces = {}
     for addr_space in completecfg["addr_spaces"]:
@@ -135,10 +230,21 @@ def main():
                         default=REPO_TOP,
                         help="Directory under which the IP block descriptions are found. "
                              "Defaults to the repository containing this script.")
+    parser.add_argument("--jtag-id-pkg",
+                        type=Path,
+                        default=None,
+                        help="JTAG ID package of the top. Defaults to "
+                             "hw/top_<topname>/rtl/jtag_id_pkg.sv under --repo-top, if it "
+                             "exists.")
     args = parser.parse_args()
 
     completecfg, name_to_block = load_completecfg_and_blocks(args.completecfg, args.repo_top)
-    desc = host_description(completecfg, name_to_block)
+    jtag_id_pkg = args.jtag_id_pkg
+    if jtag_id_pkg is None:
+        default = args.repo_top / f"hw/top_{completecfg['name']}/rtl/jtag_id_pkg.sv"
+        jtag_id_pkg = default if default.exists() else None
+    desc = host_description(completecfg, name_to_block,
+                            jtag_id_pkg.read_text() if jtag_id_pkg else None)
 
     outdir = args.outdir or args.completecfg.parent
     outfile = outdir / f"top_{completecfg['name']}.host.json"

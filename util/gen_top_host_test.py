@@ -12,7 +12,7 @@ import sys
 
 import pytest
 
-from gen_top_host import REPO_TOP, host_description
+from gen_top_host import REPO_TOP, host_description, jtag_idcodes, parse_localparams
 from topgen.lib import load_completecfg_and_blocks
 
 TOPS = ["egret", "dragonfly", "scafi_deprecated"]
@@ -61,7 +61,9 @@ def top(request):
     completecfg_path = (REPO_TOP / f"hw/top_{request.param}/data/autogen/"
                         f"top_{request.param}.gen.hjson")
     completecfg, name_to_block = load_completecfg_and_blocks(completecfg_path, REPO_TOP)
-    return request.param, host_description(completecfg, name_to_block)
+    jtag_id_pkg = REPO_TOP / f"hw/top_{request.param}/rtl/jtag_id_pkg.sv"
+    return request.param, host_description(
+        completecfg, name_to_block, jtag_id_pkg.read_text() if jtag_id_pkg.exists() else None)
 
 
 def test_name(top):
@@ -120,6 +122,78 @@ def test_pad_counts(top):
     consts = rust_consts(rust_source(name, "hart"))
     assert desc["pinmux"]["num_mio_pads"] == consts["NUM_MIO_PADS"]
     assert desc["pinmux"]["num_dio_pads"] == consts["NUM_DIO_PADS"]
+
+
+# The OpenOCD target configuration of each TAP, whose default _CPUTAPID is the IDCODE.
+OPENOCD_CFGS = {
+    "dm_idcode": "util/openocd/target/lowrisc-{}.cfg",
+    "lc_idcode": "util/openocd/target/lowrisc-{}-lc.cfg",
+}
+CPUTAPID_RE = re.compile(r"^\s*set _CPUTAPID (0x[0-9A-Fa-f]+)$", re.MULTILINE)
+
+
+def test_jtag_idcodes(top):
+    name, desc = top
+    cfgs = {key: REPO_TOP / path.format(name) for key, path in OPENOCD_CFGS.items()}
+    if not all(cfg.exists() for cfg in cfgs.values()):
+        assert "dm_idcode" not in desc and "lc_idcode" not in desc
+        pytest.skip("no OpenOCD configuration")
+    for key, cfg in cfgs.items():
+        assert desc[key] == int(CPUTAPID_RE.search(cfg.read_text()).group(1), 0), key
+
+
+def test_localparam_literals():
+    params = parse_localparams("""
+        localparam logic [3:0] A = 4'hA;  // comment
+        localparam logic [6:0] B = 7'b110_1111;
+        localparam logic [5:0] C = 6'o17;
+        localparam logic [3:0] D = 4'd12;
+        localparam logic [21:0] E = {
+            A,     // A
+            B,
+            1'b1, {C, D}
+        };
+    """)
+    assert params == {
+        "A": (0xa, 4),
+        "B": (0x6f, 7),
+        "C": (0o17, 6),
+        "D": (12, 4),
+        "E": ((((((0xa << 7) | 0x6f) << 1) | 1) << 10) | (0o17 << 4) | 12, 22),
+    }
+
+
+@pytest.mark.parametrize("text", [
+    "localparam logic [3:0] A = 5'h1;",  # width mismatch
+    "localparam logic [3:0] A = 4'h1f;",  # value too wide
+    "localparam logic [3:0] A = B;",  # unknown name
+    "localparam logic [3:0] A = 4;",  # unsized literal
+])
+def test_localparam_errors(text):
+    with pytest.raises(ValueError):
+        parse_localparams(text)
+
+
+def idcode(tap_type: int) -> str:
+    return f"32'h1000{tap_type:x}cdf"
+
+
+def test_jtag_idcode_selection():
+    # The first IDCODE with each TAP type bit wins; other localparams are ignored.
+    text = f"""
+        localparam logic [31:0] OTHER = {idcode(1)};
+        localparam logic [31:0] X_IDCODE = {idcode(4)};
+        localparam logic [31:0] LC_IDCODE = {idcode(2)};
+        localparam logic [31:0] DM_IDCODE = {idcode(1)};
+        localparam logic [31:0] BOTH_IDCODE = {idcode(3)};
+    """
+    assert jtag_idcodes(text) == {"dm_idcode": 0x10001cdf, "lc_idcode": 0x10002cdf}
+    # One combined TAP gives both.
+    text = f"localparam logic [31:0] COMBINED_JTAG_IDCODE = {idcode(3)};"
+    assert jtag_idcodes(text) == {"dm_idcode": 0x10003cdf, "lc_idcode": 0x10003cdf}
+    assert jtag_idcodes("localparam logic [3:0] A = 4'h1;") == {}
+    with pytest.raises(ValueError):
+        jtag_idcodes("localparam logic [15:0] SHORT_IDCODE = 16'h1cdf;")
 
 
 if __name__ == "__main__":

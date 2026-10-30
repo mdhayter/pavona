@@ -94,11 +94,17 @@ def _pavona_top_host_desc_impl(ctx):
     topname = completecfg.basename.removesuffix(".gen.hjson")
     host_desc = ctx.actions.declare_file("autogen/" + topname + ".host.json")
 
+    jtag_id_pkg_args = []
+    jtag_id_pkg_inputs = []
+    if ctx.file.jtag_id_pkg:
+        jtag_id_pkg_args = ["--jtag-id-pkg", ctx.file.jtag_id_pkg.path]
+        jtag_id_pkg_inputs = [ctx.file.jtag_id_pkg]
+
     # The IP block descriptions are staged at their source paths, so the
     # generator finds them under the execution root.
     ctx.actions.run(
         outputs = [host_desc],
-        inputs = [completecfg] + ctx.files.ip_descriptions,
+        inputs = [completecfg] + ctx.files.ip_descriptions + jtag_id_pkg_inputs,
         arguments = [
             "--completecfg",
             completecfg.path,
@@ -106,7 +112,7 @@ def _pavona_top_host_desc_impl(ctx):
             host_desc.dirname,
             "--repo-top",
             ".",
-        ],
+        ] + jtag_id_pkg_args,
         executable = ctx.executable._gen_top_host,
     )
 
@@ -118,6 +124,7 @@ pavona_top_host_desc_rule = rule(
     attrs = {
         "completecfg": attr.label(allow_files = True, doc = "Complete top config (a completecfg target)"),
         "ip_descriptions": attr.label_list(allow_files = True, doc = "Hjson descriptions of the top's IP blocks"),
+        "jtag_id_pkg": attr.label(allow_single_file = [".sv"], doc = "JTAG ID package of the top (rtl/jtag_id_pkg.sv), if it has one"),
         "_gen_top_host": attr.label(
             default = "//util:gen_top_host",
             executable = True,
@@ -126,19 +133,21 @@ pavona_top_host_desc_rule = rule(
     },
 )
 
-def pavona_top_host_desc(name, completecfg, ip_descriptions, **kwargs):
+def pavona_top_host_desc(name, completecfg, ip_descriptions, jtag_id_pkg = None, **kwargs):
     """
     Macro around `pavona_top_host_desc_rule`, which generates
     `top_<topname>.host.json`, the description of a top that host tools load at
     run time.
 
     `ip_descriptions` must include the Hjson description of every IP block type
-    in the top, at the path where topgen expects it.
+    in the top, at the path where topgen expects it. `jtag_id_pkg`, if given, is the
+    top's JTAG ID package, from which the TAP IDCODEs are read.
     """
     pavona_top_host_desc_rule(
         name = name,
         completecfg = completecfg,
         ip_descriptions = ip_descriptions,
+        jtag_id_pkg = jtag_id_pkg,
         **kwargs
     )
 
