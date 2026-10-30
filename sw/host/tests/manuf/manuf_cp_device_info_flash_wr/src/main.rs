@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -56,10 +57,11 @@ fn manuf_cp_device_info_flash_wr(opts: &Opts, transport: &TransportWrapper) -> R
     uart.clear_rx_buffer()?;
 
     // Load and execute the SRAM program that contains the test code.
-    match opts
-        .sram_program
-        .load_and_execute(&mut *jtag, ExecutionMode::JumpAndWait(opts.timeout))?
-    {
+    match opts.sram_program.load_and_execute(
+        &mut *jtag,
+        transport.top()?,
+        ExecutionMode::JumpAndWait(opts.timeout),
+    )? {
         ExecutionResult::ExecutionDone(_) => {
             log::info!("SRAM program loaded and executed successfully.")
         }

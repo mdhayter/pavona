@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -50,6 +51,7 @@ fn ibex_isa_smoke_test(opts: &Opts, transport: &TransportWrapper) -> Result<()> 
     // Load SRAM program
     match opts.sram_program.load_and_execute(
         &mut *jtag,
+        transport.top()?,
         ExecutionMode::JumpAndWait(Duration::from_secs(5)),
     )? {
         ExecutionResult::ExecutionDone(_) => {
