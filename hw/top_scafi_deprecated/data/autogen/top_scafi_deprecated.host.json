@@ -108,6 +108,7 @@
       }
     }
   },
+  "per_top_used_regs": {},
   "pinmux": {
     "num_mio_pads": 47,
     "num_dio_pads": 14,
