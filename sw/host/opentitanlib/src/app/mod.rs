@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -23,8 +24,9 @@ use crate::transport::{
     TransportInterfaceType, ioexpander,
 };
 
-use anyhow::{Result, bail, ensure};
+use anyhow::{Context, Result, bail, ensure};
 use indicatif::{ProgressBar, ProgressStyle};
+use ot_hal::top::TopDescription;
 use serialport::Parity;
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -216,6 +218,7 @@ pub struct TransportWrapperBuilder {
     strapping_conf_map: HashMap<String, Vec<(String, PinConfiguration)>>,
     io_expander_conf_map: HashMap<String, config::IoExpander>,
     gpio_conf: HashSet<String>,
+    top: Option<TopDescription>,
 }
 
 // This is the structure to be passed to each Command implementation,
@@ -235,6 +238,7 @@ pub struct TransportWrapper {
     i2c_conf_map: HashMap<String, I2cConfiguration>,
     strapping_conf_map: HashMap<String, HashMap<String, PinConfiguration>>,
     gpio_conf: HashSet<String>,
+    top: Option<TopDescription>,
     //
     // Below fields are lazily populated, as instances are requested.
     //
@@ -268,6 +272,7 @@ impl TransportWrapperBuilder {
             strapping_conf_map: HashMap::new(),
             io_expander_conf_map: HashMap::new(),
             gpio_conf: HashSet::new(),
+            top: None,
         }
     }
 
@@ -687,6 +692,11 @@ impl TransportWrapperBuilder {
         self.openocd_adapter_config = openocd_adapter_config.clone();
     }
 
+    /// Sets the description of the top of the chip on the other end of the transport.
+    pub fn set_top(&mut self, top: TopDescription) {
+        self.top = Some(top);
+    }
+
     pub fn build(
         self,
         transport: Box<dyn crate::transport::Transport>,
@@ -731,6 +741,7 @@ impl TransportWrapperBuilder {
             i2c_conf_map,
             strapping_conf_map,
             gpio_conf: self.gpio_conf,
+            top: self.top,
             pin_instance_map: RefCell::new(HashMap::new()),
             spi_physical_map: RefCell::new(HashMap::new()),
             spi_logical_map: RefCell::new(HashMap::new()),
@@ -767,6 +778,13 @@ impl TransportWrapperBuilder {
 }
 
 impl TransportWrapper {
+    /// Returns the description of the top of the chip on the other end of the transport.
+    pub fn top(&self) -> Result<&TopDescription> {
+        self.top
+            .as_ref()
+            .context("No top selected: use --top or set TARGET_CHIP_TOP")
+    }
+
     pub fn ignore_dft_straps_on_reset(&self) -> Result<()> {
         self.disable_dft_on_reset.set(false);
         Ok(())
