@@ -2,6 +2,8 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "generator": "util/gen_top_host.py",
   "name": "dragonfly",
+  "dm_idcode": 268516575,
+  "lc_idcode": 268516575,
   "addr_spaces": {
     "hart": {
       "devices": {
