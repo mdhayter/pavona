@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -17,7 +18,6 @@ use opentitanlib::test_utils::init::InitializeTest;
 use opentitanlib::test_utils::pinmux_config::PinmuxConfig;
 use opentitanlib::uart::console::UartConsole;
 use opentitanlib::{collection, execute_test};
-use ot_hal::top::{PinmuxInsel, PinmuxMioOut, PinmuxOutsel, PinmuxPeripheralIn};
 
 #[derive(Debug, Parser)]
 struct Opts {
@@ -29,9 +29,26 @@ struct Opts {
     timeout: Duration,
 }
 
+/// Pinmux configuration, by the names in the top description: GPIO inputs to
+/// pads, and pads to GPIO outputs.
 struct Config {
-    input: HashMap<PinmuxPeripheralIn, PinmuxInsel>,
-    output: HashMap<PinmuxMioOut, PinmuxOutsel>,
+    input: HashMap<String, String>,
+    output: HashMap<String, String>,
+}
+
+/// Returns a map of pinmux names from `pairs`.
+fn names(pairs: &[(&str, &str)]) -> HashMap<String, String> {
+    pairs
+        .iter()
+        .map(|(k, v)| (k.to_string(), v.to_string()))
+        .collect()
+}
+
+/// Returns the index of GPIO `name` (`GpioGpio<index>`).
+fn gpio_index(name: &str) -> u32 {
+    name.strip_prefix("GpioGpio")
+        .and_then(|index| index.parse().ok())
+        .unwrap_or_else(|| panic!("{name} is not a GPIO"))
 }
 
 static CONFIG: LazyLock<HashMap<&'static str, Config>> = LazyLock::new(|| {
@@ -39,78 +56,78 @@ static CONFIG: LazyLock<HashMap<&'static str, Config>> = LazyLock::new(|| {
          // from:https://github.com/lowRISC/opentitan/
          // blob/master/hw/top_egret/data/pins_cw310_hyperdebug.xdc
         "hyper310" => Config {
-            input: collection! {
+            input: names(&[
                 // The commented lines represent multi-fuction pins.  These will
                 // be added back in when the hyperdebug firmware can set these
                 // multifunction pins into GPIO mode.
                 // ioc0~2: sw strap0~2
                 // ioc5: tap strap1
                 // ioc6: pwm ext)_clk
-                PinmuxPeripheralIn::GpioGpio17 => PinmuxInsel::Ioc10,
-                PinmuxPeripheralIn::GpioGpio18 => PinmuxInsel::Ioc11,
-                PinmuxPeripheralIn::GpioGpio19 => PinmuxInsel::Ioc12,
+                ("GpioGpio17", "Ioc10"),
+                ("GpioGpio18", "Ioc11"),
+                ("GpioGpio19", "Ioc12"),
 
-                PinmuxPeripheralIn::GpioGpio20 => PinmuxInsel::Ior5,
-                PinmuxPeripheralIn::GpioGpio21 => PinmuxInsel::Ior6,
-                PinmuxPeripheralIn::GpioGpio22 => PinmuxInsel::Ior7,
+                ("GpioGpio20", "Ior5"),
+                ("GpioGpio21", "Ior6"),
+                ("GpioGpio22", "Ior7"),
                 // IOR8-9 aren't MIOs.
-                PinmuxPeripheralIn::GpioGpio25 => PinmuxInsel::Ior10,
-                PinmuxPeripheralIn::GpioGpio26 => PinmuxInsel::Ior11,
-                PinmuxPeripheralIn::GpioGpio27 => PinmuxInsel::Ior12,
-                PinmuxPeripheralIn::GpioGpio28 => PinmuxInsel::Ior13,
+                ("GpioGpio25", "Ior10"),
+                ("GpioGpio26", "Ior11"),
+                ("GpioGpio27", "Ior12"),
+                ("GpioGpio28", "Ior13"),
 
-            },
-            output: collection! {
+            ]),
+            output: names(&[
                 // The commented lines represent multi-fuction pins.  These will
                 // be added back in when the hyperdebug firmware can set these
                 // multifunction pins into GPIO mode.
                 // ioc0~2: sw strap0~2
                 // ioc5: tap strap1
                 // ioc6: pwm ext)_clk
-                PinmuxMioOut::Ioc10 => PinmuxOutsel::GpioGpio17,
-                PinmuxMioOut::Ioc11 => PinmuxOutsel::GpioGpio18,
-                PinmuxMioOut::Ioc12 => PinmuxOutsel::GpioGpio19,
+                ("Ioc10", "GpioGpio17"),
+                ("Ioc11", "GpioGpio18"),
+                ("Ioc12", "GpioGpio19"),
 
-                PinmuxMioOut::Ior5 => PinmuxOutsel::GpioGpio20,
-                PinmuxMioOut::Ior6 => PinmuxOutsel::GpioGpio21,
-                PinmuxMioOut::Ior7 => PinmuxOutsel::GpioGpio22,
+                ("Ior5", "GpioGpio20"),
+                ("Ior6", "GpioGpio21"),
+                ("Ior7", "GpioGpio22"),
                 // IOR8-9 aren't MIOs.
-                PinmuxMioOut::Ior10 => PinmuxOutsel::GpioGpio25,
-                PinmuxMioOut::Ior11 => PinmuxOutsel::GpioGpio26,
-                PinmuxMioOut::Ior12 => PinmuxOutsel::GpioGpio27,
-                PinmuxMioOut::Ior13 => PinmuxOutsel::GpioGpio28,
-            },
+                ("Ior10", "GpioGpio25"),
+                ("Ior11", "GpioGpio26"),
+                ("Ior12", "GpioGpio27"),
+                ("Ior13", "GpioGpio28"),
+            ]),
         },
         // Replication of the hyper310 config.
         "teacup" => Config {
-            input: collection! {
-                PinmuxPeripheralIn::GpioGpio17 => PinmuxInsel::Ioc10,
-                PinmuxPeripheralIn::GpioGpio18 => PinmuxInsel::Ioc11,
-                PinmuxPeripheralIn::GpioGpio19 => PinmuxInsel::Ioc12,
+            input: names(&[
+                ("GpioGpio17", "Ioc10"),
+                ("GpioGpio18", "Ioc11"),
+                ("GpioGpio19", "Ioc12"),
 
-                PinmuxPeripheralIn::GpioGpio20 => PinmuxInsel::Ior5,
-                PinmuxPeripheralIn::GpioGpio21 => PinmuxInsel::Ior6,
-                PinmuxPeripheralIn::GpioGpio22 => PinmuxInsel::Ior7,
+                ("GpioGpio20", "Ior5"),
+                ("GpioGpio21", "Ior6"),
+                ("GpioGpio22", "Ior7"),
 
-                PinmuxPeripheralIn::GpioGpio25 => PinmuxInsel::Ior10,
-                PinmuxPeripheralIn::GpioGpio26 => PinmuxInsel::Ior11,
-                PinmuxPeripheralIn::GpioGpio27 => PinmuxInsel::Ior12,
-                PinmuxPeripheralIn::GpioGpio28 => PinmuxInsel::Ior13,
-            },
-            output: collection! {
-                PinmuxMioOut::Ioc10 => PinmuxOutsel::GpioGpio17,
-                PinmuxMioOut::Ioc11 => PinmuxOutsel::GpioGpio18,
-                PinmuxMioOut::Ioc12 => PinmuxOutsel::GpioGpio19,
+                ("GpioGpio25", "Ior10"),
+                ("GpioGpio26", "Ior11"),
+                ("GpioGpio27", "Ior12"),
+                ("GpioGpio28", "Ior13"),
+            ]),
+            output: names(&[
+                ("Ioc10", "GpioGpio17"),
+                ("Ioc11", "GpioGpio18"),
+                ("Ioc12", "GpioGpio19"),
 
-                PinmuxMioOut::Ior5 => PinmuxOutsel::GpioGpio20,
-                PinmuxMioOut::Ior6 => PinmuxOutsel::GpioGpio21,
-                PinmuxMioOut::Ior7 => PinmuxOutsel::GpioGpio22,
+                ("Ior5", "GpioGpio20"),
+                ("Ior6", "GpioGpio21"),
+                ("Ior7", "GpioGpio22"),
 
-                PinmuxMioOut::Ior10 => PinmuxOutsel::GpioGpio25,
-                PinmuxMioOut::Ior11 => PinmuxOutsel::GpioGpio26,
-                PinmuxMioOut::Ior12 => PinmuxOutsel::GpioGpio27,
-                PinmuxMioOut::Ior13 => PinmuxOutsel::GpioGpio28,
-            },
+                ("Ior10", "GpioGpio25"),
+                ("Ior11", "GpioGpio26"),
+                ("Ior12", "GpioGpio27"),
+                ("Ior13", "GpioGpio28"),
+            ]),
         },
     }
 });
@@ -119,11 +136,11 @@ fn gpio_write(
     transport: &TransportWrapper,
     uart: &dyn Uart,
     value: u32,
-    config: &HashMap<PinmuxMioOut, PinmuxOutsel>,
+    config: &HashMap<String, String>,
     invert: u8,
 ) -> Result<()> {
     let mask = config.values().fold(0, |acc, v| {
-        let i = u32::from(*v) - u32::from(PinmuxOutsel::GpioGpio0);
+        let i = gpio_index(v);
         acc | 1u32 << i
     });
     let masked_value = value & mask;
@@ -150,8 +167,8 @@ fn gpio_write(
         GpioSet::write_all(uart, write_val)?;
         let mut result = 0u32;
         for (k, v) in config.iter() {
-            let n = u32::from(transport.gpio_pin(&k.to_string())?.read()?);
-            let i = u32::from(*v) - u32::from(PinmuxOutsel::GpioGpio0);
+            let n = u32::from(transport.gpio_pin(k)?.read()?);
+            let i = gpio_index(v);
             result |= n << i;
         }
         if invert == 1 {
@@ -168,7 +185,7 @@ fn gpio_read(
     transport: &TransportWrapper,
     uart: &dyn Uart,
     value: u32,
-    config: &HashMap<PinmuxPeripheralIn, PinmuxInsel>,
+    config: &HashMap<String, String>,
     invert: u32,
 ) -> Result<()> {
     let mask = if invert == 1 {
@@ -176,7 +193,7 @@ fn gpio_read(
         GpioGet::read_all(uart)?
     } else {
         config.keys().fold(0, |acc, k| {
-            let i = u32::from(*k) - u32::from(PinmuxPeripheralIn::GpioGpio0);
+            let i = gpio_index(k);
             acc | 1u32 << i
         })
     };
@@ -194,9 +211,9 @@ fn gpio_read(
         );
     } else {
         for (k, v) in config.iter() {
-            let i = u32::from(*k) - u32::from(PinmuxPeripheralIn::GpioGpio0);
+            let i = gpio_index(k);
             transport
-                .gpio_pin(&v.to_string())?
+                .gpio_pin(v)?
                 .write(((masked_value >> i) & 1) != invert)?;
         }
         // issue dummy read to make sure write complete.
@@ -215,14 +232,18 @@ fn test_gpio_outputs(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     let config = CONFIG
         .get(opts.init.backend_opts.interface.as_str())
         .expect("interface");
-    PinmuxConfig::configure(&*uart, Some(&config.input), Some(&config.output), None)?;
+    PinmuxConfig::configure(
+        &*uart,
+        transport.top()?,
+        Some(&config.input),
+        Some(&config.output),
+        None,
+    )?;
 
     log::info!("Configuring debugger GPIOs as inputs");
     // The outputs (with respect to pinmux config) correspond to the input pins on the debug board.
     for pin in config.output.keys() {
-        transport
-            .gpio_pin(&pin.to_string())?
-            .set_mode(PinMode::Input)?;
+        transport.gpio_pin(pin)?.set_mode(PinMode::Input)?;
     }
 
     log::info!("Enabling outputs on the DUT");
@@ -290,14 +311,12 @@ fn test_gpio_inputs(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     let config = CONFIG
         .get(opts.init.backend_opts.interface.as_str())
         .expect("interface");
-    PinmuxConfig::configure(&*uart, Some(&config.input), None, None)?;
+    PinmuxConfig::configure(&*uart, transport.top()?, Some(&config.input), None, None)?;
 
     log::info!("Configuring debugger GPIOs as outputs");
     // The inputs (with respect to pinmux config) correspond to the output pins on the debug board.
     for pin in config.input.values() {
-        transport
-            .gpio_pin(&pin.to_string())?
-            .set_mode(PinMode::PushPull)?;
+        transport.gpio_pin(pin)?.set_mode(PinMode::PushPull)?;
     }
 
     log::info!("Disabling outputs on the DUT");
@@ -306,7 +325,7 @@ fn test_gpio_inputs(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
 
     // Initialize pins to 0
     for pin in config.input.values() {
-        transport.gpio_pin(&pin.to_string())?.write(false)?;
+        transport.gpio_pin(pin)?.write(false)?;
     }
 
     // Input level high test
@@ -322,7 +341,7 @@ fn test_gpio_inputs(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
 
     // Initialize pins to 0
     for pin in config.input.values() {
-        transport.gpio_pin(&pin.to_string())?.write(false)?;
+        transport.gpio_pin(pin)?.write(false)?;
     }
     // Input Rising Edge test
     log::info!("test: input rising edge test");
@@ -337,7 +356,7 @@ fn test_gpio_inputs(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
 
     // Initialize pins to 1
     for pin in config.input.values() {
-        transport.gpio_pin(&pin.to_string())?.write(true)?;
+        transport.gpio_pin(pin)?.write(true)?;
     }
 
     // Input level low test
@@ -353,7 +372,7 @@ fn test_gpio_inputs(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
 
     // Initialize pins to 1
     for pin in config.input.values() {
-        transport.gpio_pin(&pin.to_string())?.write(true)?;
+        transport.gpio_pin(pin)?.write(true)?;
     }
     // Input Falling Edge test
     log::info!("test: input falling edge test");
