@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -36,7 +37,7 @@ impl CommandDispatch for AlertDigest {
     fn run(
         &self,
         _context: &dyn Any,
-        _transport: &TransportWrapper,
+        transport: &TransportWrapper,
     ) -> Result<Option<Box<dyn erased_serde::Serialize>>> {
         // From kErrorOk in ROM.
         const ERROR_OK: u32 = 0x739;
@@ -54,12 +55,13 @@ impl CommandDispatch for AlertDigest {
 
         // Read in the OTP img description.
         let otp = OtpImg::from_file(&self.alert_cfg)?;
+        let top = transport.top()?;
 
         let mut items = Vec::<OtpImgItem>::new();
 
         for lc_state in lc_states {
             // Create model for alert_handler register states.
-            let alert = AlertRegs::try_new(lc_state.1, &otp)?;
+            let alert = AlertRegs::try_new(lc_state.1, &otp, top)?;
 
             // Use alert_handler registers states to construct CRC32 checksum.
             let crc32 = alert.crc32();
