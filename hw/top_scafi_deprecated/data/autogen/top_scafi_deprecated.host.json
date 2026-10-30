@@ -368,6 +368,15 @@
       "SpiDevice": 0,
       "SpiHost0": 1,
       "Usb": 2
+    },
+    "reset_info": {
+      "Por": 0,
+      "LowPowerExit": 1,
+      "SwReset": 2,
+      "AonTimerAonAonTimerRstReq": 3,
+      "MainPwr": 4,
+      "Esc": 5,
+      "Ndm": 6
     }
   },
   "clkmgr": {
@@ -379,6 +388,7 @@
     },
     "hintable_clocks": {
       "MainAes": 0
-    }
+    },
+    "ext_clk_bypass": true
   }
 }
