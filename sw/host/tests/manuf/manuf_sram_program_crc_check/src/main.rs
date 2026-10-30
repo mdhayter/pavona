@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -69,6 +70,7 @@ fn test_sram_load(
     // Execute and check execution status.
     let exec_res = execute_sram_program(
         &mut *jtag,
+        transport.top()?,
         &sram_prog_info,
         ExecutionMode::JumpAndWait(Duration::from_secs(5)),
         skip_crc,
