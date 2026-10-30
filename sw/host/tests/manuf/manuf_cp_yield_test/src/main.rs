@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -61,6 +62,7 @@ fn manuf_cp_yield_test(opts: &Opts, transport: &TransportWrapper) -> Result<()> 
     // We must wait for the lc_ctrl to initialize before the LC state is exposed.
     wait_for_status(
         &mut *jtag,
+        transport.top()?,
         Duration::from_secs(3),
         LcCtrlStatus::INITIALIZED,
     )?;

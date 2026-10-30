@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -12,7 +13,7 @@ use thiserror::Error;
 use ot_hal::dif::lc_ctrl::{
     DifLcCtrlState, LcCtrlReg, LcCtrlStatus, LcCtrlTransitionCmd, LcCtrlTransitionCtrl,
 };
-use ot_hal::top;
+use ot_hal::top::TopDescription;
 use ot_hal::util::multibits::MultiBitBool8;
 
 use crate::app::{TransportWrapper, UartRx};
@@ -200,6 +201,7 @@ pub fn trigger_lc_transition(
 
     wait_for_status(
         &mut *jtag,
+        transport.top()?,
         Duration::from_secs(3),
         LcCtrlStatus::TRANSITION_SUCCESSFUL,
     )
@@ -286,6 +288,7 @@ pub fn trigger_volatile_raw_unlock<'t>(
     if expect_raw_unlock_supported {
         wait_for_status(
             &mut *jtag,
+            transport.top()?,
             Duration::from_secs(3),
             LcCtrlStatus::TRANSITION_SUCCESSFUL,
         )
@@ -295,13 +298,18 @@ pub fn trigger_volatile_raw_unlock<'t>(
         if use_external_clk {
             status |= LcCtrlStatus::EXT_CLOCK_SWITCHED;
         }
-        wait_for_status(&mut *jtag, Duration::from_secs(3), status)
+        wait_for_status(&mut *jtag, transport.top()?, Duration::from_secs(3), status)
             .context("failed waiting for TOKEN_ERROR status.")?;
     }
     Ok(jtag)
 }
 
-pub fn wait_for_status(jtag: &mut dyn Jtag, timeout: Duration, status: LcCtrlStatus) -> Result<()> {
+pub fn wait_for_status(
+    jtag: &mut dyn Jtag,
+    top: &TopDescription,
+    timeout: Duration,
+    status: LcCtrlStatus,
+) -> Result<()> {
     let jtag_tap = jtag.tap();
 
     // Wait for LC controller to be ready.
@@ -309,11 +317,9 @@ pub fn wait_for_status(jtag: &mut dyn Jtag, timeout: Duration, status: LcCtrlSta
         let polled_status = match jtag_tap {
             JtagTap::LcTap => jtag.read_lc_ctrl_reg(&LcCtrlReg::Status).unwrap(),
             JtagTap::RiscvTap => {
+                let lc_ctrl_base = top.base_addr("lc_ctrl_regs")? as u32;
                 let mut status = [0u32];
-                jtag.read_memory32(
-                    top::LC_CTRL_REGS_BASE_ADDR as u32 + LcCtrlReg::Status as u32,
-                    &mut status,
-                )?;
+                jtag.read_memory32(lc_ctrl_base + LcCtrlReg::Status as u32, &mut status)?;
                 status[0]
             }
         };
