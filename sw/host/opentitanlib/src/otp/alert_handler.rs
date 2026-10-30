@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -8,6 +9,7 @@ use crate::otp::otp_img::OtpRead;
 
 use anyhow::{Context, Result, bail};
 use crc::{Crc, Digest};
+use ot_hal::top::desc::TopDescription;
 
 /// ALERT_HANDLER_ALERT_CLASS related register values.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -20,14 +22,19 @@ struct AlertClassRegs {
 }
 
 /// Register values for alert_handler used in CRC32 calculation.
+///
+/// The alert handler's registers are the same on every top except for the number of alerts,
+/// which sizes the per-alert registers. It comes from the top's description, so the
+/// count-dependent constants in `alert_handler_regs` (`ALERT_HANDLER_PARAM_N_ALERTS` and the
+/// per-alert `*_MULTIREG_COUNT`s) are not used.
 #[derive(Debug, PartialEq)]
 pub struct AlertRegs {
-    /// ALERT_HANDLER_LOC_ALERT_REGWEN
-    regwen: [u32; ALERT_HANDLER_ALERT_REGWEN_MULTIREG_COUNT as usize],
-    /// ALERT_HANDLER_ALERT_EN_SHADOWED
-    en: [u32; ALERT_HANDLER_ALERT_EN_SHADOWED_MULTIREG_COUNT as usize],
-    /// ALERT_HANDLER_ALERT_CLASS_SHADOWED
-    class: [u32; ALERT_HANDLER_ALERT_CLASS_SHADOWED_MULTIREG_COUNT as usize],
+    /// ALERT_HANDLER_ALERT_REGWEN, one per alert.
+    regwen: Vec<u32>,
+    /// ALERT_HANDLER_ALERT_EN_SHADOWED, one per alert.
+    en: Vec<u32>,
+    /// ALERT_HANDLER_ALERT_CLASS_SHADOWED, one per alert.
+    class: Vec<u32>,
     /// ALERT_HANDLER_LOC_ALERT_REGWEN
     loc_regwen: [u32; ALERT_HANDLER_LOC_ALERT_REGWEN_MULTIREG_COUNT as usize],
     /// ALERT_HANDLER_LOC_ALERT_EN_SHADOWED
@@ -113,13 +120,14 @@ impl Default for AlertClassRegs {
     }
 }
 
-impl Default for AlertRegs {
-    fn default() -> Self {
+impl AlertRegs {
+    /// The register values after reset of an alert handler with `num_alerts` alerts.
+    fn reset(num_alerts: usize) -> Self {
         AlertRegs {
-            regwen: [1; ALERT_HANDLER_ALERT_REGWEN_MULTIREG_COUNT as usize],
+            regwen: vec![1; num_alerts],
             loc_regwen: [1; ALERT_HANDLER_LOC_ALERT_REGWEN_MULTIREG_COUNT as usize],
-            en: [0; ALERT_HANDLER_ALERT_EN_SHADOWED_MULTIREG_COUNT as usize],
-            class: [0; ALERT_HANDLER_ALERT_CLASS_SHADOWED_MULTIREG_COUNT as usize],
+            en: vec![0; num_alerts],
+            class: vec![0; num_alerts],
             loc_en: [0; ALERT_HANDLER_LOC_ALERT_EN_SHADOWED_MULTIREG_COUNT as usize],
             loc_class: [0; ALERT_HANDLER_LOC_ALERT_CLASS_SHADOWED_MULTIREG_COUNT as usize],
             class_regs: [Default::default(); ALERT_HANDLER_PARAM_N_CLASSES as usize],
@@ -137,12 +145,23 @@ impl AlertRegs {
         digest.finalize()
     }
 
-    /// Create the set of alert_handler register values from a given lifecycle state and OTP.
+    /// Create the set of alert_handler register values of `top` from a given lifecycle state
+    /// and OTP.
     ///
     /// The internal fields of `AlertRegs` should match those produced on the device after
     /// alert_handler is configured in `sw/device/silicon_creator/lib/shutdown.h:shutdown_init`.
-    pub fn try_new<T: OtpRead>(lc_state: LcStateVal, otp: &T) -> Result<Self> {
-        let mut alert = AlertRegs::default();
+    pub fn try_new<T: OtpRead>(
+        lc_state: LcStateVal,
+        otp: &T,
+        top: &TopDescription,
+    ) -> Result<Self> {
+        let num_alerts = top
+            .alert_handler
+            .as_ref()
+            .with_context(|| format!("Top {} has no alert handler", top.name))?
+            .alerts
+            .len();
+        let mut alert = AlertRegs::reset(num_alerts);
 
         let lc_shift = match lc_state {
             LcStateVal::Prod => 0,
@@ -155,7 +174,7 @@ impl AlertRegs {
         let class_enable = otp.read32("OWNER_SW_CFG_ROM_ALERT_CLASS_EN")?;
         let class_escalate = otp.read32("OWNER_SW_CFG_ROM_ALERT_ESCALATION")?;
 
-        for i in 0..ALERT_HANDLER_ALERT_CLASS_SHADOWED_MULTIREG_COUNT as usize {
+        for i in 0..num_alerts {
             let value = otp.read32_offset("OWNER_SW_CFG_ROM_ALERT_CLASSIFICATION", i * 4)?;
             let cls = AlertClass::from_repr(value.to_le_bytes()[lc_shift])
                 .with_context(|| format!("invalid alert class value {value:#010x}"))?;
@@ -198,7 +217,7 @@ impl AlertRegs {
     }
 
     fn configure(&mut self, index: usize, cls: AlertClass, enabled: AlertEnable) -> Result<()> {
-        if index >= ALERT_HANDLER_ALERT_CLASS_SHADOWED_MULTIREG_COUNT as usize {
+        if index >= self.class.len() {
             bail!("Bad alert index {}", index);
         }
 
@@ -331,6 +350,12 @@ impl<T: Crc32Add, const N: usize> Crc32Add for [T; N] {
     }
 }
 
+impl<T: Crc32Add> Crc32Add for Vec<T> {
+    fn crc32_add(self, digest: &mut Digest<u32>) {
+        self.into_iter().for_each(|v| v.crc32_add(digest));
+    }
+}
+
 impl Crc32Add for AlertClassRegs {
     fn crc32_add(self, digest: &mut Digest<u32>) {
         self.regwen.crc32_add(digest);
@@ -361,51 +386,64 @@ fn new_crc() -> Crc<u32> {
 mod test {
     use super::*;
 
+    /// The tops to test, with the CRCs of `test_regs()` (and of the registers from
+    /// `TestOtpAlertsDisabled`) and of the registers from `TestOtpAlertsEnabled`.
+    const TOPS: [(&str, u32, u32); 2] = [
+        ("egret", 0xf9616122, 0x561bcb14),
+        ("dragonfly", 0x07bea283, 0xa8c408b5),
+    ];
+
+    fn top(name: &str) -> TopDescription {
+        TopDescription::embedded(name).unwrap().unwrap()
+    }
+
     // Register values dumped from device after alert_handler initialization.
-    const TEST_REGS: AlertRegs = AlertRegs {
-        regwen: [0x00000001; ALERT_HANDLER_PARAM_N_ALERTS as usize],
-        en: [0x00000000; ALERT_HANDLER_PARAM_N_ALERTS as usize],
-        class: [0x00000000; ALERT_HANDLER_PARAM_N_ALERTS as usize],
-        loc_regwen: [
-            0x00000001, 0x00000001, 0x00000001, 0x00000001, 0x00000001, 0x00000001, 0x00000001,
-        ],
-        loc_en: [
-            0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-        ],
-        loc_class: [
-            0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-        ],
-        class_regs: [
-            AlertClassRegs {
-                regwen: 0x00000001,
-                ctrl: 0x00003900,
-                accum_thresh: 0x00000000,
-                timeout_cyc: 0x00000000,
-                phase_cycs: [0x00000000, 0x0000000a, 0x0000000a, 0xffffffff],
-            },
-            AlertClassRegs {
-                regwen: 0x00000001,
-                ctrl: 0x00003900,
-                accum_thresh: 0x00000000,
-                timeout_cyc: 0x00000000,
-                phase_cycs: [0x00000000, 0x0000000a, 0x0000000a, 0xffffffff],
-            },
-            AlertClassRegs {
-                regwen: 0x00000001,
-                ctrl: 0x00003900,
-                accum_thresh: 0x00000000,
-                timeout_cyc: 0x00000000,
-                phase_cycs: [0x00000000, 0x00000000, 0x00000000, 0x00000000],
-            },
-            AlertClassRegs {
-                regwen: 0x00000001,
-                ctrl: 0x00003900,
-                accum_thresh: 0x00000000,
-                timeout_cyc: 0x00000000,
-                phase_cycs: [0x00000000, 0x00000000, 0x00000000, 0x00000000],
-            },
-        ],
-    };
+    fn test_regs(num_alerts: usize) -> AlertRegs {
+        AlertRegs {
+            regwen: vec![0x00000001; num_alerts],
+            en: vec![0x00000000; num_alerts],
+            class: vec![0x00000000; num_alerts],
+            loc_regwen: [
+                0x00000001, 0x00000001, 0x00000001, 0x00000001, 0x00000001, 0x00000001, 0x00000001,
+            ],
+            loc_en: [
+                0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+            ],
+            loc_class: [
+                0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+            ],
+            class_regs: [
+                AlertClassRegs {
+                    regwen: 0x00000001,
+                    ctrl: 0x00003900,
+                    accum_thresh: 0x00000000,
+                    timeout_cyc: 0x00000000,
+                    phase_cycs: [0x00000000, 0x0000000a, 0x0000000a, 0xffffffff],
+                },
+                AlertClassRegs {
+                    regwen: 0x00000001,
+                    ctrl: 0x00003900,
+                    accum_thresh: 0x00000000,
+                    timeout_cyc: 0x00000000,
+                    phase_cycs: [0x00000000, 0x0000000a, 0x0000000a, 0xffffffff],
+                },
+                AlertClassRegs {
+                    regwen: 0x00000001,
+                    ctrl: 0x00003900,
+                    accum_thresh: 0x00000000,
+                    timeout_cyc: 0x00000000,
+                    phase_cycs: [0x00000000, 0x00000000, 0x00000000, 0x00000000],
+                },
+                AlertClassRegs {
+                    regwen: 0x00000001,
+                    ctrl: 0x00003900,
+                    accum_thresh: 0x00000000,
+                    timeout_cyc: 0x00000000,
+                    phase_cycs: [0x00000000, 0x00000000, 0x00000000, 0x00000000],
+                },
+            ],
+        }
+    }
 
     struct TestOtpAlertsDisabled {}
 
@@ -479,49 +517,45 @@ mod test {
 
     #[test]
     fn test_crc_from_regs() {
-        assert_eq!(
-            TEST_REGS.crc32(),
-            match ALERT_HANDLER_PARAM_N_ALERTS {
-                65 => 0xf9616122,
-                77 => 0x07bea283,
-                n => panic!("Unexpected alert count: {}", n),
-            }
-        );
+        for (name, crc, _) in TOPS {
+            let num_alerts = top(name).alert_handler.unwrap().alerts.len();
+            assert_eq!(test_regs(num_alerts).crc32(), crc, "{name}");
+        }
     }
 
     #[test]
     fn test_regs_from_otp() {
-        assert_eq!(
-            TEST_REGS,
-            AlertRegs::try_new(LcStateVal::Dev, &TestOtpAlertsDisabled {}).unwrap()
-        );
+        for (name, _, _) in TOPS {
+            let top = top(name);
+            let num_alerts = top.alert_handler.as_ref().unwrap().alerts.len();
+            assert_eq!(
+                test_regs(num_alerts),
+                AlertRegs::try_new(LcStateVal::Dev, &TestOtpAlertsDisabled {}, &top).unwrap(),
+                "{name}"
+            );
+        }
     }
 
     #[test]
     fn test_crc_disabled() {
-        assert_eq!(
-            AlertRegs::try_new(LcStateVal::Dev, &TestOtpAlertsDisabled {})
-                .unwrap()
-                .crc32(),
-            match ALERT_HANDLER_PARAM_N_ALERTS {
-                65 => 0xf9616122,
-                77 => 0x07bea283,
-                n => panic!("Unexpected alert count: {}", n),
-            },
-        );
+        for (name, crc, _) in TOPS {
+            let regs = AlertRegs::try_new(LcStateVal::Dev, &TestOtpAlertsDisabled {}, &top(name));
+            assert_eq!(regs.unwrap().crc32(), crc, "{name}");
+        }
     }
 
     #[test]
     fn test_crc_enabled() {
-        assert_eq!(
-            AlertRegs::try_new(LcStateVal::Dev, &TestOtpAlertsEnabled {})
-                .unwrap()
-                .crc32(),
-            match ALERT_HANDLER_PARAM_N_ALERTS {
-                65 => 0x561bcb14,
-                77 => 0xa8c408b5,
-                n => panic!("Unexpected alert count: {}", n),
-            },
-        );
+        for (name, _, crc) in TOPS {
+            let regs = AlertRegs::try_new(LcStateVal::Dev, &TestOtpAlertsEnabled {}, &top(name));
+            assert_eq!(regs.unwrap().crc32(), crc, "{name}");
+        }
+    }
+
+    #[test]
+    fn test_no_alert_handler() {
+        let top = top("scafi_deprecated");
+        let err = AlertRegs::try_new(LcStateVal::Dev, &TestOtpAlertsDisabled {}, &top);
+        assert!(err.is_err());
     }
 }

@@ -65,19 +65,16 @@ RUSTC_ENV = {
 
 run_binary(
     name = "alert_handler_rust_regs",
-    srcs = select({
-        "//hw/top:egret": ["//hw/top_egret/ip_autogen/alert_handler/data:alert_handler.hjson"],
-        "//hw/top:dragonfly": ["//hw/top_dragonfly/ip_autogen/alert_handler/data:alert_handler.hjson"],
-    }),
+    # The alert handler's registers are the same on every top except for the number of alerts,
+    # which src/otp/alert_handler.rs takes from the top description instead.
+    srcs = ["//hw/top_egret/ip_autogen/alert_handler/data:alert_handler.hjson"],
     outs = ["src/otp/alert_handler_regs.rs"],
     args = [
         "--rust",
         "--outfile",
         "$(location :src/otp/alert_handler_regs.rs)",
-    ] + select({
-        "//hw/top:egret": ["$(location //hw/top_egret/ip_autogen/alert_handler/data:alert_handler.hjson)"],
-        "//hw/top:dragonfly": ["$(location //hw/top_dragonfly/ip_autogen/alert_handler/data:alert_handler.hjson)"],
-    }),
+        "$(location //hw/top_egret/ip_autogen/alert_handler/data:alert_handler.hjson)",
+    ],
     tool = "//util:regtool",
 )
 
