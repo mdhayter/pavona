@@ -122,6 +122,7 @@ fpga_cw310(
     args = [
         "--rcfile=",
         "--logging=info",
+        "--top=egret",
         "--interface={interface}",
     ],
     base = ":fpga_cw310",
@@ -274,6 +275,7 @@ fpga_cw340(
     args = [
         "--rcfile=",
         "--logging=info",
+        "--top=egret",
         "--interface={interface}",
     ] + select({
         "//ci:lowrisc_fpga_cw340": ["--uarts=/dev/ttyACM_CW340_1,/dev/ttyACM_CW340_0"],
@@ -424,6 +426,7 @@ silicon(
     args = [
         "--rcfile=",
         "--logging=info",
+        "--top=egret",
         "--interface={interface}",
     ],
     design = "egret",
@@ -459,6 +462,7 @@ silicon(
     args = [
         "--rcfile=",
         "--logging=info",
+        "--top=egret",
         "--interface={interface}",
     ],
     design = "egret",
@@ -525,6 +529,7 @@ sim_verilator(
     args = [
         "--rcfile=",
         "--logging=info",
+        "--top=egret",
         "--interface=verilator",
         "--verilator-bin=$(rootpath //hw:verilator)",
         "--verilator-rom={rom}",

@@ -152,9 +152,9 @@ pub struct BackendOpts {
     pub openocd_adapter_config: Option<PathBuf>,
 
     /// Top of the chip: the name of a built-in top (egret, dragonfly, scafi_deprecated) or the
-    /// path of a `top_<top>.host.json` description. Defaults to the top these tools were built
-    /// for. $TARGET_CHIP_TOP overrides a `--top` in the rcfile. Unlike other options, `--top` may
-    /// be given more than once; the last one wins.
+    /// path of a `top_<top>.host.json` description. There is no default: commands that need the
+    /// top fail without one. $TARGET_CHIP_TOP overrides a `--top` in the rcfile. Unlike other
+    /// options, `--top` may be given more than once; the last one wins.
     #[arg(long, env = TOP_ENV_VAR, overrides_with = "top")]
     pub top: Option<String>,
 }
@@ -219,7 +219,7 @@ pub fn create(args: &BackendOpts) -> Result<TransportWrapper> {
     env.set_openocd_adapter_config(&args.openocd_adapter_config);
     // An empty value (such as `TARGET_CHIP_TOP=`) counts as not given.
     let top = args.top.as_deref().filter(|top| !top.is_empty());
-    if let Some(top) = top.or(ot_hal::top::BUILT_FOR) {
+    if let Some(top) = top {
         let top = TopDescription::from_name_or_path(top)?;
         log::info!("Using top {}", top.name);
         env.set_top(top);

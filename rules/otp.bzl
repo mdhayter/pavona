@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -192,7 +193,8 @@ def _otp_alert_digest_impl(ctx):
     outputs = [file]
     inputs = [ctx.file.otp_img]
     args = ctx.actions.args()
-    args.add_all(("--rcfile=", "otp", "alert-digest", ctx.file.otp_img))
+    args.add_all(("--rcfile=", "--top", ctx.attr._top[BuildSettingInfo].value))
+    args.add_all(("otp", "alert-digest", ctx.file.otp_img))
     args.add("--output", file)
 
     # By default, no environment variables are available to the action
@@ -219,6 +221,7 @@ otp_alert_digest = rule(
             allow_single_file = [".json", ".hjson"],
             doc = "The OTP image file containing alert_handler values.",
         ),
+        "_top": attr.label(default = "//hw/top:top"),
     },
     toolchains = [LOCALTOOLS_TOOLCHAIN],
 )
