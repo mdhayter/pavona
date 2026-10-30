@@ -14,7 +14,9 @@ The description contains, for each address space, the base address and size of e
 device register block, memory and subrange (such as "mmio"). It also contains the
 top's enumerations, using the same names as the generated Rust code: alert handler
 peripherals and alerts, pinmux selections and pads, power manager wakeups and reset
-requests, reset manager software resets and clock manager clocks.
+requests, reset manager software resets and clock manager clocks. For the reset manager
+it gives the bit of each reset cause in RESET_INFO, and for the clock manager whether it
+supports external clock bypass (the EXTCLK registers).
 
 If the top has a JTAG ID package (hw/top_<topname>/rtl/jtag_id_pkg.sv), the description
 also gives the JTAG IDCODEs of the debug module TAP (dm_idcode) and the life cycle
@@ -45,6 +47,12 @@ LITERAL_BASES = {"b": 2, "o": 8, "d": 10, "h": 16}
 IDCODE_TAP_TYPE_SHIFT = 12
 IDCODE_TAP_TYPE_DM = 1 << 0
 IDCODE_TAP_TYPE_LC = 1 << 1
+# The reset causes at the bottom of the reset manager's RESET_INFO register, before the
+# hardware reset requests (HW_REQ), named as the register's fields.
+RESET_INFO_FIXED = ["Por", "LowPowerExit", "SwReset"]
+# The clock manager's default for ext_clk_bypass (hw/ip_templates/clkmgr/data/
+# clkmgr.tpldesc.hjson).
+CLKMGR_EXT_CLK_BYPASS_DEFAULT = True
 
 
 def enum_dict(enum: RustEnum) -> Dict[str, int]:
@@ -138,6 +146,27 @@ def jtag_idcodes(text: str) -> Dict[str, int]:
     return idcodes
 
 
+def reset_info_bits(completecfg: ConfigT, reset_requests: Dict[str, int]) -> Dict[str, int]:
+    """Return the bit of each reset cause in the reset manager's RESET_INFO register.
+
+    HW_REQ has a bit for each hardware reset request that the power manager passes on: the
+    peripheral requests (by their names in `reset_requests`, in order), then the power
+    manager's internal ones, then the debug ones (by their names in the top config, such as
+    MainPwr, Esc and Ndm).
+    """
+    bits = {name: bit for bit, name in enumerate(RESET_INFO_FIXED)}
+    hw_req = len(bits)
+    for name, index in reset_requests.items():
+        bits[name] = hw_req + index
+    requests = completecfg.get("reset_requests", {})
+    next_bit = hw_req + len(requests.get("peripheral", []))
+    for kind in ("int", "debug"):
+        for request in requests.get(kind, []):
+            bits[request["name"]] = next_bit
+            next_bit += 1
+    return bits
+
+
 def host_description(completecfg: ConfigT, name_to_block: IpBlocksT,
                      jtag_id_pkg: Optional[str] = None) -> Dict[str, object]:
     """Build the host description of a top from its loaded complete configuration."""
@@ -202,12 +231,18 @@ def host_description(completecfg: ConfigT, name_to_block: IpBlocksT,
     if find_module(modules, "rstmgr"):
         desc["rstmgr"] = {
             "sw_resets": enum_dict(helper.rstmgr_sw_rsts),
+            "reset_info": reset_info_bits(
+                completecfg,
+                enum_dict(helper.pwrmgr_reset_requests) if find_module(modules, "pwrmgr") else {}),
         }
 
-    if find_module(modules, "clkmgr"):
+    clkmgr = find_module(modules, "clkmgr")
+    if clkmgr:
         desc["clkmgr"] = {
             "gateable_clocks": enum_dict(helper.clkmgr_gateable_clocks),
             "hintable_clocks": enum_dict(helper.clkmgr_hintable_clocks),
+            "ext_clk_bypass": bool(clkmgr.get("ipgen_params", {}).get(
+                "ext_clk_bypass", CLKMGR_EXT_CLK_BYPASS_DEFAULT)),
         }
 
     return desc
