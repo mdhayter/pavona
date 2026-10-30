@@ -111,12 +111,20 @@ pub struct Pwrmgr {
 #[derive(Clone, Debug, Default, Deserialize)]
 pub struct Rstmgr {
     pub sw_resets: NameTable,
+    /// The bit of each reset cause in the RESET_INFO register: `Por`, `LowPowerExit`,
+    /// `SwReset`, then the hardware reset requests (the names in `Pwrmgr::reset_requests`,
+    /// then the power manager's own, such as `MainPwr`, `Esc` and `Ndm`).
+    #[serde(default)]
+    pub reset_info: NameTable,
 }
 
 #[derive(Clone, Debug, Default, Deserialize)]
 pub struct Clkmgr {
     pub gateable_clocks: NameTable,
     pub hintable_clocks: NameTable,
+    /// Whether the clock manager supports external clock bypass (has the EXTCLK registers).
+    #[serde(default)]
+    pub ext_clk_bypass: bool,
 }
 
 /// The host's view of a top.
@@ -212,6 +220,15 @@ impl TopDescription {
         Ok(self.range(name)?.size_bytes)
     }
 
+    /// Returns the mask of reset cause `name` (see `Rstmgr::reset_info`) in the reset manager's
+    /// RESET_INFO register.
+    pub fn reset_info_mask(&self, name: &str) -> Result<u32> {
+        match self.rstmgr.reset_info.get(name) {
+            Some(bit) => Ok(1 << bit),
+            None => bail!("Top {} has no reset cause {name:?}", self.name),
+        }
+    }
+
     /// Returns the MMIO region of the hart address space.
     pub fn mmio(&self) -> Result<&AddrRange> {
         match self.addr_space(HART_ADDR_SPACE)?.subranges.get("mmio") {
@@ -234,6 +251,80 @@ mod tests {
         assert_eq!(idcodes("egret")?, (Some(0x10001cdf), Some(0x10002cdf)));
         assert_eq!(idcodes("dragonfly")?, (Some(0x10013cdf), Some(0x10013cdf)));
         assert_eq!(idcodes("scafi_deprecated")?, (None, None));
+        Ok(())
+    }
+
+    #[test]
+    fn embedded_reset_info_and_extclk() -> Result<()> {
+        let egret = TopDescription::embedded("egret").unwrap()?;
+        assert_eq!(egret.reset_info_mask("Por")?, 1 << 0);
+        assert_eq!(egret.reset_info_mask("SwReset")?, 1 << 2);
+        assert_eq!(egret.reset_info_mask("AonTimerAonAonTimerRstReq")?, 1 << 4);
+        assert_eq!(egret.reset_info_mask("Ndm")?, 1 << 7);
+        assert!(egret.reset_info_mask("Watchdog").is_err());
+        assert!(egret.clkmgr.ext_clk_bypass);
+        let dragonfly = TopDescription::embedded("dragonfly").unwrap()?;
+        assert_eq!(
+            dragonfly.reset_info_mask("AonTimerAonAonTimerRstReq")?,
+            1 << 3
+        );
+        assert!(!dragonfly.clkmgr.ext_clk_bypass);
+        Ok(())
+    }
+
+    /// The reset causes of the top the host tools are built for match its DIF.
+    #[cfg(any(feature = "egret", feature = "dragonfly"))]
+    #[test]
+    fn reset_info_matches_dif() -> Result<()> {
+        use ot_bindgen_dif as dif;
+
+        let desc = TopDescription::embedded(crate::top::BUILT_FOR.unwrap()).unwrap()?;
+        #[cfg(feature = "egret")]
+        let hw_requests = [
+            (
+                "SysrstCtrlAonRstReq",
+                dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoSysRstCtrl,
+            ),
+            (
+                "AonTimerAonAonTimerRstReq",
+                dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoWatchdog,
+            ),
+        ];
+        #[cfg(feature = "dragonfly")]
+        let hw_requests = [
+            (
+                "AonTimerAonAonTimerRstReq",
+                dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoWatchdog,
+            ),
+            (
+                "SocProxyRstReqExternal",
+                dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoExternalRst,
+            ),
+        ];
+        let causes = [
+            ("Por", dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoPor),
+            (
+                "LowPowerExit",
+                dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoLowPowerExit,
+            ),
+            ("SwReset", dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoSw),
+            (
+                "MainPwr",
+                dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoPowerUnstable,
+            ),
+            (
+                "Esc",
+                dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoEscalation,
+            ),
+            ("Ndm", dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoNdm),
+        ];
+        for (name, mask) in causes.into_iter().chain(hw_requests) {
+            assert_eq!(desc.reset_info_mask(name)?, mask, "{name}");
+        }
+        assert_eq!(
+            desc.rstmgr.reset_info.len(),
+            causes.len() + hw_requests.len()
+        );
         Ok(())
     }
 
