@@ -21,7 +21,6 @@ use opentitanlib::test_utils::extclk::{ClockSpeed, ExternalClock};
 use opentitanlib::test_utils::init::InitializeTest;
 use opentitanlib::test_utils::lc_transition::wait_for_status;
 use ot_hal::dif::lc_ctrl::{DifLcCtrlState, LcCtrlReg, LcCtrlStatus};
-use ot_hal::top;
 
 #[derive(Debug, Parser)]
 struct Opts {
@@ -68,7 +67,7 @@ fn manuf_cp_yield_test(opts: &Opts, transport: &TransportWrapper) -> Result<()> 
     )?;
     let mut encoded_lc_state = [0u32];
     jtag.read_memory32(
-        top::LC_CTRL_REGS_BASE_ADDR as u32 + LcCtrlReg::LcState as u32,
+        transport.top()?.base_addr("lc_ctrl_regs")? as u32 + LcCtrlReg::LcState as u32,
         &mut encoded_lc_state,
     )?;
     assert_eq!(
