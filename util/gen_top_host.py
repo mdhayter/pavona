@@ -18,6 +18,10 @@ requests, reset manager software resets and clock manager clocks. For the reset 
 it gives the bit of each reset cause in RESET_INFO, and for the clock manager whether it
 supports external clock bypass (the EXTCLK registers).
 
+The register offsets of the IP blocks in REGISTER_IPS, whose layouts differ between tops,
+are under "registers". If the OTP controller is generated with ipgen, "otp_ctrl" gives its
+memory map: the partitions and items, with their byte offsets and sizes in OTP.
+
 If the top has a JTAG ID package (hw/top_<topname>/rtl/jtag_id_pkg.sv), the description
 also gives the JTAG IDCODEs of the debug module TAP (dm_idcode) and the life cycle
 controller TAP (lc_idcode); on a top with one combined TAP they are the same.
@@ -29,8 +33,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from basegen.typing import ConfigT
-from topgen.lib import (RustArrayMapping, RustEnum, TopGen, find_module,
-                        load_completecfg_and_blocks)
+import hjson
+
+from topgen.lib import (RustArrayMapping, RustEnum, TopGen, find_module, get_ip_hjson_path,
+                        is_ipgen, load_completecfg_and_blocks)
 from topgen.typing import IpBlocksT
 
 REPO_TOP = Path(__file__).parents[1].resolve()
@@ -50,6 +56,8 @@ IDCODE_TAP_TYPE_LC = 1 << 1
 # The reset causes at the bottom of the reset manager's RESET_INFO register, before the
 # hardware reset requests (HW_REQ), named as the register's fields.
 RESET_INFO_FIXED = ["Por", "LowPowerExit", "SwReset"]
+# The IP blocks whose register offsets the description gives, by block type.
+REGISTER_IPS = ["otp_ctrl"]
 # The clock manager's default for ext_clk_bypass (hw/ip_templates/clkmgr/data/
 # clkmgr.tpldesc.hjson).
 CLKMGR_EXT_CLK_BYPASS_DEFAULT = True
@@ -167,8 +175,63 @@ def reset_info_bits(completecfg: ConfigT, reset_requests: Dict[str, int]) -> Dic
     return bits
 
 
+def register_offsets(block) -> Dict[str, int]:
+    """Return the offset of each register and window of an IP block with one register block,
+    with multiregs flattened (ERR_CODE_0, ERR_CODE_1, ...)."""
+    if len(block.reg_blocks) != 1:
+        raise ValueError(f"{block.name} has {len(block.reg_blocks)} register blocks, not 1")
+    (reg_block, ) = block.reg_blocks.values()
+    offsets = {reg.name: reg.offset for reg in reg_block.flat_regs}
+    offsets.update({window.name: window.offset for window in reg_block.windows})
+    return offsets
+
+
+def load_otp_mmap(completecfg: ConfigT, repo_top: Path) -> Optional[Dict[str, object]]:
+    """Load the OTP memory map of the top's OTP controller from its ipgen configuration
+    (hw/top_<top>/ip_autogen/otp_ctrl/data/top_<top>_otp_ctrl.ipconfig.hjson). Returns None
+    if the top has no OTP controller or it is not generated with ipgen."""
+    module = find_module(completecfg["module"], "otp_ctrl")
+    if not module or not is_ipgen(module):
+        return None
+    data_dir = get_ip_hjson_path(module["type"], completecfg, repo_top).parent
+    ipconfig = data_dir / f"top_{completecfg['name']}_{module['name']}.ipconfig.hjson"
+    return hjson.loads(ipconfig.read_text())["param_values"]["otp_mmap"]
+
+
+def otp_map(otp_mmap: Dict[str, object]) -> Dict[str, object]:
+    """Return the partitions and items of an OTP memory map, by name.
+
+    A partition's digest is its item marked as a digest, if it has one. Secret partitions
+    are scrambled and accessed 64 bits at a time through the DAI.
+    """
+    partitions = {}
+    items = {}
+    for part in otp_mmap["partitions"]:
+        digests = [item for item in part["items"] if item["isdigest"]]
+        if len(digests) > 1:
+            raise ValueError(f"OTP partition {part['name']} has more than one digest")
+        partitions[part["name"]] = {
+            "offset": int(part["offset"]),
+            "size": int(part["size"]),
+            "secret": bool(part["secret"]),
+            "hw_digest": bool(part["hw_digest"]),
+            "digest": {
+                "offset": int(digests[0]["offset"]),
+                "size": int(digests[0]["size"]),
+            } if digests else None,
+        }
+        for item in part["items"]:
+            items[item["name"]] = {
+                "offset": int(item["offset"]),
+                "size": int(item["size"]),
+                "partition": part["name"],
+            }
+    return {"partitions": partitions, "items": items}
+
+
 def host_description(completecfg: ConfigT, name_to_block: IpBlocksT,
-                     jtag_id_pkg: Optional[str] = None) -> Dict[str, object]:
+                     jtag_id_pkg: Optional[str] = None,
+                     otp_mmap: Optional[Dict[str, object]] = None) -> Dict[str, object]:
     """Build the host description of a top from its loaded complete configuration."""
     helper = TopGen(completecfg, name_to_block, RustEnum, RustArrayMapping)
     modules = completecfg["module"]
@@ -199,6 +262,13 @@ def host_description(completecfg: ConfigT, name_to_block: IpBlocksT,
             },
         }
     desc["addr_spaces"] = addr_spaces
+
+    desc["registers"] = {
+        ip: register_offsets(name_to_block[ip])
+        for ip in REGISTER_IPS if ip in name_to_block
+    }
+    if otp_mmap is not None:
+        desc["otp_ctrl"] = otp_map(otp_mmap)
 
     if find_module(modules, "alert_handler"):
         desc["alert_handler"] = {
@@ -279,7 +349,8 @@ def main():
         default = args.repo_top / f"hw/top_{completecfg['name']}/rtl/jtag_id_pkg.sv"
         jtag_id_pkg = default if default.exists() else None
     desc = host_description(completecfg, name_to_block,
-                            jtag_id_pkg.read_text() if jtag_id_pkg else None)
+                            jtag_id_pkg.read_text() if jtag_id_pkg else None,
+                            load_otp_mmap(completecfg, args.repo_top))
 
     outdir = args.outdir or args.completecfg.parent
     outfile = outdir / f"top_{completecfg['name']}.host.json"

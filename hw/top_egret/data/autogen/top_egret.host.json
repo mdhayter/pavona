@@ -226,6 +226,756 @@
       }
     }
   },
+  "registers": {
+    "otp_ctrl": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "STATUS": 16,
+      "PARTITION_STATUS_0": 20,
+      "ERR_CODE_0": 24,
+      "ERR_CODE_1": 28,
+      "ERR_CODE_2": 32,
+      "ERR_CODE_3": 36,
+      "ERR_CODE_4": 40,
+      "ERR_CODE_5": 44,
+      "ERR_CODE_6": 48,
+      "ERR_CODE_7": 52,
+      "ERR_CODE_8": 56,
+      "ERR_CODE_9": 60,
+      "ERR_CODE_10": 64,
+      "ERR_CODE_11": 68,
+      "ERR_CODE_12": 72,
+      "DIRECT_ACCESS_REGWEN": 76,
+      "DIRECT_ACCESS_CMD": 80,
+      "DIRECT_ACCESS_ADDRESS": 84,
+      "DIRECT_ACCESS_WDATA_0": 88,
+      "DIRECT_ACCESS_WDATA_1": 92,
+      "DIRECT_ACCESS_RDATA_0": 96,
+      "DIRECT_ACCESS_RDATA_1": 100,
+      "CHECK_TRIGGER_REGWEN": 104,
+      "CHECK_TRIGGER": 108,
+      "CHECK_REGWEN": 112,
+      "CHECK_TIMEOUT": 116,
+      "INTEGRITY_CHECK_PERIOD": 120,
+      "CONSISTENCY_CHECK_PERIOD": 124,
+      "VENDOR_TEST_READ_LOCK": 128,
+      "CREATOR_SW_CFG_READ_LOCK": 132,
+      "OWNER_SW_CFG_READ_LOCK": 136,
+      "ROT_CREATOR_AUTH_CODESIGN_READ_LOCK": 140,
+      "ROT_CREATOR_AUTH_STATE_READ_LOCK": 144,
+      "VENDOR_TEST_DIGEST_0": 148,
+      "VENDOR_TEST_DIGEST_1": 152,
+      "CREATOR_SW_CFG_DIGEST_0": 156,
+      "CREATOR_SW_CFG_DIGEST_1": 160,
+      "OWNER_SW_CFG_DIGEST_0": 164,
+      "OWNER_SW_CFG_DIGEST_1": 168,
+      "ROT_CREATOR_AUTH_CODESIGN_DIGEST_0": 172,
+      "ROT_CREATOR_AUTH_CODESIGN_DIGEST_1": 176,
+      "ROT_CREATOR_AUTH_STATE_DIGEST_0": 180,
+      "ROT_CREATOR_AUTH_STATE_DIGEST_1": 184,
+      "HW_CFG0_DIGEST_0": 188,
+      "HW_CFG0_DIGEST_1": 192,
+      "HW_CFG1_DIGEST_0": 196,
+      "HW_CFG1_DIGEST_1": 200,
+      "SECRET0_DIGEST_0": 204,
+      "SECRET0_DIGEST_1": 208,
+      "SECRET1_DIGEST_0": 212,
+      "SECRET1_DIGEST_1": 216,
+      "SECRET2_DIGEST_0": 220,
+      "SECRET2_DIGEST_1": 224,
+      "SW_CFG_WINDOW": 2048
+    }
+  },
+  "otp_ctrl": {
+    "partitions": {
+      "VENDOR_TEST": {
+        "offset": 0,
+        "size": 64,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 56,
+          "size": 8
+        }
+      },
+      "CREATOR_SW_CFG": {
+        "offset": 64,
+        "size": 368,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 424,
+          "size": 8
+        }
+      },
+      "OWNER_SW_CFG": {
+        "offset": 432,
+        "size": 712,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 1136,
+          "size": 8
+        }
+      },
+      "ROT_CREATOR_AUTH_CODESIGN": {
+        "offset": 1144,
+        "size": 472,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 1608,
+          "size": 8
+        }
+      },
+      "ROT_CREATOR_AUTH_STATE": {
+        "offset": 1616,
+        "size": 40,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 1648,
+          "size": 8
+        }
+      },
+      "HW_CFG0": {
+        "offset": 1656,
+        "size": 72,
+        "secret": false,
+        "hw_digest": true,
+        "digest": {
+          "offset": 1720,
+          "size": 8
+        }
+      },
+      "HW_CFG1": {
+        "offset": 1728,
+        "size": 16,
+        "secret": false,
+        "hw_digest": true,
+        "digest": {
+          "offset": 1736,
+          "size": 8
+        }
+      },
+      "SECRET0": {
+        "offset": 1744,
+        "size": 40,
+        "secret": true,
+        "hw_digest": true,
+        "digest": {
+          "offset": 1776,
+          "size": 8
+        }
+      },
+      "SECRET1": {
+        "offset": 1784,
+        "size": 88,
+        "secret": true,
+        "hw_digest": true,
+        "digest": {
+          "offset": 1864,
+          "size": 8
+        }
+      },
+      "SECRET2": {
+        "offset": 1872,
+        "size": 88,
+        "secret": true,
+        "hw_digest": true,
+        "digest": {
+          "offset": 1952,
+          "size": 8
+        }
+      },
+      "LIFE_CYCLE": {
+        "offset": 1960,
+        "size": 88,
+        "secret": false,
+        "hw_digest": false,
+        "digest": null
+      }
+    },
+    "items": {
+      "SCRATCH": {
+        "offset": 0,
+        "size": 56,
+        "partition": "VENDOR_TEST"
+      },
+      "VENDOR_TEST_DIGEST": {
+        "offset": 56,
+        "size": 8,
+        "partition": "VENDOR_TEST"
+      },
+      "CREATOR_SW_CFG_AST_CFG": {
+        "offset": 64,
+        "size": 156,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_AST_INIT_EN": {
+        "offset": 220,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_ROM_EXT_SKU": {
+        "offset": 224,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_SIGVERIFY_SPX_EN": {
+        "offset": 228,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_FLASH_DATA_DEFAULT_CFG": {
+        "offset": 232,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_FLASH_INFO_BOOT_DATA_CFG": {
+        "offset": 236,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_FLASH_HW_INFO_CFG_OVERRIDE": {
+        "offset": 240,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_EN": {
+        "offset": 244,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_JITTER_EN": {
+        "offset": 248,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RET_RAM_RESET_MASK": {
+        "offset": 252,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_MANUF_STATE": {
+        "offset": 256,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_ROM_EXEC_EN": {
+        "offset": 260,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_CPUCTRL": {
+        "offset": 264,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_MIN_SEC_VER_ROM_EXT": {
+        "offset": 268,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_MIN_SEC_VER_BL0": {
+        "offset": 272,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_DEFAULT_BOOT_DATA_IN_PROD_EN": {
+        "offset": 276,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RMA_SPIN_EN": {
+        "offset": 280,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RMA_SPIN_CYCLES": {
+        "offset": 284,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_REPCNT_THRESHOLDS": {
+        "offset": 288,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_REPCNTS_THRESHOLDS": {
+        "offset": 292,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_ADAPTP_HI_THRESHOLDS": {
+        "offset": 296,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_ADAPTP_LO_THRESHOLDS": {
+        "offset": 300,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_BUCKET_THRESHOLDS": {
+        "offset": 304,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_MARKOV_HI_THRESHOLDS": {
+        "offset": 308,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_MARKOV_LO_THRESHOLDS": {
+        "offset": 312,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_EXTHT_HI_THRESHOLDS": {
+        "offset": 316,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_EXTHT_LO_THRESHOLDS": {
+        "offset": 320,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_ALERT_THRESHOLD": {
+        "offset": 324,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_HEALTH_CONFIG_DIGEST": {
+        "offset": 328,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_SRAM_KEY_RENEW_AND_INIT_EN": {
+        "offset": 332,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_IMMUTABLE_ROM_EXT_EN": {
+        "offset": 336,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_IMMUTABLE_ROM_EXT_START_OFFSET": {
+        "offset": 340,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_IMMUTABLE_ROM_EXT_LENGTH": {
+        "offset": 344,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_IMMUTABLE_ROM_EXT_SHA256_HASH": {
+        "offset": 348,
+        "size": 32,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RESERVED": {
+        "offset": 380,
+        "size": 32,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_DIGEST": {
+        "offset": 424,
+        "size": 8,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ERROR_REPORTING": {
+        "offset": 432,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_BOOTSTRAP_DIS": {
+        "offset": 436,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_CLASS_EN": {
+        "offset": 440,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_ESCALATION": {
+        "offset": 444,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_CLASSIFICATION": {
+        "offset": 448,
+        "size": 320,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_LOCAL_ALERT_CLASSIFICATION": {
+        "offset": 768,
+        "size": 64,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_ACCUM_THRESH": {
+        "offset": 832,
+        "size": 16,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_TIMEOUT_CYCLES": {
+        "offset": 848,
+        "size": 16,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_PHASE_CYCLES": {
+        "offset": 864,
+        "size": 64,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_DIGEST_PROD": {
+        "offset": 928,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_DIGEST_PROD_END": {
+        "offset": 932,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_DIGEST_DEV": {
+        "offset": 936,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_DIGEST_RMA": {
+        "offset": 940,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_WATCHDOG_BITE_THRESHOLD_CYCLES": {
+        "offset": 944,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_KEYMGR_OTP_MEAS_EN": {
+        "offset": 948,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_MANUF_STATE": {
+        "offset": 952,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_RSTMGR_INFO_EN": {
+        "offset": 956,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_EXT_BOOTSTRAP_EN": {
+        "offset": 960,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_SENSOR_CTRL_ALERT_CFG": {
+        "offset": 964,
+        "size": 12,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_SRAM_READBACK_EN": {
+        "offset": 976,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_PRESERVE_RESET_REASON_EN": {
+        "offset": 980,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_RESET_REASON_CHECK_VALUE": {
+        "offset": 984,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_BANNER_EN": {
+        "offset": 988,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_FLASH_ECC_EXC_HANDLER_EN": {
+        "offset": 992,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_RESERVED": {
+        "offset": 996,
+        "size": 128,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_DIGEST": {
+        "offset": 1136,
+        "size": 8,
+        "partition": "OWNER_SW_CFG"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_ECDSA_KEY_TYPE0": {
+        "offset": 1144,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_ECDSA_KEY0": {
+        "offset": 1148,
+        "size": 64,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_ECDSA_KEY_TYPE1": {
+        "offset": 1212,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_ECDSA_KEY1": {
+        "offset": 1216,
+        "size": 64,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_ECDSA_KEY_TYPE2": {
+        "offset": 1280,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_ECDSA_KEY2": {
+        "offset": 1284,
+        "size": 64,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_ECDSA_KEY_TYPE3": {
+        "offset": 1348,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_ECDSA_KEY3": {
+        "offset": 1352,
+        "size": 64,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_SPX_KEY_TYPE0": {
+        "offset": 1416,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_SPX_KEY0": {
+        "offset": 1420,
+        "size": 32,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_SPX_KEY_CONFIG0": {
+        "offset": 1452,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_SPX_KEY_TYPE1": {
+        "offset": 1456,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_SPX_KEY1": {
+        "offset": 1460,
+        "size": 32,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_SPX_KEY_CONFIG1": {
+        "offset": 1492,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_SPX_KEY_TYPE2": {
+        "offset": 1496,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_SPX_KEY2": {
+        "offset": 1500,
+        "size": 32,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_SPX_KEY_CONFIG2": {
+        "offset": 1532,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_SPX_KEY_TYPE3": {
+        "offset": 1536,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_SPX_KEY3": {
+        "offset": 1540,
+        "size": 32,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_SPX_KEY_CONFIG3": {
+        "offset": 1572,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_BLOCK_SHA2_256_HASH": {
+        "offset": 1576,
+        "size": 32,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_DIGEST": {
+        "offset": 1608,
+        "size": 8,
+        "partition": "ROT_CREATOR_AUTH_CODESIGN"
+      },
+      "ROT_CREATOR_AUTH_STATE_ECDSA_KEY0": {
+        "offset": 1616,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_STATE"
+      },
+      "ROT_CREATOR_AUTH_STATE_ECDSA_KEY1": {
+        "offset": 1620,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_STATE"
+      },
+      "ROT_CREATOR_AUTH_STATE_ECDSA_KEY2": {
+        "offset": 1624,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_STATE"
+      },
+      "ROT_CREATOR_AUTH_STATE_ECDSA_KEY3": {
+        "offset": 1628,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_STATE"
+      },
+      "ROT_CREATOR_AUTH_STATE_SPX_KEY0": {
+        "offset": 1632,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_STATE"
+      },
+      "ROT_CREATOR_AUTH_STATE_SPX_KEY1": {
+        "offset": 1636,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_STATE"
+      },
+      "ROT_CREATOR_AUTH_STATE_SPX_KEY2": {
+        "offset": 1640,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_STATE"
+      },
+      "ROT_CREATOR_AUTH_STATE_SPX_KEY3": {
+        "offset": 1644,
+        "size": 4,
+        "partition": "ROT_CREATOR_AUTH_STATE"
+      },
+      "ROT_CREATOR_AUTH_STATE_DIGEST": {
+        "offset": 1648,
+        "size": 8,
+        "partition": "ROT_CREATOR_AUTH_STATE"
+      },
+      "DEVICE_ID": {
+        "offset": 1656,
+        "size": 32,
+        "partition": "HW_CFG0"
+      },
+      "MANUF_STATE": {
+        "offset": 1688,
+        "size": 32,
+        "partition": "HW_CFG0"
+      },
+      "HW_CFG0_DIGEST": {
+        "offset": 1720,
+        "size": 8,
+        "partition": "HW_CFG0"
+      },
+      "EN_SRAM_IFETCH": {
+        "offset": 1728,
+        "size": 1,
+        "partition": "HW_CFG1"
+      },
+      "EN_CSRNG_SW_APP_READ": {
+        "offset": 1729,
+        "size": 1,
+        "partition": "HW_CFG1"
+      },
+      "DIS_RV_DM_LATE_DEBUG": {
+        "offset": 1730,
+        "size": 1,
+        "partition": "HW_CFG1"
+      },
+      "HW_CFG1_DIGEST": {
+        "offset": 1736,
+        "size": 8,
+        "partition": "HW_CFG1"
+      },
+      "TEST_UNLOCK_TOKEN": {
+        "offset": 1744,
+        "size": 16,
+        "partition": "SECRET0"
+      },
+      "TEST_EXIT_TOKEN": {
+        "offset": 1760,
+        "size": 16,
+        "partition": "SECRET0"
+      },
+      "SECRET0_DIGEST": {
+        "offset": 1776,
+        "size": 8,
+        "partition": "SECRET0"
+      },
+      "FLASH_ADDR_KEY_SEED": {
+        "offset": 1784,
+        "size": 32,
+        "partition": "SECRET1"
+      },
+      "FLASH_DATA_KEY_SEED": {
+        "offset": 1816,
+        "size": 32,
+        "partition": "SECRET1"
+      },
+      "SRAM_DATA_KEY_SEED": {
+        "offset": 1848,
+        "size": 16,
+        "partition": "SECRET1"
+      },
+      "SECRET1_DIGEST": {
+        "offset": 1864,
+        "size": 8,
+        "partition": "SECRET1"
+      },
+      "RMA_TOKEN": {
+        "offset": 1872,
+        "size": 16,
+        "partition": "SECRET2"
+      },
+      "CREATOR_ROOT_KEY_SHARE0": {
+        "offset": 1888,
+        "size": 32,
+        "partition": "SECRET2"
+      },
+      "CREATOR_ROOT_KEY_SHARE1": {
+        "offset": 1920,
+        "size": 32,
+        "partition": "SECRET2"
+      },
+      "SECRET2_DIGEST": {
+        "offset": 1952,
+        "size": 8,
+        "partition": "SECRET2"
+      },
+      "LC_TRANSITION_CNT": {
+        "offset": 1960,
+        "size": 48,
+        "partition": "LIFE_CYCLE"
+      },
+      "LC_STATE": {
+        "offset": 2008,
+        "size": 40,
+        "partition": "LIFE_CYCLE"
+      }
+    }
+  },
   "alert_handler": {
     "peripherals": {
       "External": 0,

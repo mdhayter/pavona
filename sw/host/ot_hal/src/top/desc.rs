@@ -127,6 +127,46 @@ pub struct Clkmgr {
     pub ext_clk_bypass: bool,
 }
 
+/// A range of bytes in OTP.
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq, Hash)]
+pub struct OtpRange {
+    /// Byte offset in OTP.
+    pub offset: u32,
+    pub size: u32,
+}
+
+/// An OTP partition.
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
+pub struct OtpPartition {
+    /// Byte offset in OTP.
+    pub offset: u32,
+    pub size: u32,
+    /// Scrambled, and not readable once locked.
+    pub secret: bool,
+    /// Locked by a digest that the OTP controller computes (the DAI digest command).
+    pub hw_digest: bool,
+    /// The partition's digest, if it has one.
+    pub digest: Option<OtpRange>,
+}
+
+/// An item in an OTP partition.
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
+pub struct OtpItem {
+    /// Byte offset in OTP.
+    pub offset: u32,
+    pub size: u32,
+    /// Name of the partition the item is in.
+    pub partition: String,
+}
+
+/// The OTP memory map, by the partition and item names of the top's OTP map
+/// (`HW_CFG0`, `DEVICE_ID`).
+#[derive(Clone, Debug, Default, Deserialize)]
+pub struct OtpCtrl {
+    pub partitions: BTreeMap<String, OtpPartition>,
+    pub items: BTreeMap<String, OtpItem>,
+}
+
 /// The host's view of a top.
 #[derive(Clone, Debug, Deserialize)]
 pub struct TopDescription {
@@ -140,6 +180,13 @@ pub struct TopDescription {
     pub pwrmgr: Pwrmgr,
     pub rstmgr: Rstmgr,
     pub clkmgr: Clkmgr,
+    /// Register offsets of the IP blocks whose layouts differ between tops, by block type
+    /// (`otp_ctrl`) and register name (`DIRECT_ACCESS_CMD`, `ERR_CODE_0`).
+    #[serde(default)]
+    pub registers: BTreeMap<String, BTreeMap<String, u32>>,
+    /// The OTP memory map. Absent on tops whose OTP controller is not generated with ipgen.
+    #[serde(default)]
+    pub otp_ctrl: Option<OtpCtrl>,
     /// JTAG IDCODE of the debug module TAP, from the top's JTAG ID package. Absent on
     /// tops without one.
     #[serde(default)]
@@ -229,6 +276,38 @@ impl TopDescription {
         }
     }
 
+    /// Returns the offset of register `reg` (`DIRECT_ACCESS_CMD`) of IP block type `ip`
+    /// (`otp_ctrl`).
+    pub fn register_offset(&self, ip: &str, reg: &str) -> Result<u32> {
+        match self.registers.get(ip).and_then(|regs| regs.get(reg)) {
+            Some(&offset) => Ok(offset),
+            None => bail!("Top {} has no {ip} register {reg:?}", self.name),
+        }
+    }
+
+    fn otp_map(&self) -> Result<&OtpCtrl> {
+        match &self.otp_ctrl {
+            Some(otp) => Ok(otp),
+            None => bail!("Top {} has no OTP memory map", self.name),
+        }
+    }
+
+    /// Returns OTP partition `name` (`HW_CFG0`).
+    pub fn otp_partition(&self, name: &str) -> Result<&OtpPartition> {
+        match self.otp_map()?.partitions.get(name) {
+            Some(partition) => Ok(partition),
+            None => bail!("Top {} has no OTP partition {name:?}", self.name),
+        }
+    }
+
+    /// Returns OTP item `name` (`DEVICE_ID`).
+    pub fn otp_item(&self, name: &str) -> Result<&OtpItem> {
+        match self.otp_map()?.items.get(name) {
+            Some(item) => Ok(item),
+            None => bail!("Top {} has no OTP item {name:?}", self.name),
+        }
+    }
+
     /// Returns the MMIO region of the hart address space.
     pub fn mmio(&self) -> Result<&AddrRange> {
         match self.addr_space(HART_ADDR_SPACE)?.subranges.get("mmio") {
@@ -269,6 +348,133 @@ mod tests {
             1 << 3
         );
         assert!(!dragonfly.clkmgr.ext_clk_bypass);
+        Ok(())
+    }
+
+    #[test]
+    fn embedded_otp_map() -> Result<()> {
+        let egret = TopDescription::embedded("egret").unwrap()?;
+        assert_eq!(
+            egret.register_offset("otp_ctrl", "DIRECT_ACCESS_CMD")?,
+            0x50
+        );
+        let item = egret.otp_item("DEVICE_ID")?;
+        assert_eq!(
+            (item.offset, item.size, item.partition.as_str()),
+            (1656, 32, "HW_CFG0")
+        );
+        let secret0 = egret.otp_partition("SECRET0")?;
+        assert!(secret0.secret && secret0.hw_digest);
+        assert_eq!(
+            secret0.digest,
+            Some(OtpRange {
+                offset: 1776,
+                size: 8
+            })
+        );
+        assert!(egret.otp_item("NO_SUCH_ITEM").is_err());
+        let dragonfly = TopDescription::embedded("dragonfly").unwrap()?;
+        assert_eq!(
+            dragonfly.register_offset("otp_ctrl", "DIRECT_ACCESS_CMD")?,
+            0x8c
+        );
+        assert_eq!(dragonfly.otp_item("DEVICE_ID")?.offset, 20008);
+        let scafi = TopDescription::embedded("scafi_deprecated").unwrap()?;
+        assert!(scafi.otp_partition("HW_CFG0").is_err());
+        Ok(())
+    }
+
+    /// The OTP map and otp_ctrl registers of the top the host tools are built for match its
+    /// DIF, for the ones that host code used from the DIF.
+    #[cfg(any(feature = "egret", feature = "dragonfly"))]
+    #[test]
+    fn otp_matches_dif() -> Result<()> {
+        use ot_bindgen_dif as dif;
+
+        let desc = TopDescription::embedded(crate::top::BUILT_FOR.unwrap()).unwrap()?;
+        for (name, offset) in [
+            ("STATUS", dif::OTP_CTRL_STATUS_REG_OFFSET),
+            (
+                "DIRECT_ACCESS_REGWEN",
+                dif::OTP_CTRL_DIRECT_ACCESS_REGWEN_REG_OFFSET,
+            ),
+            (
+                "DIRECT_ACCESS_CMD",
+                dif::OTP_CTRL_DIRECT_ACCESS_CMD_REG_OFFSET,
+            ),
+            (
+                "DIRECT_ACCESS_ADDRESS",
+                dif::OTP_CTRL_DIRECT_ACCESS_ADDRESS_REG_OFFSET,
+            ),
+            (
+                "DIRECT_ACCESS_WDATA_0",
+                dif::OTP_CTRL_DIRECT_ACCESS_WDATA_0_REG_OFFSET,
+            ),
+            (
+                "DIRECT_ACCESS_WDATA_1",
+                dif::OTP_CTRL_DIRECT_ACCESS_WDATA_1_REG_OFFSET,
+            ),
+            (
+                "DIRECT_ACCESS_RDATA_0",
+                dif::OTP_CTRL_DIRECT_ACCESS_RDATA_0_REG_OFFSET,
+            ),
+            (
+                "DIRECT_ACCESS_RDATA_1",
+                dif::OTP_CTRL_DIRECT_ACCESS_RDATA_1_REG_OFFSET,
+            ),
+        ] {
+            assert_eq!(desc.register_offset("otp_ctrl", name)?, offset, "{name}");
+        }
+        for (name, offset, size) in [
+            (
+                "DEVICE_ID",
+                dif::OTP_CTRL_PARAM_DEVICE_ID_OFFSET,
+                dif::OTP_CTRL_PARAM_DEVICE_ID_SIZE,
+            ),
+            (
+                "MANUF_STATE",
+                dif::OTP_CTRL_PARAM_MANUF_STATE_OFFSET,
+                dif::OTP_CTRL_PARAM_MANUF_STATE_SIZE,
+            ),
+            (
+                "TEST_UNLOCK_TOKEN",
+                dif::OTP_CTRL_PARAM_TEST_UNLOCK_TOKEN_OFFSET,
+                dif::OTP_CTRL_PARAM_TEST_UNLOCK_TOKEN_SIZE,
+            ),
+            (
+                "RMA_TOKEN",
+                dif::OTP_CTRL_PARAM_RMA_TOKEN_OFFSET,
+                dif::OTP_CTRL_PARAM_RMA_TOKEN_SIZE,
+            ),
+        ] {
+            let item = desc.otp_item(name)?;
+            assert_eq!((item.offset, item.size), (offset, size), "{name}");
+        }
+        for (name, offset, digest_offset) in [
+            (
+                "HW_CFG0",
+                dif::OTP_CTRL_PARAM_HW_CFG0_OFFSET,
+                dif::OTP_CTRL_PARAM_HW_CFG0_DIGEST_OFFSET,
+            ),
+            (
+                "SECRET0",
+                dif::OTP_CTRL_PARAM_SECRET0_OFFSET,
+                dif::OTP_CTRL_PARAM_SECRET0_DIGEST_OFFSET,
+            ),
+            (
+                "SECRET2",
+                dif::OTP_CTRL_PARAM_SECRET2_OFFSET,
+                dif::OTP_CTRL_PARAM_SECRET2_DIGEST_OFFSET,
+            ),
+        ] {
+            let partition = desc.otp_partition(name)?;
+            assert_eq!(partition.offset, offset, "{name}");
+            assert_eq!(
+                partition.digest.map(|d| d.offset),
+                Some(digest_offset),
+                "{name}"
+            );
+        }
         Ok(())
     }
 

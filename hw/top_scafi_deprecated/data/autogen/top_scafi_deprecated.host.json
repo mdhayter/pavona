@@ -108,6 +108,7 @@
       }
     }
   },
+  "registers": {},
   "pinmux": {
     "num_mio_pads": 47,
     "num_dio_pads": 14,

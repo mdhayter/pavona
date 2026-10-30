@@ -13,7 +13,8 @@ import sys
 import hjson
 import pytest
 
-from gen_top_host import REPO_TOP, host_description, jtag_idcodes, parse_localparams
+from gen_top_host import (REPO_TOP, host_description, jtag_idcodes, load_otp_mmap,
+                          parse_localparams)
 from topgen.lib import load_completecfg_and_blocks
 
 TOPS = ["egret", "dragonfly", "scafi_deprecated"]
@@ -64,7 +65,8 @@ def top(request):
     completecfg, name_to_block = load_completecfg_and_blocks(completecfg_path, REPO_TOP)
     jtag_id_pkg = REPO_TOP / f"hw/top_{request.param}/rtl/jtag_id_pkg.sv"
     return request.param, host_description(
-        completecfg, name_to_block, jtag_id_pkg.read_text() if jtag_id_pkg.exists() else None)
+        completecfg, name_to_block, jtag_id_pkg.read_text() if jtag_id_pkg.exists() else None,
+        load_otp_mmap(completecfg, REPO_TOP))
 
 
 def test_name(top):
@@ -252,3 +254,51 @@ def test_ext_clk_bypass(top):
     has_extclk = any(r.get("name") == "EXTCLK_CTRL"
                      for r in ip_hjson(name, "clkmgr")["registers"])
     assert desc["clkmgr"]["ext_clk_bypass"] == has_extclk
+
+
+def test_registers(top):
+    """The register offsets match the constants that regtool generates for the IP."""
+    name, desc = top
+    if name == "scafi_deprecated":
+        pytest.skip("Scafi's otp_ctrl is not generated with ipgen")
+    registers = desc["registers"]["otp_ctrl"]
+    block = ip_hjson(name, "otp_ctrl")
+    assert registers["STATUS"] == 0x10
+    assert registers["DIRECT_ACCESS_CMD"] == registers["DIRECT_ACCESS_REGWEN"] + 4
+    num_errors = ip_param(block, "NumErrorEntries")
+    assert [registers[f"ERR_CODE_{i}"] for i in range(num_errors)] == [
+        registers["ERR_CODE_0"] + 4 * i for i in range(num_errors)]
+    assert f"ERR_CODE_{num_errors}" not in registers
+
+
+def squash(name: str) -> str:
+    """Normalise an OTP partition or item name and a parameter name for comparison
+    (ROT_..._SHA2_256_HASH and RotCreator...Sha2_256Hash)."""
+    return name.replace("_", "").lower()
+
+
+def test_otp_map(top):
+    """Every partition and item matches the <Name>Offset / <Name>Size parameters of the OTP
+    controller, and the items of each partition lie inside it."""
+    name, desc = top
+    if "otp_ctrl" not in desc:
+        pytest.skip(f"{name}'s otp_ctrl is not generated with ipgen")
+    params = {squash(p["name"]): int(p["default"])
+              for p in ip_hjson(name, "otp_ctrl")["param_list"]
+              if p["name"].endswith(("Offset", "Size")) and p.get("default") is not None}
+    otp = desc["otp_ctrl"]
+    for kind in ("partitions", "items"):
+        for entry_name, entry in otp[kind].items():
+            assert params[squash(entry_name) + "offset"] == entry["offset"], entry_name
+            assert params[squash(entry_name) + "size"] == entry["size"], entry_name
+    for item_name, item in otp["items"].items():
+        part = otp["partitions"][item["partition"]]
+        assert part["offset"] <= item["offset"]
+        assert item["offset"] + item["size"] <= part["offset"] + part["size"], item_name
+    for part_name, part in otp["partitions"].items():
+        if part["digest"] is not None:
+            assert part["digest"]["size"] == 8, part_name
+    assert otp["partitions"]["SECRET0"]["secret"]
+    assert not otp["partitions"]["HW_CFG0"]["secret"]
+    assert otp["partitions"]["HW_CFG0"]["hw_digest"]
+    assert not otp["partitions"]["CREATOR_SW_CFG"]["hw_digest"]
