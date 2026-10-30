@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -14,8 +15,6 @@ use opentitanlib::execute_test;
 use opentitanlib::io::jtag::JtagTap;
 use opentitanlib::test_utils::init::InitializeTest;
 
-use ot_hal::top;
-
 #[derive(Debug, Parser)]
 struct Opts {
     #[command(flatten)]
@@ -30,6 +29,7 @@ struct Opts {
 }
 
 fn shutdown_execution_asm(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
+    let top = transport.top()?;
     log::info!("Loading symbols from ELF {}", opts.elf.display());
     let sym = ElfSymbols::load_elf(&opts.elf)?;
 
@@ -48,7 +48,7 @@ fn shutdown_execution_asm(opts: &Opts, transport: &TransportWrapper) -> Result<(
     dbg.reset(false)?;
 
     // Reset PC to the start of main SRAM
-    dbg.set_pc(top::SRAM_CTRL_MAIN_RAM_BASE_ADDR as u32)?;
+    dbg.set_pc(top.base_addr("sram_ctrl_main_ram")? as u32)?;
 
     // Check that the execution hits the exception handler
     dbg.run_until("_asm_exception_handler", opts.breakpoint_timeout)?;
