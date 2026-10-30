@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -9,7 +10,7 @@ use std::time::Duration;
 use thiserror::Error;
 
 use ot_hal::dif::clkmgr::{ClkmgrExtclkCtrl, ClkmgrReg};
-use ot_hal::top;
+use ot_hal::top::TopDescription;
 use ot_hal::util::multibits::MultiBitBool4;
 
 use crate::io::jtag::Jtag;
@@ -28,22 +29,25 @@ pub enum ClockSpeed {
 pub struct ExternalClock;
 
 impl ExternalClock {
-    /// Base address of the clock manager.
-    const CLKMGR_BASE_ADDR: u32 = top::CLKMGR_AON_BASE_ADDR as u32;
-
-    /// Addresses of clock manager registers in memory.
-    const EXTCLK_CTRL_REGWEN_ADDR: u32 =
-        Self::CLKMGR_BASE_ADDR + ClkmgrReg::ExtclkCtrlRegwen as u32;
-    const EXTCLK_CTRL_ADDR: u32 = Self::CLKMGR_BASE_ADDR + ClkmgrReg::ExtclkCtrl as u32;
-    const EXTCLK_STATUS_ADDR: u32 = Self::CLKMGR_BASE_ADDR + ClkmgrReg::ExtclkStatus as u32;
+    /// Returns the base address of the clock manager.
+    fn clkmgr_base_addr(top: &TopDescription) -> Result<u32, ExternalClockError> {
+        top.base_addr("clkmgr_aon")
+            .map(|addr| addr as u32)
+            .map_err(|source| ExternalClockError::Top { source })
+    }
 
     /// Durations for polling of the STATUS register.
     const POLL_TIMEOUT: Duration = Duration::from_millis(500);
     const POLL_DELAY: Duration = Duration::from_millis(5);
 
     /// Enable the external clock at the given speed.
-    pub fn enable(jtag: &mut dyn Jtag, speed: ClockSpeed) -> Result<(), ExternalClockError> {
-        if !Self::write_enabled(jtag)? {
+    pub fn enable(
+        jtag: &mut dyn Jtag,
+        top: &TopDescription,
+        speed: ClockSpeed,
+    ) -> Result<(), ExternalClockError> {
+        let clkmgr = Self::clkmgr_base_addr(top)?;
+        if !Self::write_enabled(jtag, clkmgr)? {
             return Err(ExternalClockError::WriteDisabled);
         }
 
@@ -63,46 +67,47 @@ impl ExternalClock {
         });
 
         // Set the EXTCLK_CTRL register.
-        jtag.write_memory32(Self::EXTCLK_CTRL_ADDR, &[extclk_ctrl])
+        jtag.write_memory32(clkmgr + ClkmgrReg::ExtclkCtrl as u32, &[extclk_ctrl])
             .map_err(|source| ExternalClockError::Jtag { source })?;
 
-        Self::wait_for_ack(jtag)?;
+        Self::wait_for_ack(jtag, clkmgr)?;
 
         Ok(())
     }
 
     /// Disable the external clock.
-    pub fn disable(jtag: &mut dyn Jtag) -> Result<(), ExternalClockError> {
-        if !Self::write_enabled(jtag)? {
+    pub fn disable(jtag: &mut dyn Jtag, top: &TopDescription) -> Result<(), ExternalClockError> {
+        let clkmgr = Self::clkmgr_base_addr(top)?;
+        if !Self::write_enabled(jtag, clkmgr)? {
             return Err(ExternalClockError::WriteDisabled);
         }
 
         // Set the EXTCLK_CTRL register.
         let extclk_ctrl = ClkmgrExtclkCtrl::SEL.emplace(u8::from(MultiBitBool4::False) as u32);
-        jtag.write_memory32(Self::EXTCLK_CTRL_ADDR, &[extclk_ctrl])
+        jtag.write_memory32(clkmgr + ClkmgrReg::ExtclkCtrl as u32, &[extclk_ctrl])
             .map_err(|source| ExternalClockError::Jtag { source })?;
 
-        Self::wait_for_ack(jtag)?;
+        Self::wait_for_ack(jtag, clkmgr)?;
 
         Ok(())
     }
 
     /// Returns the CLKMGR_EXTCLK_REGWEN setting which shows whether the
     /// `EXTCLK_CTRL` register can be written.
-    fn write_enabled(jtag: &mut dyn Jtag) -> Result<bool, ExternalClockError> {
+    fn write_enabled(jtag: &mut dyn Jtag, clkmgr: u32) -> Result<bool, ExternalClockError> {
         let mut buf = [0];
-        jtag.read_memory32(Self::EXTCLK_CTRL_REGWEN_ADDR, &mut buf)
+        jtag.read_memory32(clkmgr + ClkmgrReg::ExtclkCtrlRegwen as u32, &mut buf)
             .map_err(|source| ExternalClockError::Jtag { source })?;
 
         Ok(buf[0] & 1 == 1)
     }
 
     /// Wait until the clock manager reports that the clock has changed to the external source.
-    fn wait_for_ack(jtag: &mut dyn Jtag) -> Result<(), ExternalClockError> {
+    fn wait_for_ack(jtag: &mut dyn Jtag, clkmgr: u32) -> Result<(), ExternalClockError> {
         poll::poll_until(Self::POLL_TIMEOUT, Self::POLL_DELAY, || {
             // Check the status register.
             let mut status_buf = [0];
-            jtag.read_memory32(Self::EXTCLK_STATUS_ADDR, &mut status_buf)
+            jtag.read_memory32(clkmgr + ClkmgrReg::ExtclkStatus as u32, &mut status_buf)
                 .map_err(|source| ExternalClockError::Jtag { source })?;
 
             Ok(status_buf[0] == u8::from(MultiBitBool4::True) as u32)
@@ -115,6 +120,9 @@ impl ExternalClock {
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum ExternalClockError {
+    #[error("failed to find clkmgr in the top description")]
+    Top { source: anyhow::Error },
+
     #[error("failed to communicate over JTAG")]
     Jtag { source: anyhow::Error },
 

@@ -1,8 +1,10 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 use std::collections::HashMap;
+use std::fmt;
 use std::iter;
 use std::str::FromStr;
 use std::time::Duration;
@@ -20,6 +22,13 @@ use opentitanlib::test_utils::pinmux_config::PinmuxConfig;
 use opentitanlib::uart::console::UartConsole;
 use ot_hal::dif::pinmux::PinmuxPadAttr;
 use ot_hal::top::{PinmuxInsel, PinmuxMioOut, PinmuxOutsel, PinmuxPeripheralIn};
+
+/// Returns `map` with its keys and values replaced by their names, as `PinmuxConfig` takes them.
+fn pinmux_names<K: fmt::Display, V: fmt::Display>(map: &HashMap<K, V>) -> HashMap<String, String> {
+    map.iter()
+        .map(|(k, v)| (k.to_string(), v.to_string()))
+        .collect()
+}
 
 #[derive(Debug, Parser)]
 struct Opts {
@@ -222,7 +231,13 @@ fn get_config(transport: &TransportWrapper) -> Config {
 
 fn test_gpio_outputs(transport: &TransportWrapper, config: &Config) -> Result<()> {
     let uart = transport.uart("console")?;
-    PinmuxConfig::configure(&*uart, None, Some(&config.output), None)?;
+    PinmuxConfig::configure(
+        &*uart,
+        transport.top()?,
+        None,
+        Some(&pinmux_names(&config.output)),
+        None,
+    )?;
 
     log::info!("Configuring debugger GPIOs as inputs");
     // The outputs (with respect to pinmux config) correspond to the input pins on the debug board.
@@ -247,7 +262,13 @@ fn test_gpio_outputs(transport: &TransportWrapper, config: &Config) -> Result<()
 fn test_gpio_inputs(transport: &TransportWrapper, config: &Config) -> Result<()> {
     let uart = transport.uart("console")?;
 
-    PinmuxConfig::configure(&*uart, Some(&config.input), None, None)?;
+    PinmuxConfig::configure(
+        &*uart,
+        transport.top()?,
+        Some(&pinmux_names(&config.input)),
+        None,
+        None,
+    )?;
 
     log::info!("Configuring debugger GPIOs as outputs");
     // The inputs (with respect to pinmux config) correspond to the output pins on the debug board.
@@ -275,11 +296,17 @@ fn test_pad_inversion(transport: &TransportWrapper, config: &Config) -> Result<(
     let invert_all: HashMap<_, _> = config
         .output
         .keys()
-        .map(|&mio| (mio, PinmuxPadAttr::INVERT))
+        .map(|mio| (mio.to_string(), PinmuxPadAttr::INVERT))
         .collect();
 
     log::info!("Configuring pads as inverted inputs");
-    PinmuxConfig::configure(&*uart, Some(&config.input), None, Some(&invert_all))?;
+    PinmuxConfig::configure(
+        &*uart,
+        transport.top()?,
+        Some(&pinmux_names(&config.input)),
+        None,
+        Some(&invert_all),
+    )?;
 
     log::info!("Configuring debugger GPIOs as outputs");
     // The inputs (with respect to pinmux config) correspond to the output pins on the debug board.
@@ -301,7 +328,13 @@ fn test_pad_inversion(transport: &TransportWrapper, config: &Config) -> Result<(
     }
 
     log::info!("Configuring pads as inverted outputs");
-    PinmuxConfig::configure(&*uart, None, Some(&config.output), Some(&invert_all))?;
+    PinmuxConfig::configure(
+        &*uart,
+        transport.top()?,
+        None,
+        Some(&pinmux_names(&config.output)),
+        Some(&invert_all),
+    )?;
 
     log::info!("Configuring debugger GPIOs as inputs");
     // The outputs (with respect to pinmux config) correspond to the input pins on the debug board.
@@ -354,14 +387,15 @@ fn test_opendrain(
         .collect();
     let opendrain_attrs: HashMap<_, _> = opendrain_outputs
         .keys()
-        .map(|&mio| (mio, pad_attr))
+        .map(|mio| (mio.to_string(), pad_attr))
         .collect();
 
     log::info!("Configuring pads as opendrain outputs");
     PinmuxConfig::configure(
         &*uart,
+        transport.top()?,
         None,
-        Some(&opendrain_outputs),
+        Some(&pinmux_names(&opendrain_outputs)),
         Some(&opendrain_attrs),
     )?;
 

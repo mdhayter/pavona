@@ -53,7 +53,7 @@ fn manuf_cp_yield_test(opts: &Opts, transport: &TransportWrapper) -> Result<()> 
         .connect(JtagTap::RiscvTap)
         .context("failed to connect to RISCV TAP over JTAG")?;
 
-    ExternalClock::enable(&mut *jtag, ClockSpeed::High)
+    ExternalClock::enable(&mut *jtag, transport.top()?, ClockSpeed::High)
         .context("failed to enable external clock")?;
 
     // Read and write memory to verify connection.

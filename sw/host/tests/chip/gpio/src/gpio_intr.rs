@@ -1,8 +1,10 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 use std::collections::HashMap;
+use std::fmt;
 use std::sync::LazyLock;
 use std::time::Duration;
 
@@ -18,6 +20,13 @@ use opentitanlib::test_utils::pinmux_config::PinmuxConfig;
 use opentitanlib::uart::console::UartConsole;
 use opentitanlib::{collection, execute_test};
 use ot_hal::top::{PinmuxInsel, PinmuxMioOut, PinmuxOutsel, PinmuxPeripheralIn};
+
+/// Returns `map` with its keys and values replaced by their names, as `PinmuxConfig` takes them.
+fn pinmux_names<K: fmt::Display, V: fmt::Display>(map: &HashMap<K, V>) -> HashMap<String, String> {
+    map.iter()
+        .map(|(k, v)| (k.to_string(), v.to_string()))
+        .collect()
+}
 
 #[derive(Debug, Parser)]
 struct Opts {
@@ -215,7 +224,13 @@ fn test_gpio_outputs(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     let config = CONFIG
         .get(opts.init.backend_opts.interface.as_str())
         .expect("interface");
-    PinmuxConfig::configure(&*uart, Some(&config.input), Some(&config.output), None)?;
+    PinmuxConfig::configure(
+        &*uart,
+        transport.top()?,
+        Some(&pinmux_names(&config.input)),
+        Some(&pinmux_names(&config.output)),
+        None,
+    )?;
 
     log::info!("Configuring debugger GPIOs as inputs");
     // The outputs (with respect to pinmux config) correspond to the input pins on the debug board.
@@ -290,7 +305,13 @@ fn test_gpio_inputs(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     let config = CONFIG
         .get(opts.init.backend_opts.interface.as_str())
         .expect("interface");
-    PinmuxConfig::configure(&*uart, Some(&config.input), None, None)?;
+    PinmuxConfig::configure(
+        &*uart,
+        transport.top()?,
+        Some(&pinmux_names(&config.input)),
+        None,
+        None,
+    )?;
 
     log::info!("Configuring debugger GPIOs as outputs");
     // The inputs (with respect to pinmux config) correspond to the output pins on the debug board.
