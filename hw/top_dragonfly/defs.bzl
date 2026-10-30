@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -11,6 +12,8 @@ DRAGONFLY = pavona_top(
     name = "dragonfly",
     hjson = "//hw/top_dragonfly/data/autogen:top_dragonfly.gen.hjson",
     top_lib = "//hw/top_dragonfly/sw/autogen:top_dragonfly",
+    # Host description, embedded in the host tools (//sw/host/ot_hal).
+    host_desc = "//hw/top_dragonfly/data:host_desc",
     top_rtl = "//hw/top_dragonfly:rtl_files",
     top_verilator_core = ["lowrisc:dv:top_dragonfly_chip_verilator_sim"],
     top_verilator_binary = {"binary": ["lowrisc_dv_top_dragonfly_chip_verilator_sim_0.1/sim-verilator/Vchip_sim_tb"]},
