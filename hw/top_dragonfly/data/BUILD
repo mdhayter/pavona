@@ -44,11 +44,14 @@ copy_files(
     tags = ["manual"],
 )
 
-# Hjson descriptions of the top's IP blocks, as gen_top_host.py expects them.
+# Hjson descriptions of the top's IP blocks and its OTP memory map, as gen_top_host.py expects
+# them.
 filegroup(
     name = "host_desc_inputs",
     srcs = [ip.attrs["hjson"] for ip in DRAGONFLY_IPS] + [
         "//hw/top_dragonfly/ip:block_descriptions",
+        # The OTP memory map.
+        "//hw/top_dragonfly/ip_autogen/otp_ctrl/data:top_dragonfly_otp_ctrl.ipconfig.hjson",
     ],
 )
 
