@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -126,8 +127,13 @@ fn manuf_cp_ast_text_execution_read_otp(opts: &Opts, transport: &TransportWrappe
     // the SRAM program.
     let mut device_id =
         [0xffffffffu32; DaiParam::DEVICE_ID.size as usize / std::mem::size_of::<u32>()];
-    OtpParam::read_param(&mut *jtag, DaiParam::DeviceId, &mut device_id)
-        .context("failed to read back DEVICE_ID from OTP")?;
+    OtpParam::read_param(
+        &mut *jtag,
+        transport.top()?,
+        DaiParam::DeviceId,
+        &mut device_id,
+    )
+    .context("failed to read back DEVICE_ID from OTP")?;
     assert_eq!(device_id, EXPECTED_DEVICE_ID);
 
     // Disconnect JTAG.

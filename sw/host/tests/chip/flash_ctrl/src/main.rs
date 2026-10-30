@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -135,8 +136,13 @@ fn test_rma_command(opts: &Opts, transport: &TransportWrapper) -> anyhow::Result
 
     // Wait for the lifecycle controller to enter the `READY` state from
     // which it accepts transition commands.
-    lc_transition::wait_for_status(&mut *jtag, Duration::from_secs(3), LcCtrlStatus::READY)
-        .context("failed to wait for lifecycle controller to be ready")?;
+    lc_transition::wait_for_status(
+        &mut *jtag,
+        transport.top()?,
+        Duration::from_secs(3),
+        LcCtrlStatus::READY,
+    )
+    .context("failed to wait for lifecycle controller to be ready")?;
 
     // Check we're in the `DEV` state with 5 transitions registered.
     assert_eq!(

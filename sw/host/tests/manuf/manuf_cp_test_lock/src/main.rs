@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -49,6 +50,7 @@ fn provision_token(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
 
     OtpParam::write_param(
         &mut *jtag,
+        transport.top()?,
         DaiParam::TestUnlockToken,
         &TEST_UNLOCK_TOKEN_POSTIMAGE,
     )
@@ -58,6 +60,7 @@ fn provision_token(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     let mut test_unlock_token = [0xff; 4];
     OtpParam::read_param(
         &mut *jtag,
+        transport.top()?,
         DaiParam::TestUnlockToken,
         &mut test_unlock_token,
     )
@@ -69,11 +72,11 @@ fn provision_token(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     );
 
     // Lock the SECRET0 partition.
-    OtpPartition::lock(&mut *jtag, Partition::SECRET0)
+    OtpPartition::lock(&mut *jtag, transport.top()?, Partition::SECRET0)
         .context("failed to lock SECRET0 partition")?;
 
     // Read its digest to ensure it's now locked.
-    let digest = OtpPartition::read_digest(&mut *jtag, Partition::SECRET0)
+    let digest = OtpPartition::read_digest(&mut *jtag, transport.top()?, Partition::SECRET0)
         .context("failed to read SECRET0 digest")?;
     assert_ne!(digest, [0x00, 2]);
 

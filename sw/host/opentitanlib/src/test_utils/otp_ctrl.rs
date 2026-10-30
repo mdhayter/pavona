@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -18,7 +19,7 @@ use ot_hal::dif::otp_ctrl::{
     DaiParam, DirectAccessCmd, Granularity, OtpCtrlReg, OtpCtrlStatus, OtpParamMmap, Partition,
     SECRET_PARTITIONS,
 };
-use ot_hal::top;
+use ot_hal::top::TopDescription;
 
 use crate::io::jtag::Jtag;
 use crate::test_utils::poll;
@@ -29,9 +30,11 @@ impl OtpParam {
     /// Read a parameter from OTP into an output buffer.
     pub fn read_param(
         jtag: &mut dyn Jtag,
+        top: &TopDescription,
         param: DaiParam,
         out_buf: &mut [u32],
     ) -> OtpDaiResult<()> {
+        let dai = OtpDai::new(top)?;
         let OtpParamMmap { byte_addr, size } = param.mmap();
 
         if mem::size_of_val(out_buf) < size as usize {
@@ -49,7 +52,7 @@ impl OtpParam {
                 let out_iter = out_buf.iter_mut().take(size as usize);
                 for (idx, out_word) in out_iter.enumerate() {
                     let addr = byte_addr + (idx * mem::size_of::<u32>()) as u32;
-                    let [lower, _] = OtpDai::read(jtag, addr, access_granule)?;
+                    let [lower, _] = dai.read(jtag, addr, access_granule)?;
                     *out_word = lower;
                 }
             }
@@ -57,7 +60,7 @@ impl OtpParam {
                 let out_iter = out_buf.chunks_mut(2).take(size as usize / 2);
                 for (idx, out_words) in out_iter.enumerate() {
                     let addr = byte_addr + (idx * mem::size_of::<u64>()) as u32;
-                    let otp_words = OtpDai::read(jtag, addr, access_granule)?;
+                    let otp_words = dai.read(jtag, addr, access_granule)?;
                     out_words[0] = otp_words[0];
                     out_words[1] = otp_words[1];
                 }
@@ -68,7 +71,13 @@ impl OtpParam {
     }
 
     /// Write a value from a buffer to an OTP parameter.
-    pub fn write_param(jtag: &mut dyn Jtag, param: DaiParam, data: &[u32]) -> OtpDaiResult<()> {
+    pub fn write_param(
+        jtag: &mut dyn Jtag,
+        top: &TopDescription,
+        param: DaiParam,
+        data: &[u32],
+    ) -> OtpDaiResult<()> {
+        let dai = OtpDai::new(top)?;
         let OtpParamMmap { byte_addr, size } = param.mmap();
 
         // Check if the word has been written already.
@@ -76,7 +85,7 @@ impl OtpParam {
         // when they are backdoor loaded with 0s they will be garbage when read out.
         if !SECRET_PARTITIONS.contains(&param.partition()) {
             let mut curr_value = [0u32].repeat((size / 4).try_into().unwrap());
-            Self::read_param(jtag, param, curr_value.as_mut_slice())?;
+            Self::read_param(jtag, top, param, curr_value.as_mut_slice())?;
             for word in curr_value.iter() {
                 if *word != 0u32 {
                     return Err(OtpDaiError::WriteErrorAlreadyWritten { value: *word });
@@ -99,14 +108,14 @@ impl OtpParam {
                 let data_iter = data.iter().take(size as usize);
                 for (idx, data_word) in data_iter.enumerate() {
                     let addr = byte_addr + (idx * mem::size_of::<u32>()) as u32;
-                    OtpDai::write(jtag, addr, access_granule, [*data_word, 0x00])?;
+                    dai.write(jtag, addr, access_granule, [*data_word, 0x00])?;
                 }
             }
             Granularity::B64 => {
                 let data_iter = data.chunks(2).take(size as usize / 2);
                 for (idx, data_words) in data_iter.enumerate() {
                     let addr = byte_addr + (idx * mem::size_of::<u64>()) as u32;
-                    OtpDai::write(jtag, addr, access_granule, [data_words[0], data_words[1]])?;
+                    dai.write(jtag, addr, access_granule, [data_words[0], data_words[1]])?;
                 }
             }
         }
@@ -119,26 +128,41 @@ impl OtpParam {
 pub struct OtpPartition;
 impl OtpPartition {
     /// Lock the given partition by calculating its digest.
-    pub fn lock(jtag: &mut dyn Jtag, partition: Partition) -> OtpDaiResult<()> {
-        OtpDai::lock(jtag, partition.byte_addr)
+    pub fn lock(
+        jtag: &mut dyn Jtag,
+        top: &TopDescription,
+        partition: Partition,
+    ) -> OtpDaiResult<()> {
+        OtpDai::new(top)?.lock(jtag, partition.byte_addr)
     }
 
     /// Read back this partition's digest from the OTP.
     ///
     /// This goes via the DAI, but partitions are also exposed via CSRs after reset.
-    pub fn read_digest(jtag: &mut dyn Jtag, partition: Partition) -> OtpDaiResult<[u32; 2]> {
+    pub fn read_digest(
+        jtag: &mut dyn Jtag,
+        top: &TopDescription,
+        partition: Partition,
+    ) -> OtpDaiResult<[u32; 2]> {
         let OtpParamMmap { byte_addr, size } = partition.digest;
         assert_eq!(size, 8, "OTP partition digests should be 2 words in size");
 
-        OtpDai::read(jtag, byte_addr, Granularity::B64)
+        OtpDai::new(top)?.read(jtag, byte_addr, Granularity::B64)
     }
 }
 
 /// Direct Access Interface to the OTP.
-struct OtpDai;
-impl OtpDai {
+struct OtpDai {
     /// Base address of the OTP controller in memory.
-    const OTP_CTRL_BASE_ADDR: u32 = top::OTP_CTRL_CORE_BASE_ADDR as u32;
+    base: u32,
+}
+impl OtpDai {
+    fn new(top: &TopDescription) -> OtpDaiResult<Self> {
+        let base = top
+            .base_addr("otp_ctrl_core")
+            .map_err(|source| OtpDaiError::Top { source })?;
+        Ok(Self { base: base as u32 })
+    }
 
     // Polling timeout and delay while waiting on statuses.
     const POLL_TIMEOUT: Duration = Duration::from_millis(500);
@@ -149,26 +173,27 @@ impl OtpDai {
     /// On success, returns an array of words `[lower, upper]` where `upper` is non-zero
     /// for 64-bit granularity reads.
     pub fn read(
+        &self,
         jtag: &mut dyn Jtag,
         byte_addr: u32,
         granule: Granularity,
     ) -> OtpDaiResult<[u32; 2]> {
-        Self::wait_for_idle(jtag)?;
+        self.wait_for_idle(jtag)?;
 
         // Set the DAI address to read from.
-        let dai_address_addr = Self::OTP_CTRL_BASE_ADDR + OtpCtrlReg::DirectAccessAddress as u32;
+        let dai_address_addr = self.base + OtpCtrlReg::DirectAccessAddress as u32;
         jtag.write_memory32(dai_address_addr, &[byte_addr])
             .map_err(|source| OtpDaiError::Jtag { source })?;
 
         // Trigger a read command.
-        let dai_cmd_addr = Self::OTP_CTRL_BASE_ADDR + OtpCtrlReg::DirectAccessCmd as u32;
+        let dai_cmd_addr = self.base + OtpCtrlReg::DirectAccessCmd as u32;
         jtag.write_memory32(dai_cmd_addr, &[DirectAccessCmd::RD.bits()])
             .map_err(|source| OtpDaiError::Jtag { source })?;
 
-        Self::wait_for_idle(jtag)?;
+        self.wait_for_idle(jtag)?;
 
-        let dai_rdata0_addr = Self::OTP_CTRL_BASE_ADDR + OtpCtrlReg::DirectAccessRdata0 as u32;
-        let dai_rdata1_addr = Self::OTP_CTRL_BASE_ADDR + OtpCtrlReg::DirectAccessRdata1 as u32;
+        let dai_rdata0_addr = self.base + OtpCtrlReg::DirectAccessRdata0 as u32;
+        let dai_rdata1_addr = self.base + OtpCtrlReg::DirectAccessRdata1 as u32;
 
         let mut rdata = [0x00; 2];
 
@@ -185,20 +210,21 @@ impl OtpDai {
 
     /// Perform a single write over the Direct Access Interface.
     pub fn write(
+        &self,
         jtag: &mut dyn Jtag,
         byte_addr: u32,
         granule: Granularity,
         values: [u32; 2],
     ) -> OtpDaiResult<()> {
-        Self::wait_for_idle(jtag)?;
+        self.wait_for_idle(jtag)?;
 
         // Set the DAI address to write to.
-        let dai_address_addr = Self::OTP_CTRL_BASE_ADDR + OtpCtrlReg::DirectAccessAddress as u32;
+        let dai_address_addr = self.base + OtpCtrlReg::DirectAccessAddress as u32;
         jtag.write_memory32(dai_address_addr, &[byte_addr])
             .map_err(|source| OtpDaiError::Jtag { source })?;
 
-        let dai_wdata0_addr = Self::OTP_CTRL_BASE_ADDR + OtpCtrlReg::DirectAccessWdata0 as u32;
-        let dai_wdata1_addr = Self::OTP_CTRL_BASE_ADDR + OtpCtrlReg::DirectAccessWdata1 as u32;
+        let dai_wdata0_addr = self.base + OtpCtrlReg::DirectAccessWdata0 as u32;
+        let dai_wdata1_addr = self.base + OtpCtrlReg::DirectAccessWdata1 as u32;
 
         jtag.write_memory32(dai_wdata0_addr, &[values[0]])
             .map_err(|source| OtpDaiError::Jtag { source })?;
@@ -209,43 +235,43 @@ impl OtpDai {
         }
 
         // Trigger a write command.
-        let dai_cmd_addr = Self::OTP_CTRL_BASE_ADDR + OtpCtrlReg::DirectAccessCmd as u32;
+        let dai_cmd_addr = self.base + OtpCtrlReg::DirectAccessCmd as u32;
         jtag.write_memory32(dai_cmd_addr, &[DirectAccessCmd::WR.bits()])
             .map_err(|source| OtpDaiError::Jtag { source })?;
 
-        Self::wait_for_idle(jtag)?;
+        self.wait_for_idle(jtag)?;
 
         Ok(())
     }
 
     /// Lock the partition starting at offset `byte_addr`.
-    pub fn lock(jtag: &mut dyn Jtag, byte_addr: u32) -> OtpDaiResult<()> {
+    pub fn lock(&self, jtag: &mut dyn Jtag, byte_addr: u32) -> OtpDaiResult<()> {
         if byte_addr == Partition::CREATOR_SW_CFG.byte_addr
             || byte_addr == Partition::OWNER_SW_CFG.byte_addr
         {
             return Err(OtpDaiError::NotSupported);
         }
-        Self::wait_for_idle(jtag)?;
+        self.wait_for_idle(jtag)?;
 
         // Set the DAI address to the start of the partition.
-        let dai_address_addr = Self::OTP_CTRL_BASE_ADDR + OtpCtrlReg::DirectAccessAddress as u32;
+        let dai_address_addr = self.base + OtpCtrlReg::DirectAccessAddress as u32;
         jtag.write_memory32(dai_address_addr, &[byte_addr])
             .map_err(|source| OtpDaiError::Jtag { source })?;
 
         // Trigger a digest calculation command.
-        let dai_cmd_addr = Self::OTP_CTRL_BASE_ADDR + OtpCtrlReg::DirectAccessCmd as u32;
+        let dai_cmd_addr = self.base + OtpCtrlReg::DirectAccessCmd as u32;
         jtag.write_memory32(dai_cmd_addr, &[DirectAccessCmd::DIGEST.bits()])
             .map_err(|source| OtpDaiError::Jtag { source })?;
 
-        Self::wait_for_idle(jtag)?;
+        self.wait_for_idle(jtag)?;
 
         Ok(())
     }
 
     /// Wait for the OTP controller's status to read `DAI_IDLE`, showing it's
     /// ready to accept commands.
-    pub fn wait_for_idle(jtag: &mut dyn Jtag) -> Result<(), OtpDaiError> {
-        let otp_status_addr = Self::OTP_CTRL_BASE_ADDR + OtpCtrlReg::Status as u32;
+    pub fn wait_for_idle(&self, jtag: &mut dyn Jtag) -> Result<(), OtpDaiError> {
+        let otp_status_addr = self.base + OtpCtrlReg::Status as u32;
 
         poll::poll_until(Self::POLL_TIMEOUT, Self::POLL_DELAY, || {
             let mut status = [0];
@@ -275,6 +301,9 @@ pub enum OtpDaiError {
 
     #[error("feature not supported for current partition")]
     NotSupported,
+
+    #[error("failed to find otp_ctrl in the top description")]
+    Top { source: anyhow::Error },
 
     #[error("failed to communicate over JTAG")]
     Jtag { source: anyhow::Error },
