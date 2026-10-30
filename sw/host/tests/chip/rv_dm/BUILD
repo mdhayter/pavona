@@ -33,10 +33,6 @@ rust_binary(
     srcs = [
         "src/mem_access.rs",
     ],
-    crate_features = select({
-        "//hw/top:egret": ["egret"],
-        "//hw/top:dragonfly": ["dragonfly"],
-    }),
     deps = [
         "//sw/host/opentitanlib",
         "//sw/host/ot_hal",
