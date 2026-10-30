@@ -102,6 +102,7 @@ sim_verilator(
     args = [
         "--rcfile=",
         "--logging=info",
+        "--top=dragonfly",
         "--interface=verilator",
         "--verilator-bin=$(rootpath //hw:verilator)",
         "--verilator-rom={rom}:0",

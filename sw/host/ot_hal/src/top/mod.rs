@@ -8,8 +8,8 @@ pub mod desc;
 
 pub use desc::TopDescription;
 
-/// The top these host tools were built for, if any. It is the default when no top is selected,
-/// until the host tools are no longer built for a single top.
+/// The top these host tools were built for, if any. Only the cross-check tests use it; there is
+/// no default top.
 pub const BUILT_FOR: Option<&str> = if cfg!(feature = "egret") {
     Some("egret")
 } else if cfg!(feature = "dragonfly") {
