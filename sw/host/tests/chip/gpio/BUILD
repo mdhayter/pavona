@@ -32,7 +32,6 @@ rust_binary(
     target_compatible_with = pavona_require_top("egret"),
     deps = [
         "//sw/host/opentitanlib",
-        "//sw/host/ot_hal",
         "@crate_index//:anyhow",
         "@crate_index//:clap",
         "@crate_index//:humantime",
