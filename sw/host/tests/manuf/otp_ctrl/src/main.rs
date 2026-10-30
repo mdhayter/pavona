@@ -14,7 +14,6 @@ use opentitanlib::execute_test;
 use opentitanlib::io::jtag::JtagTap;
 use opentitanlib::test_utils::init::InitializeTest;
 use opentitanlib::test_utils::otp_ctrl::{OtpParam, OtpPartition};
-use ot_hal::dif::otp_ctrl::{DaiParam, Partition};
 
 #[derive(Debug, Parser)]
 struct Opts {
@@ -55,22 +54,12 @@ fn program_readback(opts: &Opts, transport: &TransportWrapper) -> anyhow::Result
 
     // Program and then read back `MANUF_STATE`.
     let write_data = [0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF];
-    OtpParam::write_param(
-        &mut *jtag,
-        transport.top()?,
-        DaiParam::ManufState,
-        &write_data,
-    )
-    .context("failed to write MANUF_STATE")?;
+    OtpParam::write_param(&mut *jtag, transport.top()?, "MANUF_STATE", &write_data)
+        .context("failed to write MANUF_STATE")?;
 
     let mut read_data = [0xff; 8];
-    OtpParam::read_param(
-        &mut *jtag,
-        transport.top()?,
-        DaiParam::ManufState,
-        &mut read_data,
-    )
-    .context("failed to read MANUF_STATE")?;
+    OtpParam::read_param(&mut *jtag, transport.top()?, "MANUF_STATE", &mut read_data)
+        .context("failed to read MANUF_STATE")?;
 
     assert_eq!(read_data, write_data);
 
@@ -99,17 +88,17 @@ fn lock_partition(opts: &Opts, transport: &TransportWrapper) -> anyhow::Result<(
         .context("failed to connect to RISCV TAP over JTAG")?;
 
     // Read the HW_CFG0 partition's digest, which should be 0 (unlocked):
-    let digest = OtpPartition::read_digest(&mut *jtag, transport.top()?, Partition::HW_CFG0)
+    let digest = OtpPartition::read_digest(&mut *jtag, transport.top()?, "HW_CFG0")
         .context("failed to read HW_CFG0 partition's digest")?;
 
     assert_eq!(digest, [0x00; 2]);
 
     // Lock the partition.
-    OtpPartition::lock(&mut *jtag, transport.top()?, Partition::HW_CFG0)
+    OtpPartition::lock(&mut *jtag, transport.top()?, "HW_CFG0")
         .context("failed to lock HW_CFG0 partition")?;
 
     // Read the digest again to see if it's been calculated (locked):
-    let digest = OtpPartition::read_digest(&mut *jtag, transport.top()?, Partition::HW_CFG0)
+    let digest = OtpPartition::read_digest(&mut *jtag, transport.top()?, "HW_CFG0")
         .context("failed to read HW_CFG0 partition's digest")?;
 
     assert_ne!(digest, [0x00; 2]);

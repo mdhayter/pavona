@@ -18,7 +18,6 @@ use opentitanlib::test_utils::init::InitializeTest;
 use opentitanlib::test_utils::lc_transition;
 use opentitanlib::test_utils::otp_ctrl::{OtpParam, OtpPartition};
 use ot_hal::dif::lc_ctrl::{DifLcCtrlState, LcCtrlReg};
-use ot_hal::dif::otp_ctrl::{DaiParam, Partition};
 
 #[derive(Debug, Parser)]
 struct Opts {
@@ -51,7 +50,7 @@ fn provision_token(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     OtpParam::write_param(
         &mut *jtag,
         transport.top()?,
-        DaiParam::TestUnlockToken,
+        "TEST_UNLOCK_TOKEN",
         &TEST_UNLOCK_TOKEN_POSTIMAGE,
     )
     .context("failed to write TEST_UNLOCK token to OTP")?;
@@ -61,7 +60,7 @@ fn provision_token(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     OtpParam::read_param(
         &mut *jtag,
         transport.top()?,
-        DaiParam::TestUnlockToken,
+        "TEST_UNLOCK_TOKEN",
         &mut test_unlock_token,
     )
     .context("failed to read back TEST_UNLOCK token from OTP")?;
@@ -72,11 +71,11 @@ fn provision_token(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     );
 
     // Lock the SECRET0 partition.
-    OtpPartition::lock(&mut *jtag, transport.top()?, Partition::SECRET0)
+    OtpPartition::lock(&mut *jtag, transport.top()?, "SECRET0")
         .context("failed to lock SECRET0 partition")?;
 
     // Read its digest to ensure it's now locked.
-    let digest = OtpPartition::read_digest(&mut *jtag, transport.top()?, Partition::SECRET0)
+    let digest = OtpPartition::read_digest(&mut *jtag, transport.top()?, "SECRET0")
         .context("failed to read SECRET0 digest")?;
     assert_ne!(digest, [0x00, 2]);
 

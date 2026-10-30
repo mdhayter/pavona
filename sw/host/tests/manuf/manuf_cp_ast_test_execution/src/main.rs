@@ -18,7 +18,6 @@ use opentitanlib::test_utils::load_sram_program::{
 };
 use opentitanlib::test_utils::otp_ctrl::OtpParam;
 use opentitanlib::uart::console::{ExitStatus, UartConsole};
-use ot_hal::dif::otp_ctrl::DaiParam;
 
 #[derive(Debug, Parser)]
 struct Opts {
@@ -125,15 +124,11 @@ fn manuf_cp_ast_text_execution_read_otp(opts: &Opts, transport: &TransportWrappe
     // Verify that the DEVICE_ID parameter in the OTP was correctly programmed. Although the SRAM
     // program is supposed to verify that, this adds redundancy to the test and avoids trusting
     // the SRAM program.
+    let top = transport.top()?;
     let mut device_id =
-        [0xffffffffu32; DaiParam::DEVICE_ID.size as usize / std::mem::size_of::<u32>()];
-    OtpParam::read_param(
-        &mut *jtag,
-        transport.top()?,
-        DaiParam::DeviceId,
-        &mut device_id,
-    )
-    .context("failed to read back DEVICE_ID from OTP")?;
+        vec![0xffffffffu32; top.otp_item("DEVICE_ID")?.size as usize / std::mem::size_of::<u32>()];
+    OtpParam::read_param(&mut *jtag, top, "DEVICE_ID", &mut device_id)
+        .context("failed to read back DEVICE_ID from OTP")?;
     assert_eq!(device_id, EXPECTED_DEVICE_ID);
 
     // Disconnect JTAG.
