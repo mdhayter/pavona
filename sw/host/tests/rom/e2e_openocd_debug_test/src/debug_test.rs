@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -15,8 +16,6 @@ use opentitanlib::execute_test;
 use opentitanlib::io::jtag::{JtagTap, RiscvCsr, RiscvGpr};
 use opentitanlib::test_utils::init::InitializeTest;
 use opentitanlib::uart::console::{ExitStatus, UartConsole};
-
-use ot_hal::top;
 
 #[derive(Debug, Parser)]
 struct Opts {
@@ -39,6 +38,7 @@ struct Opts {
 }
 
 fn debug_test(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
+    let top = transport.top()?;
     log::info!("Loading symbols from ELF {}", opts.elf.display());
     let sym = ElfSymbols::load_elf(&opts.elf)?;
 
@@ -84,7 +84,8 @@ fn debug_test(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
 
     // Disable watchdog config
     dbg.write_u32(
-        top::AON_TIMER_AON_BASE_ADDR as u32 + ot_hal::dif::aon_timer::AonTimerReg::WdogCtrl as u32,
+        top.base_addr("aon_timer_aon")? as u32
+            + ot_hal::dif::aon_timer::AonTimerReg::WdogCtrl as u32,
         0,
     )?;
 
@@ -314,16 +315,15 @@ fn debug_test(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     }
 
     // Read and write memory (both SRAM and device)
-    // See hw/top_egret/sw/autogen/top_egret_memory.h
-    let sram_base = top::SRAM_CTRL_MAIN_RAM_BASE_ADDR as u32;
-    let sram_len = top::SRAM_CTRL_MAIN_RAM_SIZE_BYTES as u32;
+    let sram_base = top.base_addr("sram_ctrl_main_ram")? as u32;
+    let sram_len = top.size_bytes("sram_ctrl_main_ram")? as u32;
 
     dbg.read_memory(sram_base, &mut [0; 16])?;
     dbg.read_memory(sram_base + sram_len / 2, &mut [0; 16])?;
     dbg.read_memory(sram_base + sram_len - 16, &mut [0; 16])?;
 
     // Manually write bytes to UART0
-    let uart_base = top::UART0_BASE_ADDR as u32;
+    let uart_base = top.base_addr("uart0")? as u32;
     let uart_wdata = ot_hal::dif::uart::UartReg::Wdata as u32;
 
     dbg.write_u32(uart_base + uart_wdata, 'O' as u32)?;
