@@ -1,9 +1,13 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 use anyhow::Result;
 use clap::{Args, FromArgMatches};
+use ot_hal::top::TopDescription;
+use ot_hal::top::desc::TOP_ENV_VAR;
+use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 
@@ -146,6 +150,36 @@ pub struct BackendOpts {
     /// this argument must be specified if using JTAG.)
     #[arg(long)]
     pub openocd_adapter_config: Option<PathBuf>,
+
+    /// Top of the chip: the name of a built-in top (egret, dragonfly, scafi_deprecated) or the
+    /// path of a `top_<top>.host.json` description. Defaults to the top these tools were built
+    /// for. $TARGET_CHIP_TOP overrides a `--top` in the rcfile. Unlike other options, `--top` may
+    /// be given more than once; the last one wins.
+    #[arg(long, env = TOP_ENV_VAR, overrides_with = "top")]
+    pub top: Option<String>,
+}
+
+/// Removes `--top` from `args`, the arguments read from an rcfile, if $TARGET_CHIP_TOP is set,
+/// so that the environment variable overrides the rcfile but not the command line.
+pub fn drop_rcfile_top_if_env(args: &mut Vec<OsString>) {
+    if std::env::var_os(TOP_ENV_VAR).is_some_and(|v| !v.is_empty()) {
+        drop_top(args);
+    }
+}
+
+/// Removes `--top <value>` and `--top=<value>` from `args`.
+fn drop_top(args: &mut Vec<OsString>) {
+    let mut skip_value = false;
+    args.retain(|arg| {
+        if std::mem::take(&mut skip_value) {
+            return false;
+        }
+        if arg == "--top" {
+            skip_value = true;
+            return false;
+        }
+        !arg.to_str().is_some_and(|a| a.starts_with("--top="))
+    });
 }
 
 #[derive(Error, Debug)]
@@ -183,6 +217,13 @@ pub fn create(args: &BackendOpts) -> Result<TransportWrapper> {
         process_config_file(&mut env, conf_file)?
     }
     env.set_openocd_adapter_config(&args.openocd_adapter_config);
+    // An empty value (such as `TARGET_CHIP_TOP=`) counts as not given.
+    let top = args.top.as_deref().filter(|top| !top.is_empty());
+    if let Some(top) = top.or(ot_hal::top::BUILT_FOR) {
+        let top = TopDescription::from_name_or_path(top)?;
+        log::info!("Using top {}", top.name);
+        env.set_top(top);
+    }
     env.build(backend)
 }
 
@@ -201,3 +242,39 @@ impl Backend for EmptyBackend {
 }
 
 define_interface!("", EmptyBackend);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn drop_top_from_args() {
+        let mut args: Vec<OsString> = [
+            "tool",
+            "--top",
+            "egret",
+            "--interface=hyper310",
+            "--top=dragonfly",
+            "--topology",
+            "--conf",
+            "x.json",
+        ]
+        .iter()
+        .map(OsString::from)
+        .collect();
+        drop_top(&mut args);
+        assert_eq!(
+            args,
+            [
+                "tool",
+                "--interface=hyper310",
+                "--topology",
+                "--conf",
+                "x.json"
+            ]
+            .iter()
+            .map(OsString::from)
+            .collect::<Vec<_>>()
+        );
+    }
+}
