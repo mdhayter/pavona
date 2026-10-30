@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -14,8 +15,6 @@ use opentitanlib::execute_test;
 use opentitanlib::io::jtag::{JtagTap, RiscvGpr};
 use opentitanlib::test_utils::init::InitializeTest;
 
-use ot_hal::top;
-
 #[derive(Debug, Parser)]
 struct Opts {
     #[command(flatten)]
@@ -30,6 +29,7 @@ struct Opts {
 }
 
 fn asm_watchdog_bite(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
+    let top = transport.top()?;
     log::info!("Loading symbols from ELF {}", opts.elf.display());
     let sym = ElfSymbols::load_elf(&opts.elf)?;
 
@@ -58,7 +58,7 @@ fn asm_watchdog_bite(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     // We don't want the bark to trigger for this test.
     // There's no label before BARK_THOLD is stored, so we need to override the stored value.
     dbg.write_u32(
-        top::AON_TIMER_AON_BASE_ADDR as u32
+        top.base_addr("aon_timer_aon")? as u32
             + ot_hal::dif::aon_timer::AonTimerReg::WdogBarkThold as u32,
         0xFFFFFFFF,
     )?;
@@ -69,7 +69,7 @@ fn asm_watchdog_bite(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
 
     // Clear RESET_INFO.
     dbg.write_u32(
-        top::RSTMGR_AON_BASE_ADDR as u32 + ot_hal::dif::rstmgr::RstmgrReg::ResetInfo as u32,
+        top.base_addr("rstmgr_aon")? as u32 + ot_hal::dif::rstmgr::RstmgrReg::ResetInfo as u32,
         0,
     )?;
 
@@ -100,7 +100,7 @@ fn asm_watchdog_bite(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
 
     // Check the reset reason as well
     let reset_info = dbg.read_u32(
-        top::RSTMGR_AON_BASE_ADDR as u32 + ot_hal::dif::rstmgr::RstmgrReg::ResetInfo as u32,
+        top.base_addr("rstmgr_aon")? as u32 + ot_hal::dif::rstmgr::RstmgrReg::ResetInfo as u32,
     )?;
 
     // Check that the reset is caused by watchdog.
