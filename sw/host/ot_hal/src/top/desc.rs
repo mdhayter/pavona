@@ -159,6 +159,19 @@ pub struct OtpItem {
     pub partition: String,
 }
 
+/// A register entry of an IP block in the description: the offset of a register or window,
+/// or a multiregister of several registers (`NAME_0`, `NAME_1`, ...).
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
+#[serde(untagged)]
+pub enum Register {
+    Offset(u32),
+    Multi {
+        offset: u32,
+        count: u32,
+        stride: u32,
+    },
+}
+
 /// The OTP memory map, by the partition and item names of the top's OTP map
 /// (`HW_CFG0`, `DEVICE_ID`).
 #[derive(Clone, Debug, Default, Deserialize)]
@@ -180,10 +193,11 @@ pub struct TopDescription {
     pub pwrmgr: Pwrmgr,
     pub rstmgr: Rstmgr,
     pub clkmgr: Clkmgr,
-    /// Register offsets of the IP blocks whose layouts differ between tops, by block type
-    /// (`otp_ctrl`) and register name (`DIRECT_ACCESS_CMD`, `ERR_CODE_0`).
+    /// Registers of the IP blocks that host code addresses by register, by block type
+    /// (`otp_ctrl`) and register name (`DIRECT_ACCESS_CMD`, or `ERR_CODE` for the
+    /// multiregister of `ERR_CODE_0`, `ERR_CODE_1`, ...). See `register_offset()`.
     #[serde(default)]
-    pub registers: BTreeMap<String, BTreeMap<String, u32>>,
+    pub registers: BTreeMap<String, BTreeMap<String, Register>>,
     /// The OTP memory map. Absent on tops whose OTP controller is not generated with ipgen.
     #[serde(default)]
     pub otp_ctrl: Option<OtpCtrl>,
@@ -276,13 +290,25 @@ impl TopDescription {
         }
     }
 
-    /// Returns the offset of register `reg` (`DIRECT_ACCESS_CMD`) of IP block type `ip`
-    /// (`otp_ctrl`).
+    /// Returns the offset of register `reg` (`DIRECT_ACCESS_CMD`, or `ERR_CODE_3` in a
+    /// multiregister) of IP block type `ip` (`otp_ctrl`).
     pub fn register_offset(&self, ip: &str, reg: &str) -> Result<u32> {
-        match self.registers.get(ip).and_then(|regs| regs.get(reg)) {
-            Some(&offset) => Ok(offset),
-            None => bail!("Top {} has no {ip} register {reg:?}", self.name),
+        let regs = self.registers.get(ip);
+        if let Some(&Register::Offset(offset)) = regs.and_then(|regs| regs.get(reg)) {
+            return Ok(offset);
         }
+        if let Some((name, n)) = reg.rsplit_once('_')
+            && let Ok(n) = n.parse::<u32>()
+            && let Some(&Register::Multi {
+                offset,
+                count,
+                stride,
+            }) = regs.and_then(|regs| regs.get(name))
+            && n < count
+        {
+            return Ok(offset + n * stride);
+        }
+        bail!("Top {} has no {ip} register {reg:?}", self.name)
     }
 
     fn otp_map(&self) -> Result<&OtpCtrl> {
@@ -381,6 +407,35 @@ mod tests {
         assert_eq!(dragonfly.otp_item("DEVICE_ID")?.offset, 20008);
         let scafi = TopDescription::embedded("scafi_deprecated").unwrap()?;
         assert!(scafi.otp_partition("HW_CFG0").is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn embedded_registers() -> Result<()> {
+        let egret = TopDescription::embedded("egret").unwrap()?;
+        assert_eq!(egret.register_offset("pinmux", "MIO_PAD_ATTR_0")?, 1024);
+        assert_eq!(
+            egret.register_offset("pinmux", "MIO_PAD_ATTR_46")?,
+            1024 + 46 * 4
+        );
+        // Past the end of the multiregister, the multiregister itself, and unknown names.
+        assert!(egret.register_offset("pinmux", "MIO_PAD_ATTR_47").is_err());
+        assert!(egret.register_offset("pinmux", "MIO_PAD_ATTR").is_err());
+        assert!(egret.register_offset("pinmux", "NO_SUCH_REG_0").is_err());
+        assert!(egret.register_offset("no_such_ip", "INTR_ENABLE").is_err());
+        assert_eq!(
+            egret.register_offset("otp_ctrl", "ERR_CODE_12")?,
+            0x18 + 12 * 4
+        );
+        assert_eq!(egret.register_offset("uart", "INTR_ENABLE")?, 0x4);
+        let dragonfly = TopDescription::embedded("dragonfly").unwrap()?;
+        assert_eq!(dragonfly.register_offset("pinmux", "MIO_PAD_ATTR_0")?, 180);
+        assert!(dragonfly.register_offset("keymgr", "INTR_ENABLE").is_err());
+        assert!(
+            dragonfly
+                .register_offset("keymgr_dpe", "INTR_ENABLE")
+                .is_ok()
+        );
         Ok(())
     }
 

@@ -18,9 +18,11 @@ requests, reset manager software resets and clock manager clocks. For the reset 
 it gives the bit of each reset cause in RESET_INFO, and for the clock manager whether it
 supports external clock bypass (the EXTCLK registers).
 
-The register offsets of the IP blocks in REGISTER_IPS, whose layouts differ between tops,
-are under "registers". If the OTP controller is generated with ipgen, "otp_ctrl" gives its
-memory map: the partitions and items, with their byte offsets and sizes in OTP.
+The register offsets of the IP blocks in REGISTER_IPS are under "registers", by block type
+and register name. A multiregister of several registers is one entry giving the offset of
+the first, the count and the stride (NAME_0, NAME_1, ... in the generated headers).
+If the OTP controller is generated with ipgen, "otp_ctrl" gives its memory map: the
+partitions and items, with their byte offsets and sizes in OTP.
 
 If the top has a JTAG ID package (hw/top_<topname>/rtl/jtag_id_pkg.sv), the description
 also gives the JTAG IDCODEs of the debug module TAP (dm_idcode) and the life cycle
@@ -35,6 +37,7 @@ from typing import Dict, List, Optional, Tuple
 from basegen.typing import ConfigT
 import hjson
 
+from reggen.multi_register import MultiRegister
 from topgen.lib import (RustArrayMapping, RustEnum, TopGen, find_module, get_ip_hjson_path,
                         is_ipgen, load_completecfg_and_blocks)
 from topgen.typing import IpBlocksT
@@ -56,8 +59,14 @@ IDCODE_TAP_TYPE_LC = 1 << 1
 # The reset causes at the bottom of the reset manager's RESET_INFO register, before the
 # hardware reset requests (HW_REQ), named as the register's fields.
 RESET_INFO_FIXED = ["Por", "LowPowerExit", "SwReset"]
-# The IP blocks whose register offsets the description gives, by block type.
-REGISTER_IPS = ["otp_ctrl"]
+# The IP blocks whose register offsets the description gives, by block type: those host
+# code addresses by register, such as the rv_dm csr_rw test.
+REGISTER_IPS = [
+    "acc", "adc_ctrl", "aes", "alert_handler", "aon_timer", "csrng", "edn", "entropy_src",
+    "flash_ctrl", "gpio", "hmac", "i2c", "keymgr", "keymgr_dpe", "kmac", "otp_ctrl", "pattgen",
+    "pinmux", "pwm", "pwrmgr", "rstmgr", "rv_timer", "sensor_ctrl", "spi_device", "spi_host",
+    "sysrst_ctrl", "uart", "usbdev",
+]
 # The clock manager's default for ext_clk_bypass (hw/ip_templates/clkmgr/data/
 # clkmgr.tpldesc.hjson).
 CLKMGR_EXT_CLK_BYPASS_DEFAULT = True
@@ -175,13 +184,30 @@ def reset_info_bits(completecfg: ConfigT, reset_requests: Dict[str, int]) -> Dic
     return bits
 
 
-def register_offsets(block) -> Dict[str, int]:
-    """Return the offset of each register and window of an IP block with one register block,
-    with multiregs flattened (ERR_CODE_0, ERR_CODE_1, ...)."""
+def register_offsets(block) -> Dict[str, object]:
+    """Return the offset of each register and window of an IP block with one register block.
+    A multiregister of several registers gives {"offset", "count", "stride"} instead; its
+    registers are NAME_0, NAME_1, ... at offset + n * stride."""
     if len(block.reg_blocks) != 1:
         raise ValueError(f"{block.name} has {len(block.reg_blocks)} register blocks, not 1")
     (reg_block, ) = block.reg_blocks.values()
-    offsets = {reg.name: reg.offset for reg in reg_block.flat_regs}
+    offsets: Dict[str, object] = {}
+    flat = {}
+    for reg in reg_block.all_regs:
+        if isinstance(reg, MultiRegister) and len(reg.cregs) > 1:
+            first = reg.cregs[0].offset
+            stride = reg.cregs[1].offset - first
+            offsets[reg.name] = {"offset": first, "count": len(reg.cregs), "stride": stride}
+            flat.update({f"{reg.name}_{n}": first + n * stride for n in range(len(reg.cregs))})
+        else:
+            # A multiregister of one register is named like a plain register.
+            name, offset = (reg.cregs[0].name, reg.cregs[0].offset) \
+                if isinstance(reg, MultiRegister) else (reg.name, reg.offset)
+            offsets[name] = offset
+            flat[name] = offset
+    # The entries must describe exactly the registers in regtool's flattened list.
+    if flat != {reg.name: reg.offset for reg in reg_block.flat_regs}:
+        raise ValueError(f"{block.name}: registers don't match the flattened register list")
     offsets.update({window.name: window.offset for window in reg_block.windows})
     return offsets
 

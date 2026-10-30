@@ -15,8 +15,6 @@ use opentitanlib::io::jtag::{Jtag, JtagTap};
 use opentitanlib::test_utils::init::InitializeTest;
 use opentitanlib::uart::console::UartConsole;
 
-use ot_bindgen_dif as dif;
-
 #[derive(Debug, Parser)]
 struct Opts {
     #[command(flatten)]
@@ -79,63 +77,54 @@ fn test_csr_rw(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
         .create(transport)?
         .connect(JtagTap::RiscvTap)?;
 
-    // Device names in the top description, and a read/write register of each.
-    // The register offsets come from the DIFs of the top the test was built
-    // for, which only cover that top's IPs; hence the remaining cfgs.
+    // Device names in the top description, their IP block types, and a read/write
+    // register of each. The offsets come from the top description; devices the top
+    // doesn't have are skipped.
     let devices = [
-        ("aes", dif::AES_IV_0_REG_OFFSET),
-        #[cfg(feature = "egret")]
-        ("adc_ctrl_aon", dif::ADC_CTRL_INTR_ENABLE_REG_OFFSET),
-        ("alert_handler", dif::ALERT_HANDLER_INTR_ENABLE_REG_OFFSET),
-        ("aon_timer_aon", dif::AON_TIMER_WKUP_CTRL_REG_OFFSET),
-        ("csrng", dif::CSRNG_INTR_ENABLE_REG_OFFSET),
-        ("edn0", dif::EDN_INTR_ENABLE_REG_OFFSET),
-        ("edn1", dif::EDN_INTR_ENABLE_REG_OFFSET),
-        ("entropy_src", dif::ENTROPY_SRC_INTR_ENABLE_REG_OFFSET),
-        #[cfg(feature = "egret")]
-        ("flash_ctrl_core", dif::FLASH_CTRL_INTR_ENABLE_REG_OFFSET),
-        ("gpio", dif::GPIO_INTR_ENABLE_REG_OFFSET),
-        ("hmac", dif::HMAC_INTR_ENABLE_REG_OFFSET),
-        ("i2c0", dif::I2C_INTR_ENABLE_REG_OFFSET),
-        ("i2c1", dif::I2C_INTR_ENABLE_REG_OFFSET),
-        ("i2c2", dif::I2C_INTR_ENABLE_REG_OFFSET),
-        #[cfg(feature = "egret")]
-        ("keymgr", dif::KEYMGR_INTR_ENABLE_REG_OFFSET),
-        #[cfg(feature = "dragonfly")]
-        ("keymgr_dpe", dif::KEYMGR_DPE_INTR_ENABLE_REG_OFFSET),
-        ("kmac", dif::KMAC_INTR_ENABLE_REG_OFFSET),
-        ("acc", dif::ACC_INTR_ENABLE_REG_OFFSET),
-        ("otp_ctrl_core", dif::OTP_CTRL_INTR_ENABLE_REG_OFFSET),
-        #[cfg(feature = "egret")]
-        ("pattgen", dif::PATTGEN_INTR_ENABLE_REG_OFFSET),
-        ("pinmux_aon", dif::PINMUX_MIO_PAD_ATTR_0_REG_OFFSET),
-        #[cfg(feature = "egret")]
-        ("pwm_aon", dif::PWM_INVERT_REG_OFFSET),
-        ("pwrmgr_aon", dif::PWRMGR_INTR_ENABLE_REG_OFFSET),
+        ("aes", "aes", "IV_0"),
+        ("adc_ctrl_aon", "adc_ctrl", "INTR_ENABLE"),
+        ("alert_handler", "alert_handler", "INTR_ENABLE"),
+        ("aon_timer_aon", "aon_timer", "WKUP_CTRL"),
+        ("csrng", "csrng", "INTR_ENABLE"),
+        ("edn0", "edn", "INTR_ENABLE"),
+        ("edn1", "edn", "INTR_ENABLE"),
+        ("entropy_src", "entropy_src", "INTR_ENABLE"),
+        ("flash_ctrl_core", "flash_ctrl", "INTR_ENABLE"),
+        ("gpio", "gpio", "INTR_ENABLE"),
+        ("hmac", "hmac", "INTR_ENABLE"),
+        ("i2c0", "i2c", "INTR_ENABLE"),
+        ("i2c1", "i2c", "INTR_ENABLE"),
+        ("i2c2", "i2c", "INTR_ENABLE"),
+        ("keymgr", "keymgr", "INTR_ENABLE"),
+        ("keymgr_dpe", "keymgr_dpe", "INTR_ENABLE"),
+        ("kmac", "kmac", "INTR_ENABLE"),
+        ("acc", "acc", "INTR_ENABLE"),
+        ("otp_ctrl_core", "otp_ctrl", "INTR_ENABLE"),
+        ("pattgen", "pattgen", "INTR_ENABLE"),
+        ("pinmux_aon", "pinmux", "MIO_PAD_ATTR_0"),
+        ("pwm_aon", "pwm", "INVERT"),
+        ("pwrmgr_aon", "pwrmgr", "INTR_ENABLE"),
         // Skip ROM_CTRL which does not have RW registers
-        ("rstmgr_aon", dif::RSTMGR_CPU_INFO_CTRL_REG_OFFSET),
-        ("rv_timer", dif::RV_TIMER_INTR_ENABLE0_REG_OFFSET),
-        #[cfg(feature = "egret")]
-        ("sensor_ctrl_aon", dif::SENSOR_CTRL_INTR_ENABLE_REG_OFFSET),
-        ("spi_device", dif::SPI_DEVICE_INTR_ENABLE_REG_OFFSET),
-        ("spi_host0", dif::SPI_HOST_INTR_ENABLE_REG_OFFSET),
-        ("spi_host1", dif::SPI_HOST_INTR_ENABLE_REG_OFFSET),
-        #[cfg(feature = "egret")]
-        ("sysrst_ctrl_aon", dif::SYSRST_CTRL_INTR_ENABLE_REG_OFFSET),
-        ("uart0", dif::UART_INTR_ENABLE_REG_OFFSET),
-        ("uart1", dif::UART_INTR_ENABLE_REG_OFFSET),
-        ("uart2", dif::UART_INTR_ENABLE_REG_OFFSET),
-        ("uart3", dif::UART_INTR_ENABLE_REG_OFFSET),
-        #[cfg(feature = "egret")]
-        ("usbdev", dif::USBDEV_INTR_ENABLE_REG_OFFSET),
+        ("rstmgr_aon", "rstmgr", "CPU_INFO_CTRL"),
+        ("rv_timer", "rv_timer", "INTR_ENABLE0"),
+        ("sensor_ctrl_aon", "sensor_ctrl", "INTR_ENABLE"),
+        ("spi_device", "spi_device", "INTR_ENABLE"),
+        ("spi_host0", "spi_host", "INTR_ENABLE"),
+        ("spi_host1", "spi_host", "INTR_ENABLE"),
+        ("sysrst_ctrl_aon", "sysrst_ctrl", "INTR_ENABLE"),
+        ("uart0", "uart", "INTR_ENABLE"),
+        ("uart1", "uart", "INTR_ENABLE"),
+        ("uart2", "uart", "INTR_ENABLE"),
+        ("uart3", "uart", "INTR_ENABLE"),
+        ("usbdev", "usbdev", "INTR_ENABLE"),
     ];
 
     // Test the devices that the top has.
     let top = transport.top()?;
     let mut tests = Vec::new();
-    for (name, offset) in devices {
+    for (name, ip, reg) in devices {
         match top.range(name) {
-            Ok(range) => tests.push((name, range.base_addr, offset)),
+            Ok(range) => tests.push((name, range.base_addr, top.register_offset(ip, reg)?)),
             Err(_) => log::info!("Skipping {name}: not in top {}", top.name),
         }
     }

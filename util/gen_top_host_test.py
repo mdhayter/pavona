@@ -266,9 +266,21 @@ def test_registers(top):
     assert registers["STATUS"] == 0x10
     assert registers["DIRECT_ACCESS_CMD"] == registers["DIRECT_ACCESS_REGWEN"] + 4
     num_errors = ip_param(block, "NumErrorEntries")
-    assert [registers[f"ERR_CODE_{i}"] for i in range(num_errors)] == [
-        registers["ERR_CODE_0"] + 4 * i for i in range(num_errors)]
-    assert f"ERR_CODE_{num_errors}" not in registers
+    assert registers["ERR_CODE"] == {"offset": 0x18, "count": num_errors, "stride": 4}
+
+
+def test_multiregisters(top):
+    """A multiregister has one entry per replicated register: the pinmux pad attributes
+    follow the pad counts, and every multiregister has at least two registers."""
+    name, desc = top
+    registers = desc["registers"]
+    assert registers["pinmux"]["MIO_PAD_ATTR"]["count"] == desc["pinmux"]["num_mio_pads"]
+    assert registers["pinmux"]["DIO_PAD_ATTR"]["count"] == desc["pinmux"]["num_dio_pads"]
+    for ip, regs in registers.items():
+        for reg, entry in regs.items():
+            if isinstance(entry, dict):
+                assert entry["count"] > 1 and entry["stride"] >= 4, f"{ip}.{reg}"
+                assert f"{reg}_0" not in regs, f"{ip}.{reg}"
 
 
 def squash(name: str) -> str:

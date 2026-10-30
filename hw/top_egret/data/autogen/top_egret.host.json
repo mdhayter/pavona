@@ -227,6 +227,563 @@
     }
   },
   "registers": {
+    "acc": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CMD": 16,
+      "CTRL": 20,
+      "STATUS": 24,
+      "ERR_BITS": 28,
+      "FATAL_ALERT_CAUSE": 32,
+      "INSN_CNT": 36,
+      "LOAD_CHECKSUM": 40,
+      "IMEM": 32768,
+      "DMEM": 98304
+    },
+    "adc_ctrl": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "adc_en_ctl": 16,
+      "adc_pd_ctl": 20,
+      "adc_lp_sample_ctl": 24,
+      "adc_sample_ctl": 28,
+      "adc_fsm_rst": 32,
+      "adc_chn0_filter_ctl": {
+        "offset": 36,
+        "count": 8,
+        "stride": 4
+      },
+      "adc_chn1_filter_ctl": {
+        "offset": 68,
+        "count": 8,
+        "stride": 4
+      },
+      "adc_chn_val": {
+        "offset": 100,
+        "count": 2,
+        "stride": 4
+      },
+      "adc_wakeup_ctl": 108,
+      "filter_status": 112,
+      "adc_intr_ctl": 116,
+      "adc_intr_status": 120,
+      "adc_fsm_state": 124
+    },
+    "aes": {
+      "ALERT_TEST": 0,
+      "KEY_SHARE0": {
+        "offset": 4,
+        "count": 8,
+        "stride": 4
+      },
+      "KEY_SHARE1": {
+        "offset": 36,
+        "count": 8,
+        "stride": 4
+      },
+      "IV": {
+        "offset": 68,
+        "count": 4,
+        "stride": 4
+      },
+      "DATA_IN": {
+        "offset": 84,
+        "count": 4,
+        "stride": 4
+      },
+      "DATA_OUT": {
+        "offset": 100,
+        "count": 4,
+        "stride": 4
+      },
+      "CTRL_SHADOWED": 116,
+      "CTRL_AUX_SHADOWED": 120,
+      "CTRL_AUX_REGWEN": 124,
+      "TRIGGER": 128,
+      "STATUS": 132
+    },
+    "alert_handler": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "PING_TIMER_REGWEN": 12,
+      "PING_TIMEOUT_CYC_SHADOWED": 16,
+      "PING_TIMER_EN_SHADOWED": 20,
+      "ALERT_REGWEN": {
+        "offset": 24,
+        "count": 65,
+        "stride": 4
+      },
+      "ALERT_EN_SHADOWED": {
+        "offset": 284,
+        "count": 65,
+        "stride": 4
+      },
+      "ALERT_CLASS_SHADOWED": {
+        "offset": 544,
+        "count": 65,
+        "stride": 4
+      },
+      "ALERT_CAUSE": {
+        "offset": 804,
+        "count": 65,
+        "stride": 4
+      },
+      "LOC_ALERT_REGWEN": {
+        "offset": 1064,
+        "count": 7,
+        "stride": 4
+      },
+      "LOC_ALERT_EN_SHADOWED": {
+        "offset": 1092,
+        "count": 7,
+        "stride": 4
+      },
+      "LOC_ALERT_CLASS_SHADOWED": {
+        "offset": 1120,
+        "count": 7,
+        "stride": 4
+      },
+      "LOC_ALERT_CAUSE": {
+        "offset": 1148,
+        "count": 7,
+        "stride": 4
+      },
+      "CLASSA_REGWEN": 1176,
+      "CLASSA_CTRL_SHADOWED": 1180,
+      "CLASSA_CLR_REGWEN": 1184,
+      "CLASSA_CLR_SHADOWED": 1188,
+      "CLASSA_ACCUM_CNT": 1192,
+      "CLASSA_ACCUM_THRESH_SHADOWED": 1196,
+      "CLASSA_TIMEOUT_CYC_SHADOWED": 1200,
+      "CLASSA_CRASHDUMP_TRIGGER_SHADOWED": 1204,
+      "CLASSA_PHASE0_CYC_SHADOWED": 1208,
+      "CLASSA_PHASE1_CYC_SHADOWED": 1212,
+      "CLASSA_PHASE2_CYC_SHADOWED": 1216,
+      "CLASSA_PHASE3_CYC_SHADOWED": 1220,
+      "CLASSA_ESC_CNT": 1224,
+      "CLASSA_STATE": 1228,
+      "CLASSB_REGWEN": 1232,
+      "CLASSB_CTRL_SHADOWED": 1236,
+      "CLASSB_CLR_REGWEN": 1240,
+      "CLASSB_CLR_SHADOWED": 1244,
+      "CLASSB_ACCUM_CNT": 1248,
+      "CLASSB_ACCUM_THRESH_SHADOWED": 1252,
+      "CLASSB_TIMEOUT_CYC_SHADOWED": 1256,
+      "CLASSB_CRASHDUMP_TRIGGER_SHADOWED": 1260,
+      "CLASSB_PHASE0_CYC_SHADOWED": 1264,
+      "CLASSB_PHASE1_CYC_SHADOWED": 1268,
+      "CLASSB_PHASE2_CYC_SHADOWED": 1272,
+      "CLASSB_PHASE3_CYC_SHADOWED": 1276,
+      "CLASSB_ESC_CNT": 1280,
+      "CLASSB_STATE": 1284,
+      "CLASSC_REGWEN": 1288,
+      "CLASSC_CTRL_SHADOWED": 1292,
+      "CLASSC_CLR_REGWEN": 1296,
+      "CLASSC_CLR_SHADOWED": 1300,
+      "CLASSC_ACCUM_CNT": 1304,
+      "CLASSC_ACCUM_THRESH_SHADOWED": 1308,
+      "CLASSC_TIMEOUT_CYC_SHADOWED": 1312,
+      "CLASSC_CRASHDUMP_TRIGGER_SHADOWED": 1316,
+      "CLASSC_PHASE0_CYC_SHADOWED": 1320,
+      "CLASSC_PHASE1_CYC_SHADOWED": 1324,
+      "CLASSC_PHASE2_CYC_SHADOWED": 1328,
+      "CLASSC_PHASE3_CYC_SHADOWED": 1332,
+      "CLASSC_ESC_CNT": 1336,
+      "CLASSC_STATE": 1340,
+      "CLASSD_REGWEN": 1344,
+      "CLASSD_CTRL_SHADOWED": 1348,
+      "CLASSD_CLR_REGWEN": 1352,
+      "CLASSD_CLR_SHADOWED": 1356,
+      "CLASSD_ACCUM_CNT": 1360,
+      "CLASSD_ACCUM_THRESH_SHADOWED": 1364,
+      "CLASSD_TIMEOUT_CYC_SHADOWED": 1368,
+      "CLASSD_CRASHDUMP_TRIGGER_SHADOWED": 1372,
+      "CLASSD_PHASE0_CYC_SHADOWED": 1376,
+      "CLASSD_PHASE1_CYC_SHADOWED": 1380,
+      "CLASSD_PHASE2_CYC_SHADOWED": 1384,
+      "CLASSD_PHASE3_CYC_SHADOWED": 1388,
+      "CLASSD_ESC_CNT": 1392,
+      "CLASSD_STATE": 1396
+    },
+    "aon_timer": {
+      "ALERT_TEST": 0,
+      "WKUP_CTRL": 4,
+      "WKUP_THOLD_HI": 8,
+      "WKUP_THOLD_LO": 12,
+      "WKUP_COUNT_HI": 16,
+      "WKUP_COUNT_LO": 20,
+      "WDOG_REGWEN": 24,
+      "WDOG_CTRL": 28,
+      "WDOG_BARK_THOLD": 32,
+      "WDOG_BITE_THOLD": 36,
+      "WDOG_COUNT": 40,
+      "INTR_STATE": 44,
+      "INTR_TEST": 48,
+      "WKUP_CAUSE": 52
+    },
+    "csrng": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "REGWEN": 16,
+      "CTRL": 20,
+      "CMD_REQ": 24,
+      "RESEED_INTERVAL": 28,
+      "RESEED_COUNTER": {
+        "offset": 32,
+        "count": 3,
+        "stride": 4
+      },
+      "SW_CMD_STS": 44,
+      "GENBITS_VLD": 48,
+      "GENBITS": 52,
+      "INT_STATE_READ_ENABLE": 56,
+      "INT_STATE_READ_ENABLE_REGWEN": 60,
+      "INT_STATE_NUM": 64,
+      "INT_STATE_VAL": 68,
+      "FIPS_FORCE": 72,
+      "HW_EXC_STS": 76,
+      "RECOV_ALERT_STS": 80,
+      "ERR_CODE": 84,
+      "ERR_CODE_TEST": 88,
+      "MAIN_SM_STATE": 92
+    },
+    "edn": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "REGWEN": 16,
+      "CTRL": 20,
+      "BOOT_INS_CMD": 24,
+      "BOOT_GEN_CMD": 28,
+      "SW_CMD_REQ": 32,
+      "SW_CMD_STS": 36,
+      "HW_CMD_STS": 40,
+      "RESEED_CMD": 44,
+      "GENERATE_CMD": 48,
+      "MAX_NUM_REQS_BETWEEN_RESEEDS": 52,
+      "RECOV_ALERT_STS": 56,
+      "ERR_CODE": 60,
+      "ERR_CODE_TEST": 64,
+      "MAIN_SM_STATE": 68
+    },
+    "entropy_src": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "ME_REGWEN": 16,
+      "SW_REGUPD": 20,
+      "REGWEN": 24,
+      "MODULE_ENABLE": 28,
+      "CONF": 32,
+      "ENTROPY_CONTROL": 36,
+      "ENTROPY_DATA": 40,
+      "HEALTH_TEST_WINDOWS": 44,
+      "REPCNT_THRESHOLDS": 48,
+      "REPCNTS_THRESHOLDS": 52,
+      "ADAPTP_HI_THRESHOLDS": 56,
+      "ADAPTP_LO_THRESHOLDS": 60,
+      "BUCKET_THRESHOLDS": 64,
+      "MARKOV_HI_THRESHOLDS": 68,
+      "MARKOV_LO_THRESHOLDS": 72,
+      "EXTHT_HI_THRESHOLDS": 76,
+      "EXTHT_LO_THRESHOLDS": 80,
+      "HT_WATERMARK_NUM": 84,
+      "HT_WATERMARK": 88,
+      "REPCNT_TOTAL_FAILS": 92,
+      "REPCNTS_TOTAL_FAILS": 96,
+      "ADAPTP_HI_TOTAL_FAILS": 100,
+      "ADAPTP_LO_TOTAL_FAILS": 104,
+      "BUCKET_TOTAL_FAILS": 108,
+      "MARKOV_HI_TOTAL_FAILS": 112,
+      "MARKOV_LO_TOTAL_FAILS": 116,
+      "EXTHT_HI_TOTAL_FAILS": 120,
+      "EXTHT_LO_TOTAL_FAILS": 124,
+      "ALERT_THRESHOLD": 128,
+      "ALERT_SUMMARY_FAIL_COUNTS": 132,
+      "ALERT_FAIL_COUNTS": 136,
+      "EXTHT_FAIL_COUNTS": 140,
+      "FW_OV_CONTROL": 144,
+      "FW_OV_SHA3_START": 148,
+      "FW_OV_WR_FIFO_FULL": 152,
+      "FW_OV_RD_FIFO_OVERFLOW": 156,
+      "FW_OV_RD_DATA": 160,
+      "FW_OV_WR_DATA": 164,
+      "OBSERVE_FIFO_THRESH": 168,
+      "OBSERVE_FIFO_DEPTH": 172,
+      "DEBUG_STATUS": 176,
+      "RECOV_ALERT_STS": 180,
+      "ERR_CODE": 184,
+      "ERR_CODE_TEST": 188,
+      "MAIN_SM_STATE": 192
+    },
+    "flash_ctrl": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "DIS": 16,
+      "EXEC": 20,
+      "INIT": 24,
+      "CTRL_REGWEN": 28,
+      "CONTROL": 32,
+      "ADDR": 36,
+      "PROG_TYPE_EN": 40,
+      "ERASE_SUSPEND": 44,
+      "REGION_CFG_REGWEN": {
+        "offset": 48,
+        "count": 8,
+        "stride": 4
+      },
+      "MP_REGION_CFG": {
+        "offset": 80,
+        "count": 8,
+        "stride": 4
+      },
+      "MP_REGION": {
+        "offset": 112,
+        "count": 8,
+        "stride": 4
+      },
+      "DEFAULT_REGION": 144,
+      "BANK0_INFO0_REGWEN": {
+        "offset": 148,
+        "count": 10,
+        "stride": 4
+      },
+      "BANK0_INFO0_PAGE_CFG": {
+        "offset": 188,
+        "count": 10,
+        "stride": 4
+      },
+      "BANK0_INFO1_REGWEN": 228,
+      "BANK0_INFO1_PAGE_CFG": 232,
+      "BANK0_INFO2_REGWEN": {
+        "offset": 236,
+        "count": 2,
+        "stride": 4
+      },
+      "BANK0_INFO2_PAGE_CFG": {
+        "offset": 244,
+        "count": 2,
+        "stride": 4
+      },
+      "BANK1_INFO0_REGWEN": {
+        "offset": 252,
+        "count": 10,
+        "stride": 4
+      },
+      "BANK1_INFO0_PAGE_CFG": {
+        "offset": 292,
+        "count": 10,
+        "stride": 4
+      },
+      "BANK1_INFO1_REGWEN": 332,
+      "BANK1_INFO1_PAGE_CFG": 336,
+      "BANK1_INFO2_REGWEN": {
+        "offset": 340,
+        "count": 2,
+        "stride": 4
+      },
+      "BANK1_INFO2_PAGE_CFG": {
+        "offset": 348,
+        "count": 2,
+        "stride": 4
+      },
+      "HW_INFO_CFG_OVERRIDE": 356,
+      "BANK_CFG_REGWEN": 360,
+      "MP_BANK_CFG_SHADOWED": 364,
+      "OP_STATUS": 368,
+      "STATUS": 372,
+      "DEBUG_STATE": 376,
+      "ERR_CODE": 380,
+      "STD_FAULT_STATUS": 384,
+      "FAULT_STATUS": 388,
+      "ERR_ADDR": 392,
+      "ECC_SINGLE_ERR_CNT": 396,
+      "ECC_SINGLE_ERR_ADDR": {
+        "offset": 400,
+        "count": 2,
+        "stride": 4
+      },
+      "PHY_ALERT_CFG": 408,
+      "PHY_STATUS": 412,
+      "Scratch": 416,
+      "FIFO_LVL": 420,
+      "FIFO_RST": 424,
+      "CURR_FIFO_LVL": 428,
+      "prog_fifo": 432,
+      "rd_fifo": 436
+    },
+    "gpio": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "DATA_IN": 16,
+      "DIRECT_OUT": 20,
+      "MASKED_OUT_LOWER": 24,
+      "MASKED_OUT_UPPER": 28,
+      "DIRECT_OE": 32,
+      "MASKED_OE_LOWER": 36,
+      "MASKED_OE_UPPER": 40,
+      "INTR_CTRL_EN_RISING": 44,
+      "INTR_CTRL_EN_FALLING": 48,
+      "INTR_CTRL_EN_LVLHIGH": 52,
+      "INTR_CTRL_EN_LVLLOW": 56,
+      "CTRL_EN_INPUT_FILTER": 60,
+      "HW_STRAPS_DATA_IN_VALID": 64,
+      "HW_STRAPS_DATA_IN": 68
+    },
+    "hmac": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CFG": 16,
+      "CMD": 20,
+      "STATUS": 24,
+      "ERR_CODE": 28,
+      "WIPE_SECRET": 32,
+      "KEY": {
+        "offset": 36,
+        "count": 32,
+        "stride": 4
+      },
+      "DIGEST": {
+        "offset": 164,
+        "count": 16,
+        "stride": 4
+      },
+      "MSG_LENGTH_LOWER": 228,
+      "MSG_LENGTH_UPPER": 232,
+      "MSG_FIFO": 4096
+    },
+    "i2c": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CTRL": 16,
+      "STATUS": 20,
+      "RDATA": 24,
+      "FDATA": 28,
+      "FIFO_CTRL": 32,
+      "HOST_FIFO_CONFIG": 36,
+      "TARGET_FIFO_CONFIG": 40,
+      "HOST_FIFO_STATUS": 44,
+      "TARGET_FIFO_STATUS": 48,
+      "OVRD": 52,
+      "VAL": 56,
+      "TIMING0": 60,
+      "TIMING1": 64,
+      "TIMING2": 68,
+      "TIMING3": 72,
+      "TIMING4": 76,
+      "TIMEOUT_CTRL": 80,
+      "TARGET_ID": 84,
+      "ACQDATA": 88,
+      "TXDATA": 92,
+      "HOST_TIMEOUT_CTRL": 96,
+      "TARGET_TIMEOUT_CTRL": 100,
+      "TARGET_NACK_COUNT": 104,
+      "TARGET_ACK_CTRL": 108,
+      "ACQ_FIFO_NEXT_DATA": 112,
+      "HOST_NACK_HANDLER_TIMEOUT": 116,
+      "CONTROLLER_EVENTS": 120,
+      "TARGET_EVENTS": 124
+    },
+    "keymgr": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CFG_REGWEN": 16,
+      "START": 20,
+      "CONTROL_SHADOWED": 24,
+      "SIDELOAD_CLEAR": 28,
+      "RESEED_INTERVAL_REGWEN": 32,
+      "RESEED_INTERVAL_SHADOWED": 36,
+      "SW_BINDING_REGWEN": 40,
+      "SEALING_SW_BINDING": {
+        "offset": 44,
+        "count": 8,
+        "stride": 4
+      },
+      "ATTEST_SW_BINDING": {
+        "offset": 76,
+        "count": 8,
+        "stride": 4
+      },
+      "Salt": {
+        "offset": 108,
+        "count": 8,
+        "stride": 4
+      },
+      "KEY_VERSION": 140,
+      "MAX_CREATOR_KEY_VER_REGWEN": 144,
+      "MAX_CREATOR_KEY_VER_SHADOWED": 148,
+      "MAX_OWNER_INT_KEY_VER_REGWEN": 152,
+      "MAX_OWNER_INT_KEY_VER_SHADOWED": 156,
+      "MAX_OWNER_KEY_VER_REGWEN": 160,
+      "MAX_OWNER_KEY_VER_SHADOWED": 164,
+      "SW_SHARE0_OUTPUT": {
+        "offset": 168,
+        "count": 8,
+        "stride": 4
+      },
+      "SW_SHARE1_OUTPUT": {
+        "offset": 200,
+        "count": 8,
+        "stride": 4
+      },
+      "WORKING_STATE": 232,
+      "OP_STATUS": 236,
+      "ERR_CODE": 240,
+      "FAULT_STATUS": 244,
+      "DEBUG": 248
+    },
+    "kmac": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CFG_REGWEN": 16,
+      "CFG_SHADOWED": 20,
+      "CMD": 24,
+      "STATUS": 28,
+      "ENTROPY_PERIOD": 32,
+      "ENTROPY_REFRESH_HASH_CNT": 36,
+      "ENTROPY_REFRESH_THRESHOLD_SHADOWED": 40,
+      "ENTROPY_SEED": 44,
+      "KEY_SHARE0": {
+        "offset": 48,
+        "count": 16,
+        "stride": 4
+      },
+      "KEY_SHARE1": {
+        "offset": 112,
+        "count": 16,
+        "stride": 4
+      },
+      "KEY_LEN": 176,
+      "PREFIX": {
+        "offset": 180,
+        "count": 11,
+        "stride": 4
+      },
+      "ERR_CODE": 224,
+      "STATE": 1024,
+      "MSG_FIFO": 2048
+    },
     "otp_ctrl": {
       "INTR_STATE": 0,
       "INTR_ENABLE": 4,
@@ -234,26 +791,24 @@
       "ALERT_TEST": 12,
       "STATUS": 16,
       "PARTITION_STATUS_0": 20,
-      "ERR_CODE_0": 24,
-      "ERR_CODE_1": 28,
-      "ERR_CODE_2": 32,
-      "ERR_CODE_3": 36,
-      "ERR_CODE_4": 40,
-      "ERR_CODE_5": 44,
-      "ERR_CODE_6": 48,
-      "ERR_CODE_7": 52,
-      "ERR_CODE_8": 56,
-      "ERR_CODE_9": 60,
-      "ERR_CODE_10": 64,
-      "ERR_CODE_11": 68,
-      "ERR_CODE_12": 72,
+      "ERR_CODE": {
+        "offset": 24,
+        "count": 13,
+        "stride": 4
+      },
       "DIRECT_ACCESS_REGWEN": 76,
       "DIRECT_ACCESS_CMD": 80,
       "DIRECT_ACCESS_ADDRESS": 84,
-      "DIRECT_ACCESS_WDATA_0": 88,
-      "DIRECT_ACCESS_WDATA_1": 92,
-      "DIRECT_ACCESS_RDATA_0": 96,
-      "DIRECT_ACCESS_RDATA_1": 100,
+      "DIRECT_ACCESS_WDATA": {
+        "offset": 88,
+        "count": 2,
+        "stride": 4
+      },
+      "DIRECT_ACCESS_RDATA": {
+        "offset": 96,
+        "count": 2,
+        "stride": 4
+      },
       "CHECK_TRIGGER_REGWEN": 104,
       "CHECK_TRIGGER": 108,
       "CHECK_REGWEN": 112,
@@ -265,27 +820,464 @@
       "OWNER_SW_CFG_READ_LOCK": 136,
       "ROT_CREATOR_AUTH_CODESIGN_READ_LOCK": 140,
       "ROT_CREATOR_AUTH_STATE_READ_LOCK": 144,
-      "VENDOR_TEST_DIGEST_0": 148,
-      "VENDOR_TEST_DIGEST_1": 152,
-      "CREATOR_SW_CFG_DIGEST_0": 156,
-      "CREATOR_SW_CFG_DIGEST_1": 160,
-      "OWNER_SW_CFG_DIGEST_0": 164,
-      "OWNER_SW_CFG_DIGEST_1": 168,
-      "ROT_CREATOR_AUTH_CODESIGN_DIGEST_0": 172,
-      "ROT_CREATOR_AUTH_CODESIGN_DIGEST_1": 176,
-      "ROT_CREATOR_AUTH_STATE_DIGEST_0": 180,
-      "ROT_CREATOR_AUTH_STATE_DIGEST_1": 184,
-      "HW_CFG0_DIGEST_0": 188,
-      "HW_CFG0_DIGEST_1": 192,
-      "HW_CFG1_DIGEST_0": 196,
-      "HW_CFG1_DIGEST_1": 200,
-      "SECRET0_DIGEST_0": 204,
-      "SECRET0_DIGEST_1": 208,
-      "SECRET1_DIGEST_0": 212,
-      "SECRET1_DIGEST_1": 216,
-      "SECRET2_DIGEST_0": 220,
-      "SECRET2_DIGEST_1": 224,
+      "VENDOR_TEST_DIGEST": {
+        "offset": 148,
+        "count": 2,
+        "stride": 4
+      },
+      "CREATOR_SW_CFG_DIGEST": {
+        "offset": 156,
+        "count": 2,
+        "stride": 4
+      },
+      "OWNER_SW_CFG_DIGEST": {
+        "offset": 164,
+        "count": 2,
+        "stride": 4
+      },
+      "ROT_CREATOR_AUTH_CODESIGN_DIGEST": {
+        "offset": 172,
+        "count": 2,
+        "stride": 4
+      },
+      "ROT_CREATOR_AUTH_STATE_DIGEST": {
+        "offset": 180,
+        "count": 2,
+        "stride": 4
+      },
+      "HW_CFG0_DIGEST": {
+        "offset": 188,
+        "count": 2,
+        "stride": 4
+      },
+      "HW_CFG1_DIGEST": {
+        "offset": 196,
+        "count": 2,
+        "stride": 4
+      },
+      "SECRET0_DIGEST": {
+        "offset": 204,
+        "count": 2,
+        "stride": 4
+      },
+      "SECRET1_DIGEST": {
+        "offset": 212,
+        "count": 2,
+        "stride": 4
+      },
+      "SECRET2_DIGEST": {
+        "offset": 220,
+        "count": 2,
+        "stride": 4
+      },
       "SW_CFG_WINDOW": 2048
+    },
+    "pattgen": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CTRL": 16,
+      "PREDIV_CH0": 20,
+      "PREDIV_CH1": 24,
+      "DATA_CH0": {
+        "offset": 28,
+        "count": 2,
+        "stride": 4
+      },
+      "DATA_CH1": {
+        "offset": 36,
+        "count": 2,
+        "stride": 4
+      },
+      "SIZE": 44
+    },
+    "pinmux": {
+      "ALERT_TEST": 0,
+      "MIO_PERIPH_INSEL_REGWEN": {
+        "offset": 4,
+        "count": 57,
+        "stride": 4
+      },
+      "MIO_PERIPH_INSEL": {
+        "offset": 232,
+        "count": 57,
+        "stride": 4
+      },
+      "MIO_OUTSEL_REGWEN": {
+        "offset": 460,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_OUTSEL": {
+        "offset": 648,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_PAD_ATTR_REGWEN": {
+        "offset": 836,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_PAD_ATTR": {
+        "offset": 1024,
+        "count": 47,
+        "stride": 4
+      },
+      "DIO_PAD_ATTR_REGWEN": {
+        "offset": 1212,
+        "count": 16,
+        "stride": 4
+      },
+      "DIO_PAD_ATTR": {
+        "offset": 1276,
+        "count": 16,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_STATUS": {
+        "offset": 1340,
+        "count": 2,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_REGWEN": {
+        "offset": 1348,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_EN": {
+        "offset": 1536,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_MODE": {
+        "offset": 1724,
+        "count": 47,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_STATUS": 1912,
+      "DIO_PAD_SLEEP_REGWEN": {
+        "offset": 1916,
+        "count": 16,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_EN": {
+        "offset": 1980,
+        "count": 16,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_MODE": {
+        "offset": 2044,
+        "count": 16,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_REGWEN": {
+        "offset": 2108,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_EN": {
+        "offset": 2140,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR": {
+        "offset": 2172,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_CNT_TH": {
+        "offset": 2204,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_PADSEL": {
+        "offset": 2236,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_CAUSE": 2268
+    },
+    "pwm": {
+      "ALERT_TEST": 0,
+      "REGWEN": 4,
+      "CFG": 8,
+      "PWM_EN": 12,
+      "INVERT": 16,
+      "PWM_PARAM": {
+        "offset": 20,
+        "count": 6,
+        "stride": 4
+      },
+      "DUTY_CYCLE": {
+        "offset": 44,
+        "count": 6,
+        "stride": 4
+      },
+      "BLINK_PARAM": {
+        "offset": 68,
+        "count": 6,
+        "stride": 4
+      }
+    },
+    "pwrmgr": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CTRL_CFG_REGWEN": 16,
+      "CONTROL": 20,
+      "CFG_CDC_SYNC": 24,
+      "WAKEUP_EN_REGWEN": 28,
+      "WAKEUP_EN": 32,
+      "WAKE_STATUS": 36,
+      "RESET_EN_REGWEN": 40,
+      "RESET_EN": 44,
+      "RESET_STATUS": 48,
+      "ESCALATE_RESET_STATUS": 52,
+      "WAKE_INFO_CAPTURE_DIS": 56,
+      "WAKE_INFO": 60,
+      "FAULT_STATUS": 64
+    },
+    "rstmgr": {
+      "ALERT_TEST": 0,
+      "RESET_REQ": 4,
+      "RESET_INFO": 8,
+      "ALERT_REGWEN": 12,
+      "ALERT_INFO_CTRL": 16,
+      "ALERT_INFO_ATTR": 20,
+      "ALERT_INFO": 24,
+      "CPU_REGWEN": 28,
+      "CPU_INFO_CTRL": 32,
+      "CPU_INFO_ATTR": 36,
+      "CPU_INFO": 40,
+      "SW_RST_REGWEN": {
+        "offset": 44,
+        "count": 8,
+        "stride": 4
+      },
+      "SW_RST_CTRL_N": {
+        "offset": 76,
+        "count": 8,
+        "stride": 4
+      },
+      "ERR_CODE": 108
+    },
+    "rv_timer": {
+      "ALERT_TEST": 0,
+      "CTRL": 4,
+      "INTR_ENABLE0": 256,
+      "INTR_STATE0": 260,
+      "INTR_TEST0": 264,
+      "CFG0": 268,
+      "TIMER_V_LOWER0": 272,
+      "TIMER_V_UPPER0": 276,
+      "COMPARE_LOWER0_0": 280,
+      "COMPARE_UPPER0_0": 284
+    },
+    "sensor_ctrl": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CFG_REGWEN": 16,
+      "ALERT_TRIG": 20,
+      "ALERT_EN": {
+        "offset": 24,
+        "count": 11,
+        "stride": 4
+      },
+      "FATAL_ALERT_EN": 68,
+      "RECOV_ALERT": 72,
+      "FATAL_ALERT": 76,
+      "STATUS": 80,
+      "MANUAL_PAD_ATTR_REGWEN": {
+        "offset": 84,
+        "count": 4,
+        "stride": 4
+      },
+      "MANUAL_PAD_ATTR": {
+        "offset": 100,
+        "count": 4,
+        "stride": 4
+      }
+    },
+    "spi_device": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CONTROL": 16,
+      "CFG": 20,
+      "STATUS": 24,
+      "INTERCEPT_EN": 28,
+      "ADDR_MODE": 32,
+      "LAST_READ_ADDR": 36,
+      "FLASH_STATUS": 40,
+      "JEDEC_CC": 44,
+      "JEDEC_ID": 48,
+      "READ_THRESHOLD": 52,
+      "MAILBOX_ADDR": 56,
+      "UPLOAD_STATUS": 60,
+      "UPLOAD_STATUS2": 64,
+      "UPLOAD_CMDFIFO": 68,
+      "UPLOAD_ADDRFIFO": 72,
+      "CMD_FILTER": {
+        "offset": 76,
+        "count": 8,
+        "stride": 4
+      },
+      "ADDR_SWAP_MASK": 108,
+      "ADDR_SWAP_DATA": 112,
+      "PAYLOAD_SWAP_MASK": 116,
+      "PAYLOAD_SWAP_DATA": 120,
+      "CMD_INFO": {
+        "offset": 124,
+        "count": 24,
+        "stride": 4
+      },
+      "CMD_INFO_EN4B": 220,
+      "CMD_INFO_EX4B": 224,
+      "CMD_INFO_WREN": 228,
+      "CMD_INFO_WRDI": 232,
+      "TPM_CAP": 2048,
+      "TPM_CFG": 2052,
+      "TPM_STATUS": 2056,
+      "TPM_ACCESS": {
+        "offset": 2060,
+        "count": 2,
+        "stride": 4
+      },
+      "TPM_STS": 2068,
+      "TPM_INTF_CAPABILITY": 2072,
+      "TPM_INT_ENABLE": 2076,
+      "TPM_INT_VECTOR": 2080,
+      "TPM_INT_STATUS": 2084,
+      "TPM_DID_VID": 2088,
+      "TPM_RID": 2092,
+      "TPM_CMD_ADDR": 2096,
+      "TPM_READ_FIFO": 2100,
+      "egress_buffer": 4096,
+      "ingress_buffer": 7680
+    },
+    "spi_host": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CONTROL": 16,
+      "STATUS": 20,
+      "CONFIGOPTS": 24,
+      "CSID": 28,
+      "COMMAND": 32,
+      "ERROR_ENABLE": 44,
+      "ERROR_STATUS": 48,
+      "EVENT_ENABLE": 52,
+      "RXDATA": 36,
+      "TXDATA": 40
+    },
+    "sysrst_ctrl": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "REGWEN": 16,
+      "EC_RST_CTL": 20,
+      "ULP_AC_DEBOUNCE_CTL": 24,
+      "ULP_LID_DEBOUNCE_CTL": 28,
+      "ULP_PWRB_DEBOUNCE_CTL": 32,
+      "ULP_CTL": 36,
+      "ULP_STATUS": 40,
+      "WKUP_STATUS": 44,
+      "KEY_INVERT_CTL": 48,
+      "PIN_ALLOWED_CTL": 52,
+      "PIN_OUT_CTL": 56,
+      "PIN_OUT_VALUE": 60,
+      "PIN_IN_VALUE": 64,
+      "KEY_INTR_CTL": 68,
+      "KEY_INTR_DEBOUNCE_CTL": 72,
+      "AUTO_BLOCK_DEBOUNCE_CTL": 76,
+      "AUTO_BLOCK_OUT_CTL": 80,
+      "COM_PRE_SEL_CTL": {
+        "offset": 84,
+        "count": 4,
+        "stride": 4
+      },
+      "COM_PRE_DET_CTL": {
+        "offset": 100,
+        "count": 4,
+        "stride": 4
+      },
+      "COM_SEL_CTL": {
+        "offset": 116,
+        "count": 4,
+        "stride": 4
+      },
+      "COM_DET_CTL": {
+        "offset": 132,
+        "count": 4,
+        "stride": 4
+      },
+      "COM_OUT_CTL": {
+        "offset": 148,
+        "count": 4,
+        "stride": 4
+      },
+      "COMBO_INTR_STATUS": 164,
+      "KEY_INTR_STATUS": 168
+    },
+    "uart": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CTRL": 16,
+      "STATUS": 20,
+      "RDATA": 24,
+      "WDATA": 28,
+      "FIFO_CTRL": 32,
+      "FIFO_STATUS": 36,
+      "OVRD": 40,
+      "VAL": 44,
+      "TIMEOUT_CTRL": 48
+    },
+    "usbdev": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "usbctrl": 16,
+      "ep_out_enable": 20,
+      "ep_in_enable": 24,
+      "usbstat": 28,
+      "avoutbuffer": 32,
+      "avsetupbuffer": 36,
+      "rxfifo": 40,
+      "rxenable_setup": 44,
+      "rxenable_out": 48,
+      "set_nak_out": 52,
+      "in_sent": 56,
+      "out_stall": 60,
+      "in_stall": 64,
+      "configin": {
+        "offset": 68,
+        "count": 12,
+        "stride": 4
+      },
+      "out_iso": 116,
+      "in_iso": 120,
+      "out_data_toggle": 124,
+      "in_data_toggle": 128,
+      "phy_pins_sense": 132,
+      "phy_pins_drive": 136,
+      "phy_config": 140,
+      "wake_control": 144,
+      "wake_events": 148,
+      "fifo_ctrl": 152,
+      "count_out": 156,
+      "count_in": 160,
+      "count_nodata_in": 164,
+      "count_errors": 168,
+      "buffer": 2048
     }
   },
   "otp_ctrl": {
