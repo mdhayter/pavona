@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -27,6 +28,17 @@ pub struct JtagParams {
 
     #[arg(long, default_value = "false")]
     pub log_stdio: bool,
+
+    /// IDCODE of the debug module TAP, from the selected top's description. Set by
+    /// `TransportWrapper::jtag`; if `None`, the OpenOCD target configuration's default is used.
+    #[arg(skip)]
+    #[serde(default)]
+    pub dm_idcode: Option<u32>,
+
+    /// IDCODE of the life cycle controller TAP, as `dm_idcode`.
+    #[arg(skip)]
+    #[serde(default)]
+    pub lc_idcode: Option<u32>,
 }
 
 impl JtagParams {

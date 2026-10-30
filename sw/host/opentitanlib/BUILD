@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -246,16 +247,10 @@ rust_library(
         ":spi_passthru",
         ":ottf",
         "//sw/host/opentitanlib/bindgen:rom_error_enum",
-    ] + select({
-        "//hw/top:egret": [
-            "//util/openocd/target:lowrisc-egret.cfg",
-            "//util/openocd/target:lowrisc-egret-lc.cfg",
-        ],
-        "//hw/top:dragonfly": [
-            "//util/openocd/target:lowrisc-dragonfly.cfg",
-            "//util/openocd/target:lowrisc-dragonfly-lc.cfg",
-        ],
-    }),
+        # The OpenOCD target configurations serve every top; see debug/openocd.rs.
+        "//util/openocd/target:lowrisc-egret.cfg",
+        "//util/openocd/target:lowrisc-egret-lc.cfg",
+    ],
     crate_features = select({
         "//sw/device:is_scafi_deprecated": ["scafi_deprecated"],
         "//hw/top:egret": ["egret"],
@@ -266,22 +261,13 @@ rust_library(
     proc_macro_deps = [
         "//sw/host/opentitanlib/opentitantool_derive",
     ],
-    rustc_env = select({
-        "//hw/top:egret": dicts.add(
-            RUSTC_ENV,
-            {
-                "openocd_riscv_target_cfg": "$(location //util/openocd/target:lowrisc-egret.cfg)",
-                "openocd_lc_target_cfg": "$(location //util/openocd/target:lowrisc-egret-lc.cfg)",
-            },
-        ),
-        "//hw/top:dragonfly": dicts.add(
-            RUSTC_ENV,
-            {
-                "openocd_riscv_target_cfg": "$(location //util/openocd/target:lowrisc-dragonfly.cfg)",
-                "openocd_lc_target_cfg": "$(location //util/openocd/target:lowrisc-dragonfly-lc.cfg)",
-            },
-        ),
-    }),
+    rustc_env = dicts.add(
+        RUSTC_ENV,
+        {
+            "openocd_riscv_target_cfg": "$(location //util/openocd/target:lowrisc-egret.cfg)",
+            "openocd_lc_target_cfg": "$(location //util/openocd/target:lowrisc-egret-lc.cfg)",
+        },
+    ),
     deps = [
         "//sw/host/opentitanlib/bindgen",
         "//sw/host/opentitanlib/util",
