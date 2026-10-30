@@ -1,11 +1,12 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 use std::path::PathBuf;
 use std::time::Duration;
 
-use anyhow::{Result, ensure};
+use anyhow::{Context, Result, ensure};
 use clap::Parser;
 use rand::prelude::*;
 
@@ -17,7 +18,6 @@ use opentitanlib::uart::console::UartConsole;
 use opentitanlib::util::parse_int::ParseInt;
 
 use ot_bindgen_dif as dif;
-use ot_hal::top;
 
 #[derive(Debug, Parser)]
 struct Opts {
@@ -42,16 +42,11 @@ struct Opts {
 
 const NUM_ACCESSES_PER_REGION: usize = 32;
 
-#[cfg(feature = "egret")]
-const ROM_BASE_ADDR: u32 = top::ROM_CTRL_ROM_BASE_ADDR as u32;
-// The last 32 bytes of ROM (ROM digest) are not accessible.
-#[cfg(feature = "egret")]
-const ROM_ACCESSIBLE_BYTES: usize = top::ROM_CTRL_ROM_SIZE_BYTES - 32;
-
-#[cfg(feature = "dragonfly")]
-const ROM_BASE_ADDR: u32 = top::ROM_CTRL0_ROM_BASE_ADDR as u32;
-#[cfg(feature = "dragonfly")]
-const ROM_ACCESSIBLE_BYTES: usize = top::ROM_CTRL0_ROM_SIZE_BYTES - 32;
+/// Names of the boot ROM in the top descriptions, in the order to try: Egret
+/// has one ROM, Dragonfly boots from the first of two.
+const ROM_NAMES: [&str; 2] = ["rom_ctrl_rom", "rom_ctrl0_rom"];
+/// The last 32 bytes of ROM (ROM digest) are not accessible.
+const ROM_DIGEST_BYTES: usize = 32;
 
 fn test_mem_access(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     let seed = opts.seed.unwrap_or_else(|| thread_rng().r#gen());
@@ -80,28 +75,36 @@ fn test_mem_access(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
         .create(transport)?
         .connect(JtagTap::RiscvTap)?;
 
+    let top = transport.top()?;
+    let rom = ROM_NAMES
+        .iter()
+        .find_map(|name| top.range(name).ok())
+        .with_context(|| format!("Top {} has none of the ROMs {ROM_NAMES:?}", top.name))?;
+    let rom_base_addr = rom.base_addr as u32;
+    let rom_accessible_bytes = rom.size_bytes - ROM_DIGEST_BYTES;
+
     let rom_data = std::fs::read(&opts.rom)?;
     ensure!(rom_data.len() % 4 == 0);
 
     let rw_regions = [
         (
             "ram_ret",
-            top::SRAM_CTRL_RET_AON_RAM_BASE_ADDR as u32,
-            top::SRAM_CTRL_RET_AON_RAM_SIZE_BYTES as u32,
+            top.base_addr("sram_ctrl_ret_aon_ram")? as u32,
+            top.size_bytes("sram_ctrl_ret_aon_ram")? as u32,
         ),
         (
             "ram_main",
-            top::SRAM_CTRL_MAIN_RAM_BASE_ADDR as u32,
-            top::SRAM_CTRL_MAIN_RAM_SIZE_BYTES as u32,
+            top.base_addr("sram_ctrl_main_ram")? as u32,
+            top.size_bytes("sram_ctrl_main_ram")? as u32,
         ),
         (
             "acc_imem",
-            top::ACC_BASE_ADDR as u32 + dif::ACC_IMEM_REG_OFFSET,
+            top.base_addr("acc")? as u32 + dif::ACC_IMEM_REG_OFFSET,
             dif::ACC_IMEM_SIZE_BYTES,
         ),
         (
             "acc_dmem",
-            top::ACC_BASE_ADDR as u32 + dif::ACC_DMEM_REG_OFFSET,
+            top.base_addr("acc")? as u32 + dif::ACC_DMEM_REG_OFFSET,
             dif::ACC_DMEM_SIZE_BYTES,
         ),
     ];
@@ -127,13 +130,13 @@ fn test_mem_access(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     }
 
     // For ROM contents, instead of using random values, use the known value from ROM binary
-    for offset in (0..ROM_ACCESSIBLE_BYTES as u32)
+    for offset in (0..rom_accessible_bytes as u32)
         .step_by(4)
         .choose_multiple(&mut rng, NUM_ACCESSES_PER_REGION)
     {
         accesses.push((
             "rom",
-            ROM_BASE_ADDR,
+            rom_base_addr,
             offset,
             if offset as usize <= rom_data.len() {
                 u32::from_le_bytes(rom_data[offset as usize..][..4].try_into().unwrap())
