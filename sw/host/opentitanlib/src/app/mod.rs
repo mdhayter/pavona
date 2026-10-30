@@ -820,16 +820,22 @@ impl TransportWrapper {
 
     /// Returns a [`JtagChain`] implementation.
     pub fn jtag(&self, opts: &JtagParams) -> Result<Box<dyn JtagChain + '_>> {
+        // Expect the TAP IDCODEs of the selected top, if its description has them.
+        let mut opts = opts.clone();
+        if let Some(top) = &self.top {
+            opts.dm_idcode = top.dm_idcode;
+            opts.lc_idcode = top.lc_idcode;
+        }
         if let Some(ref path) = self.openocd_adapter_config {
             // Use specified external JTAG dongle, instead of the transport driver itself.
             return Ok(Box::new(OpenOcdJtagChain::new(
                 &std::fs::read_to_string(path)?,
-                opts,
+                &opts,
             )?));
         }
         // Use JTAG functionality of the transport driver itself.  (Currently, HyperDebug is the
         // only transport which has such support.)
-        self.transport.jtag(opts)
+        self.transport.jtag(&opts)
     }
 
     /// Returns a SPI [`Target`] implementation.

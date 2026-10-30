@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -246,6 +247,9 @@ impl OpenOcd {
 pub struct OpenOcdJtagChain {
     /// OpenOCD server instance.
     openocd: OpenOcd,
+    /// Expected IDCODEs of the debug module and life cycle controller TAPs.
+    dm_idcode: Option<u32>,
+    lc_idcode: Option<u32>,
 }
 
 /// Errors related to the OpenOCD server.
@@ -270,17 +274,32 @@ impl OpenOcdJtagChain {
         openocd.execute("transport select jtag")?;
         openocd.execute("scan_chain")?;
 
-        Ok(OpenOcdJtagChain { openocd })
+        Ok(OpenOcdJtagChain {
+            openocd,
+            dm_idcode: opts.dm_idcode,
+            lc_idcode: opts.lc_idcode,
+        })
     }
 }
 
 impl JtagChain for OpenOcdJtagChain {
     fn connect(mut self: Box<Self>, tap: JtagTap) -> Result<Box<dyn Jtag>> {
-        // Pass through the config for the chosen TAP.
-        let target = match tap {
-            JtagTap::RiscvTap => include_str!(env!("openocd_riscv_target_cfg")),
-            JtagTap::LcTap => include_str!(env!("openocd_lc_target_cfg")),
+        // Pass through the config for the chosen TAP. The configs serve every top: they take
+        // the expected IDCODE from CPUTAPID, if set. A CPUTAPID already set by the adapter
+        // configuration (for example for a chip with a partner IDCODE) takes precedence over
+        // the top description's.
+        let (target, idcode) = match tap {
+            JtagTap::RiscvTap => (
+                include_str!(env!("openocd_riscv_target_cfg")),
+                self.dm_idcode,
+            ),
+            JtagTap::LcTap => (include_str!(env!("openocd_lc_target_cfg")), self.lc_idcode),
         };
+        if let Some(idcode) = idcode {
+            self.openocd.execute(&format!(
+                "if {{![info exists CPUTAPID]}} {{set CPUTAPID {idcode:#010x}}}"
+            ))?;
+        }
         self.openocd.execute(target)?;
 
         // Capture outputs during initialization to see if error has occurred during the process.
