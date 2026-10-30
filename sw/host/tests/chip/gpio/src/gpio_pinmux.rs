@@ -4,9 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use std::collections::HashMap;
-use std::fmt;
 use std::iter;
-use std::str::FromStr;
 use std::time::Duration;
 
 use anyhow::Result;
@@ -21,14 +19,6 @@ use opentitanlib::test_utils::init::InitializeTest;
 use opentitanlib::test_utils::pinmux_config::PinmuxConfig;
 use opentitanlib::uart::console::UartConsole;
 use ot_hal::dif::pinmux::PinmuxPadAttr;
-use ot_hal::top::{PinmuxInsel, PinmuxMioOut, PinmuxOutsel, PinmuxPeripheralIn};
-
-/// Returns `map` with its keys and values replaced by their names, as `PinmuxConfig` takes them.
-fn pinmux_names<K: fmt::Display, V: fmt::Display>(map: &HashMap<K, V>) -> HashMap<String, String> {
-    map.iter()
-        .map(|(k, v)| (k.to_string(), v.to_string()))
-        .collect()
-}
 
 #[derive(Debug, Parser)]
 struct Opts {
@@ -40,97 +30,38 @@ struct Opts {
     timeout: Duration,
 }
 
+/// Pinmux configuration, by the names in the top description: GPIO inputs to
+/// pads, and pads to GPIO outputs.
 struct Config {
-    input: HashMap<PinmuxPeripheralIn, PinmuxInsel>,
-    output: HashMap<PinmuxMioOut, PinmuxOutsel>,
+    input: HashMap<String, String>,
+    output: HashMap<String, String>,
 }
 
-static GPIOS: [(PinmuxPeripheralIn, PinmuxOutsel); 32] = [
-    (PinmuxPeripheralIn::GpioGpio0, PinmuxOutsel::GpioGpio0),
-    (PinmuxPeripheralIn::GpioGpio1, PinmuxOutsel::GpioGpio1),
-    (PinmuxPeripheralIn::GpioGpio2, PinmuxOutsel::GpioGpio2),
-    (PinmuxPeripheralIn::GpioGpio3, PinmuxOutsel::GpioGpio3),
-    (PinmuxPeripheralIn::GpioGpio4, PinmuxOutsel::GpioGpio4),
-    (PinmuxPeripheralIn::GpioGpio5, PinmuxOutsel::GpioGpio5),
-    (PinmuxPeripheralIn::GpioGpio6, PinmuxOutsel::GpioGpio6),
-    (PinmuxPeripheralIn::GpioGpio7, PinmuxOutsel::GpioGpio7),
-    (PinmuxPeripheralIn::GpioGpio8, PinmuxOutsel::GpioGpio8),
-    (PinmuxPeripheralIn::GpioGpio9, PinmuxOutsel::GpioGpio9),
-    (PinmuxPeripheralIn::GpioGpio10, PinmuxOutsel::GpioGpio10),
-    (PinmuxPeripheralIn::GpioGpio11, PinmuxOutsel::GpioGpio11),
-    (PinmuxPeripheralIn::GpioGpio12, PinmuxOutsel::GpioGpio12),
-    (PinmuxPeripheralIn::GpioGpio13, PinmuxOutsel::GpioGpio13),
-    (PinmuxPeripheralIn::GpioGpio14, PinmuxOutsel::GpioGpio14),
-    (PinmuxPeripheralIn::GpioGpio15, PinmuxOutsel::GpioGpio15),
-    (PinmuxPeripheralIn::GpioGpio16, PinmuxOutsel::GpioGpio16),
-    (PinmuxPeripheralIn::GpioGpio17, PinmuxOutsel::GpioGpio17),
-    (PinmuxPeripheralIn::GpioGpio18, PinmuxOutsel::GpioGpio18),
-    (PinmuxPeripheralIn::GpioGpio19, PinmuxOutsel::GpioGpio19),
-    (PinmuxPeripheralIn::GpioGpio20, PinmuxOutsel::GpioGpio20),
-    (PinmuxPeripheralIn::GpioGpio21, PinmuxOutsel::GpioGpio21),
-    (PinmuxPeripheralIn::GpioGpio22, PinmuxOutsel::GpioGpio22),
-    (PinmuxPeripheralIn::GpioGpio23, PinmuxOutsel::GpioGpio23),
-    (PinmuxPeripheralIn::GpioGpio24, PinmuxOutsel::GpioGpio24),
-    (PinmuxPeripheralIn::GpioGpio25, PinmuxOutsel::GpioGpio25),
-    (PinmuxPeripheralIn::GpioGpio26, PinmuxOutsel::GpioGpio26),
-    (PinmuxPeripheralIn::GpioGpio27, PinmuxOutsel::GpioGpio27),
-    (PinmuxPeripheralIn::GpioGpio28, PinmuxOutsel::GpioGpio28),
-    (PinmuxPeripheralIn::GpioGpio29, PinmuxOutsel::GpioGpio29),
-    (PinmuxPeripheralIn::GpioGpio30, PinmuxOutsel::GpioGpio30),
-    (PinmuxPeripheralIn::GpioGpio31, PinmuxOutsel::GpioGpio31),
+/// Number of GPIOs.
+const NUM_GPIOS: u32 = 32;
+
+/// Returns the pinmux name of GPIO `index`, which is the same for its
+/// peripheral input and its output selector.
+fn gpio_name(index: u32) -> String {
+    format!("GpioGpio{index}")
+}
+
+/// Returns the index of GPIO `name`.
+fn gpio_index(name: &str) -> u32 {
+    name.strip_prefix("GpioGpio")
+        .and_then(|index| index.parse().ok())
+        .unwrap_or_else(|| panic!("{name} is not a GPIO"))
+}
+
+static SUPPORTS_OD: [&str; 14] = [
+    "Ioa6", "Ioa7", "Ioa8", "Iob9", "Iob10", "Iob11", "Iob12", "Ioc10", "Ioc11", "Ioc12", "Ior10",
+    "Ior11", "Ior12", "Ior13",
 ];
 
-static SUPPORTS_OD: [PinmuxMioOut; 14] = [
-    PinmuxMioOut::Ioa6,
-    PinmuxMioOut::Ioa7,
-    PinmuxMioOut::Ioa8,
-    PinmuxMioOut::Iob9,
-    PinmuxMioOut::Iob10,
-    PinmuxMioOut::Iob11,
-    PinmuxMioOut::Iob12,
-    PinmuxMioOut::Ioc10,
-    PinmuxMioOut::Ioc11,
-    PinmuxMioOut::Ioc12,
-    PinmuxMioOut::Ior10,
-    PinmuxMioOut::Ior11,
-    PinmuxMioOut::Ior12,
-    PinmuxMioOut::Ior13,
-];
-
-static SUPPORTS_VIRT_OD: [PinmuxMioOut; 33] = [
-    PinmuxMioOut::Ioa0,
-    PinmuxMioOut::Ioa1,
-    PinmuxMioOut::Ioa2,
-    PinmuxMioOut::Ioa3,
-    PinmuxMioOut::Ioa4,
-    PinmuxMioOut::Ioa5,
-    PinmuxMioOut::Iob0,
-    PinmuxMioOut::Iob1,
-    PinmuxMioOut::Iob2,
-    PinmuxMioOut::Iob3,
-    PinmuxMioOut::Iob4,
-    PinmuxMioOut::Iob5,
-    PinmuxMioOut::Iob6,
-    PinmuxMioOut::Iob7,
-    PinmuxMioOut::Iob8,
-    PinmuxMioOut::Ioc0,
-    PinmuxMioOut::Ioc1,
-    PinmuxMioOut::Ioc2,
-    PinmuxMioOut::Ioc3,
-    PinmuxMioOut::Ioc4,
-    PinmuxMioOut::Ioc5,
-    PinmuxMioOut::Ioc6,
-    PinmuxMioOut::Ioc7,
-    PinmuxMioOut::Ioc8,
-    PinmuxMioOut::Ioc9,
-    PinmuxMioOut::Ior0,
-    PinmuxMioOut::Ior1,
-    PinmuxMioOut::Ior2,
-    PinmuxMioOut::Ior3,
-    PinmuxMioOut::Ior4,
-    PinmuxMioOut::Ior5,
-    PinmuxMioOut::Ior6,
-    PinmuxMioOut::Ior7,
+static SUPPORTS_VIRT_OD: [&str; 33] = [
+    "Ioa0", "Ioa1", "Ioa2", "Ioa3", "Ioa4", "Ioa5", "Iob0", "Iob1", "Iob2", "Iob3", "Iob4", "Iob5",
+    "Iob6", "Iob7", "Iob8", "Ioc0", "Ioc1", "Ioc2", "Ioc3", "Ioc4", "Ioc5", "Ioc6", "Ioc7", "Ioc8",
+    "Ioc9", "Ior0", "Ior1", "Ior2", "Ior3", "Ior4", "Ior5", "Ior6", "Ior7",
 ];
 
 fn write_all_verify(
@@ -138,10 +69,10 @@ fn write_all_verify(
     uart: &dyn Uart,
     write: u32,
     read: u32,
-    config: &HashMap<PinmuxMioOut, PinmuxOutsel>,
+    config: &HashMap<String, String>,
 ) -> Result<()> {
     let mask = config.values().fold(0, |acc, v| {
-        let i = u32::from(*v) - u32::from(PinmuxOutsel::GpioGpio0);
+        let i = gpio_index(v);
         acc | 1u32 << i
     });
 
@@ -162,8 +93,8 @@ fn write_all_verify(
 
     let mut result = 0u32;
     for (k, v) in config.iter() {
-        let n = u32::from(transport.gpio_pin(&k.to_string())?.read()?);
-        let i = u32::from(*v) - u32::from(PinmuxOutsel::GpioGpio0);
+        let n = u32::from(transport.gpio_pin(k)?.read()?);
+        let i = gpio_index(v);
         result |= n << i;
     }
 
@@ -178,10 +109,10 @@ fn read_all_verify(
     uart: &dyn Uart,
     write: u32,
     read: u32,
-    config: &HashMap<PinmuxPeripheralIn, PinmuxInsel>,
+    config: &HashMap<String, String>,
 ) -> Result<()> {
     let mask = config.keys().fold(0, |acc, k| {
-        let i = u32::from(*k) - u32::from(PinmuxPeripheralIn::GpioGpio0);
+        let i = gpio_index(k);
         acc | 1u32 << i
     });
 
@@ -199,10 +130,8 @@ fn read_all_verify(
     }
 
     for (k, v) in config.iter() {
-        let i = u32::from(*k) - u32::from(PinmuxPeripheralIn::GpioGpio0);
-        transport
-            .gpio_pin(&v.to_string())?
-            .write((masked_write >> i) & 1 != 0)?;
+        let i = gpio_index(k);
+        transport.gpio_pin(v)?.write((masked_write >> i) & 1 != 0)?;
     }
 
     let result = GpioGet::read_all(uart)? & mask;
@@ -213,38 +142,24 @@ fn read_all_verify(
 }
 
 fn get_config(transport: &TransportWrapper) -> Config {
+    // The transport's GPIO pins are named after the pads they connect to.
     let gpio_pins = transport.gpios();
-    let pinmux_insels = gpio_pins
-        .iter()
-        .map(|pin| PinmuxInsel::from_str(pin).unwrap());
-    let pinmux_mio_outs = gpio_pins
-        .iter()
-        .map(|pin| PinmuxMioOut::from_str(pin).unwrap());
-    let gpio_inputs = GPIOS.iter().map(|(input, _)| *input);
-    let gpio_outputs = GPIOS.iter().map(|(_, output)| *output);
+    let gpios = (0..NUM_GPIOS).map(gpio_name);
 
-    let input: HashMap<_, _> = iter::zip(gpio_inputs, pinmux_insels).collect();
-    let output: HashMap<_, _> = iter::zip(pinmux_mio_outs, gpio_outputs).collect();
+    let input: HashMap<_, _> = iter::zip(gpios.clone(), gpio_pins.iter().cloned()).collect();
+    let output: HashMap<_, _> = iter::zip(gpio_pins.iter().cloned(), gpios).collect();
 
     Config { input, output }
 }
 
 fn test_gpio_outputs(transport: &TransportWrapper, config: &Config) -> Result<()> {
     let uart = transport.uart("console")?;
-    PinmuxConfig::configure(
-        &*uart,
-        transport.top()?,
-        None,
-        Some(&pinmux_names(&config.output)),
-        None,
-    )?;
+    PinmuxConfig::configure(&*uart, transport.top()?, None, Some(&config.output), None)?;
 
     log::info!("Configuring debugger GPIOs as inputs");
     // The outputs (with respect to pinmux config) correspond to the input pins on the debug board.
     for pin in config.output.keys() {
-        transport
-            .gpio_pin(&pin.to_string())?
-            .set_mode(PinMode::Input)?;
+        transport.gpio_pin(pin)?.set_mode(PinMode::Input)?;
     }
 
     log::info!("Enabling outputs on the DUT");
@@ -262,20 +177,12 @@ fn test_gpio_outputs(transport: &TransportWrapper, config: &Config) -> Result<()
 fn test_gpio_inputs(transport: &TransportWrapper, config: &Config) -> Result<()> {
     let uart = transport.uart("console")?;
 
-    PinmuxConfig::configure(
-        &*uart,
-        transport.top()?,
-        Some(&pinmux_names(&config.input)),
-        None,
-        None,
-    )?;
+    PinmuxConfig::configure(&*uart, transport.top()?, Some(&config.input), None, None)?;
 
     log::info!("Configuring debugger GPIOs as outputs");
     // The inputs (with respect to pinmux config) correspond to the output pins on the debug board.
     for pin in config.input.values() {
-        transport
-            .gpio_pin(&pin.to_string())?
-            .set_mode(PinMode::PushPull)?;
+        transport.gpio_pin(pin)?.set_mode(PinMode::PushPull)?;
     }
 
     log::info!("Disabling outputs on the DUT");
@@ -296,14 +203,14 @@ fn test_pad_inversion(transport: &TransportWrapper, config: &Config) -> Result<(
     let invert_all: HashMap<_, _> = config
         .output
         .keys()
-        .map(|mio| (mio.to_string(), PinmuxPadAttr::INVERT))
+        .map(|mio| (mio.clone(), PinmuxPadAttr::INVERT))
         .collect();
 
     log::info!("Configuring pads as inverted inputs");
     PinmuxConfig::configure(
         &*uart,
         transport.top()?,
-        Some(&pinmux_names(&config.input)),
+        Some(&config.input),
         None,
         Some(&invert_all),
     )?;
@@ -311,9 +218,7 @@ fn test_pad_inversion(transport: &TransportWrapper, config: &Config) -> Result<(
     log::info!("Configuring debugger GPIOs as outputs");
     // The inputs (with respect to pinmux config) correspond to the output pins on the debug board.
     for pin in config.input.values() {
-        transport
-            .gpio_pin(&pin.to_string())?
-            .set_mode(PinMode::PushPull)?;
+        transport.gpio_pin(pin)?.set_mode(PinMode::PushPull)?;
     }
 
     log::info!("Disabling outputs on the DUT");
@@ -332,16 +237,14 @@ fn test_pad_inversion(transport: &TransportWrapper, config: &Config) -> Result<(
         &*uart,
         transport.top()?,
         None,
-        Some(&pinmux_names(&config.output)),
+        Some(&config.output),
         Some(&invert_all),
     )?;
 
     log::info!("Configuring debugger GPIOs as inputs");
     // The outputs (with respect to pinmux config) correspond to the input pins on the debug board.
     for pin in config.output.keys() {
-        transport
-            .gpio_pin(&pin.to_string())?
-            .set_mode(PinMode::Input)?;
+        transport.gpio_pin(pin)?.set_mode(PinMode::Input)?;
     }
 
     log::info!("Enabling outputs on the DUT");
@@ -365,7 +268,7 @@ fn test_pad_inversion(transport: &TransportWrapper, config: &Config) -> Result<(
 fn test_opendrain(
     transport: &TransportWrapper,
     config: &Config,
-    pad_filter: &[PinmuxMioOut],
+    pad_filter: &[&str],
     pad_attr: PinmuxPadAttr,
 ) -> Result<()> {
     let uart = transport.uart("console")?;
@@ -374,7 +277,7 @@ fn test_opendrain(
     // The inputs (with respect to pinmux config) correspond to the output pins on the debug board.
     let opendrain_inputs = config.input.values();
     for pin in opendrain_inputs {
-        let pin = transport.gpio_pin(&pin.to_string())?;
+        let pin = transport.gpio_pin(pin)?;
         pin.set(Some(PinMode::Input), None, Some(PullMode::PullUp), None)?;
     }
 
@@ -383,11 +286,11 @@ fn test_opendrain(
         .output
         .clone()
         .into_iter()
-        .filter(|&(mio, _)| pad_filter.contains(&mio))
+        .filter(|(mio, _)| pad_filter.contains(&mio.as_str()))
         .collect();
     let opendrain_attrs: HashMap<_, _> = opendrain_outputs
         .keys()
-        .map(|mio| (mio.to_string(), pad_attr))
+        .map(|mio| (mio.clone(), pad_attr))
         .collect();
 
     log::info!("Configuring pads as opendrain outputs");
@@ -395,7 +298,7 @@ fn test_opendrain(
         &*uart,
         transport.top()?,
         None,
-        Some(&pinmux_names(&opendrain_outputs)),
+        Some(&opendrain_outputs),
         Some(&opendrain_attrs),
     )?;
 
