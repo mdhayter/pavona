@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -96,6 +97,9 @@ fn parse_command_line(opts: Opts, mut args: ArgsOs) -> Result<Opts> {
         }
         Err(e) => Err(anyhow::Error::new(e).context(format!("Reading file {:?}", rcfile))),
     }?;
+
+    // $TARGET_CHIP_TOP overrides a --top from the rcfile.
+    backend::drop_rcfile_top_if_env(&mut arguments);
 
     // Extend the argument list with all remaining command line arguments.
     arguments.extend(args);
