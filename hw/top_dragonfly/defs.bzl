@@ -18,6 +18,8 @@ DRAGONFLY = pavona_top(
         "sim_dv": "//hw/top_dragonfly:sim_dv",
         "sim_verilator": "//hw/top_dragonfly:sim_verilator",
     },
+    # Host description, embedded in the host tools (//sw/host/ot_hal).
+    host_desc = "//hw/top_dragonfly/data:host_desc",
     top_rtl = "//hw/top_dragonfly:rtl_files",
     top_verilator_core = ["lowrisc:dv:top_dragonfly_chip_verilator_sim"],
     top_verilator_binary = {"binary": ["lowrisc_dv_top_dragonfly_chip_verilator_sim_0.1/sim-verilator/Vchip_sim_tb"]},

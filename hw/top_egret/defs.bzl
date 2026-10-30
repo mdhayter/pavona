@@ -18,6 +18,8 @@ EGRET = pavona_top(
         "sim_dv": "//hw/top_egret:sim_dv",
         "sim_verilator": "//hw/top_egret:sim_verilator",
     },
+    # Host description, embedded in the host tools (//sw/host/ot_hal).
+    host_desc = "//hw/top_egret/data:host_desc",
     top_rtl = "//hw/top_egret:rtl_files",
     top_verilator_core = ["lowrisc:dv:top_egret_chip_verilator_sim"],
     top_verilator_binary = {"binary": ["lowrisc_dv_top_egret_chip_verilator_sim_0.1/sim-verilator/Vchip_sim_tb"]},
