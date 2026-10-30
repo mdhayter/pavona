@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -18,7 +19,7 @@ use object::{Object, ObjectSection, ObjectSegment, SectionKind};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use ot_hal::top;
+use ot_hal::top::TopDescription;
 use ot_hal::util::multibits::MultiBitBool4;
 
 use crate::impl_serializable_error;
@@ -80,9 +81,10 @@ impl SramProgramParams {
     pub fn load_and_execute(
         &self,
         jtag: &mut dyn Jtag,
+        top: &TopDescription,
         exec_mode: ExecutionMode,
     ) -> Result<ExecutionResult> {
-        load_and_execute_sram_program(jtag, &self.get_file(), exec_mode, self.skip_crc)
+        load_and_execute_sram_program(jtag, top, &self.get_file(), exec_mode, self.skip_crc)
     }
 }
 
@@ -351,7 +353,11 @@ pub fn load_sram_program(jtag: &mut dyn Jtag, file: &SramProgramFile) -> Result<
 /// [1]: https://github.com/lowRISC/opentitan/issues/14978
 /// [2]: https://riscv.org/wp-content/uploads/2019/03/riscv-debug-release.pdf
 /// [3]: hw/top_egret/rtl/ibex_pmp_reset_pkg.sv
-pub fn prepare_epmp(jtag: &mut dyn Jtag) -> Result<()> {
+pub fn prepare_epmp(jtag: &mut dyn Jtag, top: &TopDescription) -> Result<()> {
+    // Look up both ranges before changing the ePMP.
+    let sram = top.range("sram_ctrl_main_ram")?;
+    let mmio = top.mmio()?;
+
     // Setup ePMP for SRAM execution.
     log::info!("Configure ePMP for SRAM execution.");
     let pmpcfg3 = jtag.read_riscv_reg(&RiscvReg::Csr(RiscvCsr::PMPCFG3))?;
@@ -362,8 +368,8 @@ pub fn prepare_epmp(jtag: &mut dyn Jtag) -> Result<()> {
     jtag.write_riscv_reg(&RiscvReg::Csr(RiscvCsr::PMPCFG3), pmpcfg3)?;
     // Write pmpaddr15 to map the SRAM range.
     // hex((0x10000000 >> 2) | ((0x20000 - 1) >> 3)) = 0x4003fff
-    let base = top::SRAM_CTRL_MAIN_RAM_BASE_ADDR as u32;
-    let size = top::SRAM_CTRL_MAIN_RAM_SIZE_BYTES as u32;
+    let base = sram.base_addr as u32;
+    let size = sram.size_bytes as u32;
     // Make sure that this is a power of two.
     assert!(size & (size - 1) == 0);
     let pmpaddr15 = (base >> 2) | ((size - 1) >> 3);
@@ -379,14 +385,8 @@ pub fn prepare_epmp(jtag: &mut dyn Jtag) -> Result<()> {
     log::info!("New value of pmpcfg2: {:x}", pmpcfg2);
     jtag.write_riscv_reg(&RiscvReg::Csr(RiscvCsr::PMPCFG2), pmpcfg2)?;
     // Write pmpaddr10 and pmpaddr11 to map the MMIO range.
-    #[cfg(feature = "egret")]
-    let base = top::TOP_EGRET_MMIO_BASE_ADDR as u32;
-    #[cfg(feature = "egret")]
-    let size = top::TOP_EGRET_MMIO_SIZE_BYTES as u32;
-    #[cfg(feature = "dragonfly")]
-    let base = top::TOP_DRAGONFLY_MMIO_BASE_ADDR as u32;
-    #[cfg(feature = "dragonfly")]
-    let size = top::TOP_DRAGONFLY_MMIO_SIZE_BYTES as u32;
+    let base = mmio.base_addr as u32;
+    let size = mmio.size_bytes as u32;
     // make sure that this is a power of two
     assert!(size & (size - 1) == 0);
     let pmpaddr10 = base >> 2;
@@ -400,15 +400,15 @@ pub fn prepare_epmp(jtag: &mut dyn Jtag) -> Result<()> {
 }
 
 /// Set up the sram_ctrl to execute code.
-pub fn prepare_sram_ctrl(jtag: &mut dyn Jtag) -> Result<()> {
-    const SRAM_CTRL_EXEC_REG_OFFSET: u32 =
-        (top::SRAM_CTRL_MAIN_REGS_BASE_ADDR as u32) + ot_bindgen_dif::SRAM_CTRL_EXEC_REG_OFFSET;
+pub fn prepare_sram_ctrl(jtag: &mut dyn Jtag, top: &TopDescription) -> Result<()> {
+    let sram_ctrl_exec_reg_addr: u32 =
+        (top.base_addr("sram_ctrl_main_regs")? as u32) + ot_bindgen_dif::SRAM_CTRL_EXEC_REG_OFFSET;
     log::info!("Enabling execution from SRAM.");
     let mut sram_ctrl_exec = [0];
-    jtag.read_memory32(SRAM_CTRL_EXEC_REG_OFFSET, &mut sram_ctrl_exec)?;
+    jtag.read_memory32(sram_ctrl_exec_reg_addr, &mut sram_ctrl_exec)?;
     log::info!("Old value of sram_exec_en: {:x}", sram_ctrl_exec[0]);
     sram_ctrl_exec[0] = u8::from(MultiBitBool4::True) as u32;
-    jtag.write_memory32(SRAM_CTRL_EXEC_REG_OFFSET, &sram_ctrl_exec)?;
+    jtag.write_memory32(sram_ctrl_exec_reg_addr, &sram_ctrl_exec)?;
     log::info!("New value of sram_exec_en: {:x}", sram_ctrl_exec[0]);
     Ok(())
 }
@@ -416,12 +416,13 @@ pub fn prepare_sram_ctrl(jtag: &mut dyn Jtag) -> Result<()> {
 /// Execute an already loaded SRAM program. It takes care of setting up the ePMP.
 pub fn execute_sram_program(
     jtag: &mut dyn Jtag,
+    top: &TopDescription,
     prog_info: &SramProgramInfo,
     exec_mode: ExecutionMode,
     skip_crc: bool,
 ) -> Result<ExecutionResult> {
-    prepare_epmp(jtag)?;
-    prepare_sram_ctrl(jtag)?;
+    prepare_epmp(jtag, top)?;
+    prepare_sram_ctrl(jtag, top)?;
 
     // To avoid unexpected behaviors, we always make sure that the return address
     // points to an invalid address.
@@ -480,11 +481,12 @@ pub fn execute_sram_program(
 /// Loads and execute a SRAM program. It takes care of setting up the ePMP.
 pub fn load_and_execute_sram_program(
     jtag: &mut dyn Jtag,
+    top: &TopDescription,
     file: &SramProgramFile,
     exec_mode: ExecutionMode,
     skip_crc: bool,
 ) -> Result<ExecutionResult> {
     let prog_info = load_sram_program(jtag, file)?;
     // Never skip CRC check outside of a test.
-    execute_sram_program(jtag, &prog_info, exec_mode, skip_crc)
+    execute_sram_program(jtag, top, &prog_info, exec_mode, skip_crc)
 }
