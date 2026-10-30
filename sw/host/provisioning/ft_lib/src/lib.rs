@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -100,7 +101,8 @@ pub fn run_sram_ft_individualize(
     jtag.reset(/*run=*/ false)?;
 
     // Load and execute the SRAM program that contains the provisioning code.
-    let result = sram_program.load_and_execute(&mut *jtag, ExecutionMode::Jump)?;
+    let result =
+        sram_program.load_and_execute(&mut *jtag, transport.top()?, ExecutionMode::Jump)?;
     match result {
         ExecutionResult::Executing => log::info!("SRAM program loaded and is executing."),
         _ => panic!("SRAM program load/execution failed: {:?}.", result),

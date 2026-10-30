@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -75,7 +76,7 @@ fn manuf_cp_ast_text_execution_write_otp(opts: &Opts, transport: &TransportWrapp
     // Load SRAM program to write the OTP.
     match opts
         .sram_program
-        .load_and_execute(&mut *jtag, ExecutionMode::Jump)?
+        .load_and_execute(&mut *jtag, transport.top()?, ExecutionMode::Jump)?
     {
         ExecutionResult::Executing => log::info!("program successfully started"),
         res => bail!("program execution failed: {:?}", res),

@@ -88,7 +88,7 @@ fn test_sram_load(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     jtag.halt()?;
 
     opts.sram_program
-        .load_and_execute(&mut *jtag, ExecutionMode::Jump)?;
+        .load_and_execute(&mut *jtag, transport.top()?, ExecutionMode::Jump)?;
 
     jtag.disconnect()?;
 

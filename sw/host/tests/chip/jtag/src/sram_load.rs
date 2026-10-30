@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -46,7 +47,7 @@ fn test_sram_load(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
     jtag.halt()?;
 
     opts.sram_program
-        .load_and_execute(&mut *jtag, ExecutionMode::Jump)?;
+        .load_and_execute(&mut *jtag, transport.top()?, ExecutionMode::Jump)?;
 
     const CONSOLE_TIMEOUT: Duration = Duration::from_secs(5);
     let mut console = UartConsole::new(
