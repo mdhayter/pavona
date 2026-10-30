@@ -170,6 +170,7 @@ rust_library(
         "src/test_utils/crashdump.rs",
         "src/test_utils/e2e_command.rs",
         "src/test_utils/epmp.rs",
+        "src/test_utils/extclk.rs",
         "src/test_utils/gpio.rs",
         "src/test_utils/gpio_monitor.rs",
         "src/test_utils/hex_bytes.rs",
@@ -228,7 +229,6 @@ rust_library(
     ] + select({
         "//sw/device:is_scafi_deprecated": [],
         "//hw/top:egret": [
-            "src/test_utils/extclk.rs",
             "src/test_utils/pinmux_config.rs",
         ],
         "//hw/top:dragonfly": [

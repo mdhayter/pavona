@@ -1,11 +1,12 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::util::bitfield::BitField;
-#[cfg(any(feature = "egret", feature = "dragonfly"))]
-use crate::with_unknown;
 
+// The registers whose offsets are the same on every top. The reset causes in RESET_INFO
+// differ between tops: see `TopDescription::reset_info_mask()`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u32)]
 #[non_exhaustive]
@@ -23,9 +24,6 @@ pub enum RstmgrReg {
     CpuInfo = ot_bindgen_dif::RSTMGR_CPU_INFO_REG_OFFSET,
     SwRstRegwen0 = ot_bindgen_dif::RSTMGR_SW_RST_REGWEN_0_REG_OFFSET,
     SwRstRegwen1 = ot_bindgen_dif::RSTMGR_SW_RST_REGWEN_1_REG_OFFSET,
-    SwRstCtrlN0 = ot_bindgen_dif::RSTMGR_SW_RST_CTRL_N_0_REG_OFFSET,
-    SwRstCtrlN1 = ot_bindgen_dif::RSTMGR_SW_RST_CTRL_N_1_REG_OFFSET,
-    ErrCode = ot_bindgen_dif::RSTMGR_ERR_CODE_REG_OFFSET,
 }
 
 /// BitFields for the CPU_INFO_CTRL register.
@@ -59,33 +57,4 @@ impl RstmgrAlertInfoCtrl {
         // Relies on mask being continuous
         size: ot_bindgen_dif::RSTMGR_ALERT_INFO_CTRL_INDEX_MASK.count_ones(),
     };
-}
-
-#[cfg(feature = "egret")]
-with_unknown! {
-    pub enum DifRstmgrResetInfo: u32 {
-        Por = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoPor,
-        LowPowerExit = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoLowPowerExit,
-        Sw = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoSw,
-        HwReq  = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoHwReq,
-        SysRstCtrl  = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoSysRstCtrl,
-        Watchdog  = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoWatchdog,
-        PowerUnstable = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoPowerUnstable,
-        Escalation = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoEscalation,
-        Ndm = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoNdm,
-    }
-}
-
-#[cfg(feature = "dragonfly")]
-with_unknown! {
-    pub enum DifRstmgrResetInfo: u32 {
-        Por = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoPor,
-        LowPowerExit = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoLowPowerExit,
-        Sw = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoSw,
-        HwReq  = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoHwReq,
-        Watchdog  = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoWatchdog,
-        PowerUnstable = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoPowerUnstable,
-        Escalation = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoEscalation,
-        Ndm = ot_bindgen_dif::dif_rstmgr_reset_info_kDifRstmgrResetInfoNdm,
-    }
 }

@@ -3,6 +3,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
+load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_library", "rust_test")
 load("//hw/top:defs.bzl", "ALL_TOPS")
@@ -33,6 +34,21 @@ write_file(
     ],
 )
 
+# The clock manager registers that `dif::clkmgr` uses are the same on every top that has them,
+# so they are generated from the Egret clock manager.
+run_binary(
+    name = "clkmgr_regs",
+    srcs = ["//hw/top_egret/ip_autogen/clkmgr/data:clkmgr.hjson"],
+    outs = ["src/dif/clkmgr_regs.rs"],
+    args = [
+        "--rust",
+        "--outfile",
+        "$(location :src/dif/clkmgr_regs.rs)",
+        "$(location //hw/top_egret/ip_autogen/clkmgr/data:clkmgr.hjson)",
+    ],
+    tool = "//util:regtool",
+)
+
 filegroup(
     name = "doc_files",
     srcs = glob(["**/*.md"]),
@@ -42,6 +58,7 @@ rust_library(
     name = "ot_hal",
     srcs = [
         "src/dif/aon_timer.rs",
+        "src/dif/clkmgr.rs",
         "src/dif/lc_ctrl.rs",
         "src/dif/mod.rs",
         "src/dif/otp_ctrl.rs",
@@ -56,16 +73,15 @@ rust_library(
         "src/util/mod.rs",
         "src/util/multibits.rs",
         "src/util/unknown.rs",
+        ":clkmgr_regs",
         ":embedded_host_descs",
     ] + select({
         "//sw/device:is_scafi_deprecated": [],
         "//hw/top:egret": [
-            "src/dif/clkmgr.rs",
             "src/dif/pinmux.rs",
             "src/top/autogen/egret.rs",
         ],
         "//hw/top:dragonfly": [
-            "src/dif/clkmgr.rs",
             "src/dif/pinmux.rs",
             "src/top/autogen/dragonfly.rs",
         ],
