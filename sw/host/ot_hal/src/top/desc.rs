@@ -132,6 +132,14 @@ pub struct TopDescription {
     pub pwrmgr: Pwrmgr,
     pub rstmgr: Rstmgr,
     pub clkmgr: Clkmgr,
+    /// JTAG IDCODE of the debug module TAP, from the top's JTAG ID package. Absent on
+    /// tops without one.
+    #[serde(default)]
+    pub dm_idcode: Option<u32>,
+    /// JTAG IDCODE of the life cycle controller TAP; the same as `dm_idcode` on a top
+    /// with one combined TAP.
+    #[serde(default)]
+    pub lc_idcode: Option<u32>,
 }
 
 impl TopDescription {
@@ -216,6 +224,18 @@ impl TopDescription {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn embedded_jtag_idcodes() -> Result<()> {
+        let idcodes = |name| -> Result<_> {
+            let desc = TopDescription::embedded(name).unwrap()?;
+            Ok((desc.dm_idcode, desc.lc_idcode))
+        };
+        assert_eq!(idcodes("egret")?, (Some(0x10001cdf), Some(0x10002cdf)));
+        assert_eq!(idcodes("dragonfly")?, (Some(0x10013cdf), Some(0x10013cdf)));
+        assert_eq!(idcodes("scafi_deprecated")?, (None, None));
+        Ok(())
+    }
 
     #[test]
     fn embedded_tops_parse() -> Result<()> {

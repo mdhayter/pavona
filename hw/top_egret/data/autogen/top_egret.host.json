@@ -2,6 +2,8 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "generator": "util/gen_top_host.py",
   "name": "egret",
+  "dm_idcode": 268442847,
+  "lc_idcode": 268446943,
   "addr_spaces": {
     "hart": {
       "devices": {
