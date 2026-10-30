@@ -665,6 +665,16 @@
       "SpiDevice": 0,
       "SpiHost0": 1,
       "I2c0": 2
+    },
+    "reset_info": {
+      "Por": 0,
+      "LowPowerExit": 1,
+      "SwReset": 2,
+      "AonTimerAonAonTimerRstReq": 3,
+      "SocProxyRstReqExternal": 4,
+      "MainPwr": 5,
+      "Esc": 6,
+      "Ndm": 7
     }
   },
   "clkmgr": {
@@ -676,6 +686,7 @@
       "MainAes": 1,
       "MainHmac": 2,
       "MainKmac": 3
-    }
+    },
+    "ext_clk_bypass": false
   }
 }

@@ -10,6 +10,7 @@ from those compile-time definitions to the run-time description.
 import re
 import sys
 
+import hjson
 import pytest
 
 from gen_top_host import REPO_TOP, host_description, jtag_idcodes, parse_localparams
@@ -198,3 +199,56 @@ def test_jtag_idcode_selection():
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))
+
+
+def ip_hjson(top: str, ip: str):
+    return hjson.loads((REPO_TOP / f"hw/top_{top}/ip_autogen/{ip}/data/{ip}.hjson").read_text())
+
+
+def ip_param(block, name: str) -> int:
+    return int(next(p for p in block["param_list"] if p["name"] == name)["default"])
+
+
+def test_reset_info(top):
+    """Each reset cause has its own bit, the hardware requests fill HW_REQ, and the power
+    manager's internal and debug requests are at the indices of its Reset*Idx parameters."""
+    name, desc = top
+    bits = desc["rstmgr"]["reset_info"]
+    assert sorted(bits.values()) == list(range(len(bits)))
+    assert [bits[c] for c in ("Por", "LowPowerExit", "SwReset")] == [0, 1, 2]
+
+    reset_info = next(r for r in ip_hjson(name, "rstmgr")["registers"]
+                      if r.get("name") == "RESET_INFO")
+    hw_req = next(f for f in reset_info["fields"] if f["name"] == "HW_REQ")
+    msb, lsb = (int(b) for b in hw_req["bits"].split(":"))
+    assert lsb == 3 and msb == len(bits) - 1
+
+    pwrmgr = ip_hjson(name, "pwrmgr")
+    for request, param in (("MainPwr", "ResetMainPwrIdx"), ("Esc", "ResetEscIdx"),
+                           ("Ndm", "ResetNdmIdx")):
+        assert bits[request] == 3 + ip_param(pwrmgr, param), request
+    for request, index in desc["pwrmgr"]["reset_requests"].items():
+        assert bits[request] == 3 + index, request
+
+
+# The RESET_INFO bits that sw/device/lib/dif/dif_rstmgr.h defines for each top.
+DIF_RESET_INFO = {
+    "egret": {"SysrstCtrlAonRstReq": 3, "AonTimerAonAonTimerRstReq": 4},
+    "dragonfly": {"AonTimerAonAonTimerRstReq": 3, "SocProxyRstReqExternal": 4},
+}
+
+
+def test_reset_info_dif(top):
+    name, desc = top
+    if name not in DIF_RESET_INFO:
+        pytest.skip(f"dif_rstmgr.h does not support {name}")
+    bits = desc["rstmgr"]["reset_info"]
+    expected = dict(DIF_RESET_INFO[name], MainPwr=5, Esc=6, Ndm=7)
+    assert {k: bits[k] for k in expected} == expected
+
+
+def test_ext_clk_bypass(top):
+    name, desc = top
+    has_extclk = any(r.get("name") == "EXTCLK_CTRL"
+                     for r in ip_hjson(name, "clkmgr")["registers"])
+    assert desc["clkmgr"]["ext_clk_bypass"] == has_extclk
