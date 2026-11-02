@@ -26,7 +26,6 @@ use ot_hal::dif::lc_ctrl::{
     DifLcCtrlState, DifLcCtrlToken, LcCtrlReg, LcCtrlStatus, LcCtrlTransitionCmd,
     LcCtrlTransitionRegwen,
 };
-use ot_hal::dif::rstmgr::DifRstmgrResetInfo;
 use ot_hal::util::multibits::MultiBitBool8;
 
 /// Timeout waiting for the chip to reset and perform an RMA
@@ -85,7 +84,8 @@ fn test_no_rma_command(transport: &TransportWrapper) -> anyhow::Result<()> {
     log::info!("Waiting for reset reasons over the console...");
 
     // Strings expected from the console representing success or failure.
-    let expected_bitfield = u32::from(DifRstmgrResetInfo::Por) | u32::from(DifRstmgrResetInfo::Sw);
+    let top = transport.top()?;
+    let expected_bitfield = top.reset_info_mask("Por")? | top.reset_info_mask("SwReset")?;
     let exit_success =
         Regex::new(format!("reset_info_bitfield: 0x{expected_bitfield:x}\r\n").as_str())
             .context("failed to build regex")?;

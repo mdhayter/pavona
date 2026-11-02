@@ -29,8 +29,13 @@ pub enum ClockSpeed {
 pub struct ExternalClock;
 
 impl ExternalClock {
-    /// Returns the base address of the clock manager.
+    /// Returns the base address of the clock manager, if it supports external clock bypass.
     fn clkmgr_base_addr(top: &TopDescription) -> Result<u32, ExternalClockError> {
+        if !top.clkmgr.ext_clk_bypass {
+            return Err(ExternalClockError::Unsupported {
+                top: top.name.clone(),
+            });
+        }
         top.base_addr("clkmgr_aon")
             .map(|addr| addr as u32)
             .map_err(|source| ExternalClockError::Top { source })
@@ -122,6 +127,9 @@ impl ExternalClock {
 pub enum ExternalClockError {
     #[error("failed to find clkmgr in the top description")]
     Top { source: anyhow::Error },
+
+    #[error("the clock manager of top {top} does not support external clock bypass")]
+    Unsupported { top: String },
 
     #[error("failed to communicate over JTAG")]
     Jtag { source: anyhow::Error },
