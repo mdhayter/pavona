@@ -105,7 +105,7 @@ fn asm_watchdog_bite(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
 
     // Check that the reset is caused by watchdog.
     log::info!("RESET_INFO={:#x}", reset_info);
-    assert!(reset_info & u32::from(ot_hal::dif::rstmgr::DifRstmgrResetInfo::Watchdog) != 0);
+    assert!(reset_info & top.reset_info_mask("AonTimerAonAonTimerRstReq")? != 0);
 
     dbg.disconnect()?;
     Ok(())

@@ -5,9 +5,7 @@
 
 use anyhow::{Result, bail};
 
-use ot_hal::dif::rstmgr::{
-    DifRstmgrResetInfo, RstmgrAlertInfoCtrl, RstmgrCpuInfoCtrl, RstmgrCpuRegwen, RstmgrReg,
-};
+use ot_hal::dif::rstmgr::{RstmgrAlertInfoCtrl, RstmgrCpuInfoCtrl, RstmgrCpuRegwen, RstmgrReg};
 
 use crate::app::TransportWrapper;
 use crate::io::jtag::{JtagParams, JtagTap};
@@ -93,7 +91,8 @@ pub fn read_alert_crashdump_data(
 ///
 /// Assumes we are already in a TEST_UNLOCKED* state, and TAP straps are cleared.
 pub fn read_reset_reason(transport: &TransportWrapper, jtag_params: &JtagParams) -> Result<()> {
-    let rstmgr = transport.top()?.base_addr("rstmgr_aon")? as u32;
+    let top = transport.top()?;
+    let rstmgr = top.base_addr("rstmgr_aon")? as u32;
     transport.pin_strapping("PINMUX_TAP_RISCV")?.apply()?;
     let mut jtag = jtag_params.create(transport)?.connect(JtagTap::RiscvTap)?;
 
@@ -101,44 +100,13 @@ pub fn read_reset_reason(transport: &TransportWrapper, jtag_params: &JtagParams)
     jtag.read_memory32(rstmgr + RstmgrReg::ResetInfo as u32, &mut buf)?;
     let reset_reason = buf[0];
 
+    // The reset causes of the top, in RESET_INFO bit order.
+    let mut causes: Vec<_> = top.rstmgr.reset_info.iter().collect();
+    causes.sort_by_key(|&(_, bit)| bit);
     log::info!("Reset Reasons:");
-    log::info!(
-        "  PoR           = {:?}",
-        (reset_reason & u32::from(DifRstmgrResetInfo::Por)) != 0
-    );
-    log::info!(
-        "  LowPowerExit  = {:?}",
-        (reset_reason & u32::from(DifRstmgrResetInfo::LowPowerExit)) != 0
-    );
-    log::info!(
-        "  Sw            = {:?}",
-        (reset_reason & u32::from(DifRstmgrResetInfo::Sw)) != 0
-    );
-    log::info!(
-        "  HwReq         = {:?}",
-        (reset_reason & u32::from(DifRstmgrResetInfo::HwReq)) != 0
-    );
-    #[cfg(feature = "egret")]
-    log::info!(
-        "  SysRstCtrl    = {:?}",
-        (reset_reason & u32::from(DifRstmgrResetInfo::SysRstCtrl)) != 0
-    );
-    log::info!(
-        "  Watchdog      = {:?}",
-        (reset_reason & u32::from(DifRstmgrResetInfo::Watchdog)) != 0
-    );
-    log::info!(
-        "  PowerUnstable = {:?}",
-        (reset_reason & u32::from(DifRstmgrResetInfo::PowerUnstable)) != 0
-    );
-    log::info!(
-        "  Escalation    = {:?}",
-        (reset_reason & u32::from(DifRstmgrResetInfo::Escalation)) != 0
-    );
-    log::info!(
-        "  Ndm           = {:?}",
-        (reset_reason & u32::from(DifRstmgrResetInfo::Ndm)) != 0
-    );
+    for (name, bit) in causes {
+        log::info!("  {name:<26} = {:?}", (reset_reason & (1 << bit)) != 0);
+    }
 
     transport.pin_strapping("PINMUX_TAP_RISCV")?.remove()?;
     jtag.disconnect()?;
