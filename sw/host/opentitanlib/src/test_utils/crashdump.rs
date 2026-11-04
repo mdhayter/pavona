@@ -5,8 +5,6 @@
 
 use anyhow::{Result, bail};
 
-use ot_hal::dif::rstmgr::{RstmgrAlertInfoCtrl, RstmgrCpuInfoCtrl, RstmgrCpuRegwen, RstmgrReg};
-
 use crate::app::TransportWrapper;
 use crate::io::jtag::{JtagParams, JtagTap};
 
@@ -17,7 +15,12 @@ pub fn read_cpu_crashdump_data(
     transport: &TransportWrapper,
     jtag_params: &JtagParams,
 ) -> Result<()> {
-    let rstmgr = transport.top()?.base_addr("rstmgr_aon")? as u32;
+    let top = transport.top()?;
+    let rstmgr = top.base_addr("rstmgr_aon")? as u32;
+    let reg = |name| -> Result<u32> { Ok(rstmgr + top.register_offset("rstmgr", name)?) };
+    let regwen_en = top.field_mask("rstmgr", "CPU_REGWEN", "EN")?;
+    let ctrl_en = top.field_mask("rstmgr", "CPU_INFO_CTRL", "EN")?;
+    let ctrl_index = top.field("rstmgr", "CPU_INFO_CTRL", "INDEX")?;
     transport.pin_strapping("PINMUX_TAP_RISCV")?.apply()?;
     let mut jtag = jtag_params.create(transport)?.connect(JtagTap::RiscvTap)?;
 
@@ -25,21 +28,18 @@ pub fn read_cpu_crashdump_data(
     let mut buf = [0u32];
 
     // Make sure that CPU_INFO is writable.
-    jtag.read_memory32(rstmgr + RstmgrReg::CpuRegwen as u32, &mut buf)?;
-    if buf[0] & RstmgrCpuRegwen::EN == 0 {
+    jtag.read_memory32(reg("CPU_REGWEN")?, &mut buf)?;
+    if buf[0] & regwen_en == 0 {
         bail!("CPU_REGWEN.EN is 0, cannot read CPU crash dump.");
     }
 
     let mut cpu_crashdump_info = [0u32; 16];
-    jtag.read_memory32(rstmgr + RstmgrReg::CpuInfoAttr as u32, &mut buf)?;
+    jtag.read_memory32(reg("CPU_INFO_ATTR")?, &mut buf)?;
     let len = buf[0];
     log::info!("CPU Crash Dump Info ({:?} words):", len);
     for i in 0..len {
-        jtag.write_memory32(
-            rstmgr + RstmgrReg::CpuInfoCtrl as u32,
-            &[RstmgrCpuInfoCtrl::INDEX.emplace(i) | RstmgrCpuInfoCtrl::EN],
-        )?;
-        jtag.read_memory32(rstmgr + RstmgrReg::CpuInfo as u32, &mut buf)?;
+        jtag.write_memory32(reg("CPU_INFO_CTRL")?, &[ctrl_index.emplace(i) | ctrl_en])?;
+        jtag.read_memory32(reg("CPU_INFO")?, &mut buf)?;
         cpu_crashdump_info[i as usize] = buf[0];
     }
     log::info!("  Current MTVAL         = 0x{:x?}", cpu_crashdump_info[0]);
@@ -64,20 +64,21 @@ pub fn read_alert_crashdump_data(
     transport: &TransportWrapper,
     jtag_params: &JtagParams,
 ) -> Result<()> {
-    let rstmgr = transport.top()?.base_addr("rstmgr_aon")? as u32;
+    let top = transport.top()?;
+    let rstmgr = top.base_addr("rstmgr_aon")? as u32;
+    let reg = |name| -> Result<u32> { Ok(rstmgr + top.register_offset("rstmgr", name)?) };
+    let ctrl_en = top.field_mask("rstmgr", "ALERT_INFO_CTRL", "EN")?;
+    let ctrl_index = top.field("rstmgr", "ALERT_INFO_CTRL", "INDEX")?;
     transport.pin_strapping("PINMUX_TAP_RISCV")?.apply()?;
     let mut jtag = jtag_params.create(transport)?.connect(JtagTap::RiscvTap)?;
 
     let mut buf = [0u32];
-    jtag.read_memory32(rstmgr + RstmgrReg::AlertInfoAttr as u32, &mut buf)?;
+    jtag.read_memory32(reg("ALERT_INFO_ATTR")?, &mut buf)?;
     let len = buf[0];
     log::info!("Alert Crash Dump Info ({:?} words):", len);
     for i in 0..len {
-        jtag.write_memory32(
-            rstmgr + RstmgrReg::AlertInfoCtrl as u32,
-            &[RstmgrAlertInfoCtrl::INDEX.emplace(i) | RstmgrAlertInfoCtrl::EN],
-        )?;
-        jtag.read_memory32(rstmgr + RstmgrReg::AlertInfo as u32, &mut buf)?;
+        jtag.write_memory32(reg("ALERT_INFO_CTRL")?, &[ctrl_index.emplace(i) | ctrl_en])?;
+        jtag.read_memory32(reg("ALERT_INFO")?, &mut buf)?;
         log::info!("  Word {:?} = 0x{:x?}", i, buf[0]);
     }
 
@@ -97,7 +98,10 @@ pub fn read_reset_reason(transport: &TransportWrapper, jtag_params: &JtagParams)
     let mut jtag = jtag_params.create(transport)?.connect(JtagTap::RiscvTap)?;
 
     let mut buf = [0u32];
-    jtag.read_memory32(rstmgr + RstmgrReg::ResetInfo as u32, &mut buf)?;
+    jtag.read_memory32(
+        rstmgr + top.register_offset("rstmgr", "RESET_INFO")?,
+        &mut buf,
+    )?;
     let reset_reason = buf[0];
 
     // The reset causes of the top, in RESET_INFO bit order.
