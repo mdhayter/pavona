@@ -825,6 +825,50 @@
     }
   },
   "per_top_used_fields": {
+    "alert_handler": {
+      "CLASSA_CTRL_SHADOWED": {
+        "EN": {
+          "lsb": 0,
+          "width": 1
+        },
+        "LOCK": {
+          "lsb": 1,
+          "width": 1
+        },
+        "EN_E0": {
+          "lsb": 2,
+          "width": 1
+        },
+        "EN_E1": {
+          "lsb": 3,
+          "width": 1
+        },
+        "EN_E2": {
+          "lsb": 4,
+          "width": 1
+        },
+        "EN_E3": {
+          "lsb": 5,
+          "width": 1
+        },
+        "MAP_E0": {
+          "lsb": 6,
+          "width": 2
+        },
+        "MAP_E1": {
+          "lsb": 8,
+          "width": 2
+        },
+        "MAP_E2": {
+          "lsb": 10,
+          "width": 2
+        },
+        "MAP_E3": {
+          "lsb": 12,
+          "width": 2
+        }
+      }
+    },
     "clkmgr": {},
     "otp_ctrl": {
       "DIRECT_ACCESS_CMD": {
@@ -2222,6 +2266,15 @@
       "RvCoreIbexRecovSwErr": "RvCoreIbex",
       "RvCoreIbexFatalHwErr": "RvCoreIbex",
       "RvCoreIbexRecovHwErr": "RvCoreIbex"
+    },
+    "num_classes": 4,
+    "num_phases": 4,
+    "num_local_alerts": 7,
+    "class_values": {
+      "ClassA": 0,
+      "ClassB": 1,
+      "ClassC": 2,
+      "ClassD": 3
     }
   },
   "pinmux": {
