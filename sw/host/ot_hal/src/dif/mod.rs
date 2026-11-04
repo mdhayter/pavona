@@ -52,7 +52,6 @@ pub mod aon_timer;
 pub mod clkmgr;
 pub mod lc_ctrl;
 pub mod otp_ctrl;
-pub mod rstmgr;
 pub mod uart;
 
 #[cfg(not(feature = "scafi_deprecated"))]

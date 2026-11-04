@@ -22,6 +22,9 @@ supports external clock bypass (the EXTCLK registers).
 The register offsets of the IP blocks in REGISTER_IPS are under "per_top_used_regs", by
 block type and register name. A multiregister of several registers is one entry giving the
 offset of the first, the count and the stride (NAME_0, NAME_1, ... in the generated headers).
+The bit fields of the registers in FIELD_REGISTERS are under "per_top_used_fields", by block type,
+register name and field name, as {"lsb", "width"}: host code takes them from here because
+their positions depend on how the block was generated for the top.
 If the OTP controller is generated with ipgen, "otp_ctrl" gives its memory map: the
 partitions and items, with their byte offsets and sizes in OTP.
 
@@ -68,6 +71,11 @@ REGISTER_IPS = [
     "alert_handler", "flash_ctrl", "gpio", "otp_ctrl", "pinmux", "pwm", "pwrmgr", "rstmgr",
     "sensor_ctrl",
 ]
+# The registers whose fields are under "per_top_used_fields", by IP block type.
+FIELD_REGISTERS = {
+    "otp_ctrl": ["DIRECT_ACCESS_CMD", "STATUS"],
+    "rstmgr": ["ALERT_INFO_CTRL", "CPU_INFO_CTRL", "CPU_REGWEN"],
+}
 # The clock manager's default for ext_clk_bypass (hw/ip_templates/clkmgr/data/
 # clkmgr.tpldesc.hjson).
 CLKMGR_EXT_CLK_BYPASS_DEFAULT = True
@@ -213,6 +221,23 @@ def register_offsets(block) -> Dict[str, object]:
     return offsets
 
 
+def register_fields(block, names: List[str]) -> Dict[str, Dict[str, Dict[str, int]]]:
+    """Return the fields of the named registers of an IP block with one register block, as
+    {"lsb", "width"} by field name. Registers the block doesn't have are left out (Scafi's
+    reset manager has no alert crash dump registers)."""
+    (reg_block, ) = block.reg_blocks.values()
+    regs = {reg.name: reg for reg in reg_block.flat_regs}
+    fields = {}
+    for name in names:
+        if name not in regs:
+            continue
+        fields[name] = {
+            field.name: {"lsb": field.bits.lsb, "width": field.bits.width()}
+            for field in regs[name].fields
+        }
+    return fields
+
+
 def load_otp_mmap(completecfg: ConfigT, repo_top: Path) -> Optional[Dict[str, object]]:
     """Load the OTP memory map of the top's OTP controller from its ipgen configuration
     (hw/top_<top>/ip_autogen/otp_ctrl/data/top_<top>_otp_ctrl.ipconfig.hjson). Returns None
@@ -296,6 +321,10 @@ def host_description(completecfg: ConfigT, name_to_block: IpBlocksT,
     desc["per_top_used_regs"] = {
         ip: register_offsets(name_to_block[ip])
         for ip in REGISTER_IPS if ip in name_to_block
+    }
+    desc["per_top_used_fields"] = {
+        ip: register_fields(name_to_block[ip], names)
+        for ip, names in FIELD_REGISTERS.items() if ip in name_to_block
     }
     if otp_mmap is not None:
         desc["otp_ctrl"] = otp_map(otp_mmap)
