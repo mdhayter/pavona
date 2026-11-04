@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -120,6 +121,7 @@ rust_bindgen_library(
         "--allowlist-var=CSRNG_.*_REG_OFFSET",
         "--allowlist-type=dif_lc_ctrl_state",
         "--allowlist-type=dif_lc_ctrl_token",
+        "--allowlist-type=dif_pinmux_pad_attr_flags",
         "--allowlist-var=EDN_.*_REG_OFFSET",
         "--allowlist-var=ENTROPY_SRC_.*_REG_OFFSET",
         "--allowlist-var=FLASH_CTRL_.*_REG_OFFSET",

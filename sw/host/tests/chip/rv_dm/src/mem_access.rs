@@ -17,7 +17,7 @@ use opentitanlib::test_utils::init::InitializeTest;
 use opentitanlib::uart::console::UartConsole;
 use opentitanlib::util::parse_int::ParseInt;
 
-use ot_bindgen_dif as dif;
+use ot_hal::dif::acc_regs;
 
 #[derive(Debug, Parser)]
 struct Opts {
@@ -99,13 +99,13 @@ fn test_mem_access(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
         ),
         (
             "acc_imem",
-            top.base_addr("acc")? as u32 + dif::ACC_IMEM_REG_OFFSET,
-            dif::ACC_IMEM_SIZE_BYTES,
+            top.base_addr("acc")? as u32 + acc_regs::ACC_IMEM_REG_OFFSET as u32,
+            acc_regs::ACC_IMEM_SIZE_BYTES,
         ),
         (
             "acc_dmem",
-            top.base_addr("acc")? as u32 + dif::ACC_DMEM_REG_OFFSET,
-            dif::ACC_DMEM_SIZE_BYTES,
+            top.base_addr("acc")? as u32 + acc_regs::ACC_DMEM_REG_OFFSET as u32,
+            acc_regs::ACC_DMEM_SIZE_BYTES,
         ),
     ];
 
