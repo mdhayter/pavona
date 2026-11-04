@@ -129,6 +129,28 @@
     }
   },
   "per_top_used_regs": {
+    "clkmgr": {
+      "ALERT_TEST": 0,
+      "EXTCLK_CTRL_REGWEN": 4,
+      "EXTCLK_CTRL": 8,
+      "EXTCLK_STATUS": 12,
+      "JITTER_REGWEN": 16,
+      "JITTER_ENABLE": 20,
+      "CLK_ENABLES": 24,
+      "CLK_HINTS": 28,
+      "CLK_HINTS_STATUS": 32,
+      "MEASURE_CTRL_REGWEN": 36,
+      "IO_MEAS_CTRL_EN": 40,
+      "IO_MEAS_CTRL_SHADOWED": 44,
+      "IO_DIV4_MEAS_CTRL_EN": 48,
+      "IO_DIV4_MEAS_CTRL_SHADOWED": 52,
+      "MAIN_MEAS_CTRL_EN": 56,
+      "MAIN_MEAS_CTRL_SHADOWED": 60,
+      "USB_MEAS_CTRL_EN": 64,
+      "USB_MEAS_CTRL_SHADOWED": 68,
+      "RECOV_ERR_CODE": 72,
+      "FATAL_ERR_CODE": 76
+    },
     "flash_ctrl": {
       "INTR_STATE": 0,
       "INTR_ENABLE": 4,
@@ -393,6 +415,30 @@
     }
   },
   "per_top_used_fields": {
+    "clkmgr": {
+      "EXTCLK_CTRL": {
+        "SEL": {
+          "lsb": 0,
+          "width": 4
+        },
+        "HI_SPEED_SEL": {
+          "lsb": 4,
+          "width": 4
+        }
+      },
+      "EXTCLK_CTRL_REGWEN": {
+        "EN": {
+          "lsb": 0,
+          "width": 1
+        }
+      },
+      "EXTCLK_STATUS": {
+        "ACK": {
+          "lsb": 0,
+          "width": 4
+        }
+      }
+    },
     "rstmgr": {
       "CPU_INFO_CTRL": {
         "EN": {

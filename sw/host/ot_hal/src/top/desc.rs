@@ -784,6 +784,68 @@ mod tests {
         let scafi = TopDescription::embedded("scafi_deprecated").unwrap()?;
         assert!(scafi.field("rstmgr", "ALERT_INFO_CTRL", "EN").is_err());
         assert!(scafi.field("rstmgr", "CPU_INFO_CTRL", "EN").is_ok());
+        // Only clock managers with external clock bypass have the EXTCLK registers.
+        assert_eq!(egret.register_offset("clkmgr", "EXTCLK_CTRL")?, 8);
+        assert_eq!(
+            egret.field("clkmgr", "EXTCLK_CTRL", "HI_SPEED_SEL")?,
+            BitField::new(4, 4)
+        );
+        let dragonfly = TopDescription::embedded("dragonfly").unwrap()?;
+        assert!(dragonfly.register_offset("clkmgr", "EXTCLK_CTRL").is_err());
+        assert!(dragonfly.field("clkmgr", "EXTCLK_CTRL", "SEL").is_err());
+        Ok(())
+    }
+
+    /// The clock manager's EXTCLK registers and fields match the DIF of Egret, the only top
+    /// with external clock bypass that the host tools are built for.
+    #[cfg(feature = "egret")]
+    #[test]
+    fn extclk_matches_dif() -> Result<()> {
+        use ot_bindgen_dif as dif;
+
+        let desc = TopDescription::embedded("egret").unwrap()?;
+        for (name, offset) in [
+            (
+                "EXTCLK_CTRL_REGWEN",
+                dif::CLKMGR_EXTCLK_CTRL_REGWEN_REG_OFFSET,
+            ),
+            ("EXTCLK_CTRL", dif::CLKMGR_EXTCLK_CTRL_REG_OFFSET),
+            ("EXTCLK_STATUS", dif::CLKMGR_EXTCLK_STATUS_REG_OFFSET),
+        ] {
+            assert_eq!(desc.register_offset("clkmgr", name)?, offset, "{name}");
+        }
+        for (reg, field, offset, mask) in [
+            (
+                "EXTCLK_CTRL_REGWEN",
+                "EN",
+                dif::CLKMGR_EXTCLK_CTRL_REGWEN_EN_BIT,
+                1,
+            ),
+            (
+                "EXTCLK_CTRL",
+                "SEL",
+                dif::CLKMGR_EXTCLK_CTRL_SEL_OFFSET,
+                dif::CLKMGR_EXTCLK_CTRL_SEL_MASK,
+            ),
+            (
+                "EXTCLK_CTRL",
+                "HI_SPEED_SEL",
+                dif::CLKMGR_EXTCLK_CTRL_HI_SPEED_SEL_OFFSET,
+                dif::CLKMGR_EXTCLK_CTRL_HI_SPEED_SEL_MASK,
+            ),
+            (
+                "EXTCLK_STATUS",
+                "ACK",
+                dif::CLKMGR_EXTCLK_STATUS_ACK_OFFSET,
+                dif::CLKMGR_EXTCLK_STATUS_ACK_MASK,
+            ),
+        ] {
+            assert_eq!(
+                desc.field_mask("clkmgr", reg, field)?,
+                mask << offset,
+                "{reg}.{field}"
+            );
+        }
         Ok(())
     }
 
