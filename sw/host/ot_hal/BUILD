@@ -8,6 +8,7 @@ load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_library", "rust_test")
 load("//hw/top:defs.bzl", "ALL_TOPS")
 load("//rules/pavona:hw.bzl", "get_top_attr", "has_top_attr")
+load("//sw/host/ot_hal/bindgen:defs.bzl", "CROSS_CHECK_TOPS")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -102,8 +103,10 @@ rust_library(
         "src/dif/lc_ctrl.rs",
         "src/dif/mod.rs",
         "src/dif/otp_ctrl.rs",
+        "src/dif/pinmux.rs",
         "src/dif/uart.rs",
         "src/lib.rs",
+        # Compiled only by the `ot_hal_<top>_test`s; see `top::autogen`.
         "src/top/autogen/mod.rs",
         "src/top/desc.rs",
         "src/top/mod.rs",
@@ -113,24 +116,12 @@ rust_library(
         "src/util/multibits.rs",
         "src/util/unknown.rs",
         ":embedded_host_descs",
-    ] + [":{}_regs".format(ip) for ip in FIXED_IPS] + select({
-        "//sw/device:is_scafi_deprecated": [],
-        "//hw/top:egret": [
-            "src/dif/pinmux.rs",
-            "src/top/autogen/egret.rs",
-        ],
-        "//hw/top:dragonfly": [
-            "src/dif/pinmux.rs",
-            "src/top/autogen/dragonfly.rs",
-        ],
-    }),
+    ] + [":{}_regs".format(ip) for ip in FIXED_IPS] + [
+        "src/top/autogen/{}.rs".format(top)
+        for top in CROSS_CHECK_TOPS
+    ],
     # Embedded by `top::desc` whichever top is selected.
     compile_data = HOST_DESCS.values(),
-    crate_features = select({
-        "//sw/device:is_scafi_deprecated": ["scafi_deprecated"],
-        "//hw/top:egret": ["egret"],
-        "//hw/top:dragonfly": ["dragonfly"],
-    }),
     rustc_env = {
         "top_{}_host_desc".format(name): "$(location {})".format(label)
         for name, label in HOST_DESCS.items()
@@ -144,22 +135,28 @@ rust_library(
         "@crate_index//:serde_json",
         "@crate_index//:strum",
         "@crate_index//:thiserror",
-    ] + select({
-        "//hw/top:egret": ["//hw/top_egret/sw/autogen/chip:top_egret"],
-        "//hw/top:dragonfly": ["//hw/top_dragonfly/sw/autogen/chip:top_dragonfly"],
-    }),
+    ],
 )
 
 rust_test(
     name = "ot_hal_test",
     crate = ":ot_hal",
-    # Not inherited from the crate; the top checks in `top::desc` need them.
-    crate_features = select({
-        "//sw/device:is_scafi_deprecated": ["scafi_deprecated"],
-        "//hw/top:egret": ["egret"],
-        "//hw/top:dragonfly": ["dragonfly"],
-    }),
 )
+
+# For each top in CROSS_CHECK_TOPS, the tests again, plus the checks in `top::desc` of that top's
+# description against its DIF and generated constants. The crate feature names the top.
+[
+    rust_test(
+        name = "ot_hal_{}_test".format(top),
+        crate = ":ot_hal",
+        crate_features = [top],
+        deps = [
+            "//hw/top_{0}/sw/autogen/chip:top_{0}".format(top),
+            "//sw/host/ot_hal/bindgen:top_dif_{}".format(top),
+        ],
+    )
+    for top in CROSS_CHECK_TOPS
+]
 
 rust_doc(
     name = "ot_hal_doc",
