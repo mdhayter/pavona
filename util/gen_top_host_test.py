@@ -13,7 +13,7 @@ import sys
 import hjson
 import pytest
 
-from gen_top_host import (REPO_TOP, host_description, jtag_idcodes, load_otp_mmap,
+from gen_top_host import (FIELD_REGISTERS, REPO_TOP, host_description, jtag_idcodes, load_otp_mmap,
                           parse_localparams)
 from topgen.lib import load_completecfg_and_blocks
 
@@ -288,6 +288,37 @@ def test_registers(top):
     assert registers["DIRECT_ACCESS_CMD"] == registers["DIRECT_ACCESS_REGWEN"] + 4
     num_errors = ip_param(block, "NumErrorEntries")
     assert registers["ERR_CODE"] == {"offset": 0x18, "count": num_errors, "stride": 4}
+
+
+def bits_value(expr: str, block) -> int:
+    """Evaluate a field bit index such as "4+IdxWidth-1", with the block's parameters."""
+    params = {p["name"]: str(p["default"]) for p in block.get("param_list", []) if "default" in p}
+    expr = re.sub(r"[A-Za-z_]\w*", lambda m: params[m.group(0)], expr)
+    assert re.fullmatch(r"[0-9+\- ]+", expr), expr
+    return eval(expr)
+
+
+def test_fields(top):
+    """The fields of the registers in FIELD_REGISTERS match the top's IP descriptions."""
+    name, desc = top
+    for ip, names in FIELD_REGISTERS.items():
+        if ip not in desc["per_top_used_regs"]:
+            assert ip not in desc["per_top_used_fields"]
+            continue
+        block = ip_hjson(name, ip)
+        registers = block["registers"]
+        if isinstance(registers, dict):  # By register block, as in otp_ctrl ("core").
+            (registers, ) = registers.values()
+        regs = {r["name"]: r for r in registers if "name" in r}
+        assert set(desc["per_top_used_fields"][ip]) == set(names) & set(regs), f"{name} {ip}"
+        for reg in desc["per_top_used_fields"][ip]:
+            expected = {}
+            for field in regs[reg]["fields"]:
+                msb, _, lsb = str(field["bits"]).partition(":")
+                msb = bits_value(msb, block)
+                lsb = bits_value(lsb, block) if lsb else msb
+                expected[field.get("name", reg)] = {"lsb": lsb, "width": msb - lsb + 1}
+            assert desc["per_top_used_fields"][ip][reg] == expected, f"{name} {ip}.{reg}"
 
 
 def test_multiregisters(top):

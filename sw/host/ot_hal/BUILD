@@ -100,7 +100,6 @@ rust_library(
         "src/dif/lc_ctrl.rs",
         "src/dif/mod.rs",
         "src/dif/otp_ctrl.rs",
-        "src/dif/rstmgr.rs",
         "src/dif/uart.rs",
         "src/lib.rs",
         "src/top/autogen/mod.rs",

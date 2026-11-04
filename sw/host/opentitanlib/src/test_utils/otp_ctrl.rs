@@ -15,11 +15,12 @@
 use std::mem;
 use std::time::Duration;
 
-use anyhow::{Context, bail};
+use anyhow::bail;
 use thiserror::Error;
 
-use ot_hal::dif::otp_ctrl::{DirectAccessCmd, Granularity, OtpCtrlStatus};
+use ot_hal::dif::otp_ctrl::Granularity;
 use ot_hal::top::TopDescription;
+use ot_hal::util::bitfield::BitField;
 
 use crate::io::jtag::Jtag;
 use crate::test_utils::poll;
@@ -176,6 +177,14 @@ struct OtpDai {
     address: u32,
     wdata: [u32; 2],
     rdata: [u32; 2],
+    /// DIRECT_ACCESS_CMD values that start a read, a write and a digest calculation.
+    cmd_rd: u32,
+    cmd_wr: u32,
+    cmd_digest: u32,
+    /// STATUS masks: DAI_IDLE, the error fields (`*_ERROR`) and all the fields.
+    status_dai_idle: u32,
+    status_errors: u32,
+    status_fields: u32,
 }
 impl OtpDai {
     fn new(top: &TopDescription) -> OtpDaiResult<Self> {
@@ -183,12 +192,27 @@ impl OtpDai {
             let base = top.base_addr("otp_ctrl_core")? as u32;
             let reg =
                 |name| -> anyhow::Result<u32> { Ok(base + top.register_offset("otp_ctrl", name)?) };
+            let cmd_field = |name| top.field_mask("otp_ctrl", "DIRECT_ACCESS_CMD", name);
+            let status_errors = top
+                .per_top_used_fields
+                .get("otp_ctrl")
+                .and_then(|regs| regs.get("STATUS"))
+                .into_iter()
+                .flatten()
+                .filter(|(name, _)| name.ends_with("_ERROR"))
+                .fold(0, |mask, (_, &field)| mask | BitField::from(field).mask());
             Ok(Self {
                 status: reg("STATUS")?,
                 cmd: reg("DIRECT_ACCESS_CMD")?,
                 address: reg("DIRECT_ACCESS_ADDRESS")?,
                 wdata: [reg("DIRECT_ACCESS_WDATA_0")?, reg("DIRECT_ACCESS_WDATA_1")?],
                 rdata: [reg("DIRECT_ACCESS_RDATA_0")?, reg("DIRECT_ACCESS_RDATA_1")?],
+                cmd_rd: cmd_field("RD")?,
+                cmd_wr: cmd_field("WR")?,
+                cmd_digest: cmd_field("DIGEST")?,
+                status_dai_idle: top.field_mask("otp_ctrl", "STATUS", "DAI_IDLE")?,
+                status_errors,
+                status_fields: top.fields_mask("otp_ctrl", "STATUS")?,
             })
         };
         addrs().map_err(|source| OtpDaiError::Top { source })
@@ -217,7 +241,7 @@ impl OtpDai {
 
         // Trigger a read command.
         let dai_cmd_addr = self.cmd;
-        jtag.write_memory32(dai_cmd_addr, &[DirectAccessCmd::RD.bits()])
+        jtag.write_memory32(dai_cmd_addr, &[self.cmd_rd])
             .map_err(|source| OtpDaiError::Jtag { source })?;
 
         self.wait_for_idle(jtag)?;
@@ -264,7 +288,7 @@ impl OtpDai {
 
         // Trigger a write command.
         let dai_cmd_addr = self.cmd;
-        jtag.write_memory32(dai_cmd_addr, &[DirectAccessCmd::WR.bits()])
+        jtag.write_memory32(dai_cmd_addr, &[self.cmd_wr])
             .map_err(|source| OtpDaiError::Jtag { source })?;
 
         self.wait_for_idle(jtag)?;
@@ -283,7 +307,7 @@ impl OtpDai {
 
         // Trigger a digest calculation command.
         let dai_cmd_addr = self.cmd;
-        jtag.write_memory32(dai_cmd_addr, &[DirectAccessCmd::DIGEST.bits()])
+        jtag.write_memory32(dai_cmd_addr, &[self.cmd_digest])
             .map_err(|source| OtpDaiError::Jtag { source })?;
 
         self.wait_for_idle(jtag)?;
@@ -301,14 +325,15 @@ impl OtpDai {
             jtag.read_memory32(otp_status_addr, &mut status)
                 .map_err(|source| OtpDaiError::Jtag { source })?;
 
-            let status =
-                OtpCtrlStatus::from_bits(status[0]).context("status has invalid bits set")?;
-
-            if status.intersects(OtpCtrlStatus::ERRORS) {
+            let status = status[0];
+            if status & !self.status_fields != 0 {
+                bail!("status {status:#b} has invalid bits set");
+            }
+            if status & self.status_errors != 0 {
                 bail!("status {status:#b} has error bits set");
             }
 
-            Ok(status.contains(OtpCtrlStatus::DAI_IDLE))
+            Ok(status & self.status_dai_idle != 0)
         })
         .map_err(|source| OtpDaiError::WaitForIdle { source })
     }

@@ -783,6 +783,98 @@
       }
     }
   },
+  "per_top_used_fields": {
+    "otp_ctrl": {
+      "DIRECT_ACCESS_CMD": {
+        "RD": {
+          "lsb": 0,
+          "width": 1
+        },
+        "WR": {
+          "lsb": 1,
+          "width": 1
+        },
+        "DIGEST": {
+          "lsb": 2,
+          "width": 1
+        },
+        "ZEROIZE": {
+          "lsb": 3,
+          "width": 1
+        }
+      },
+      "STATUS": {
+        "PARTITION_ERROR": {
+          "lsb": 0,
+          "width": 1
+        },
+        "DAI_ERROR": {
+          "lsb": 1,
+          "width": 1
+        },
+        "LCI_ERROR": {
+          "lsb": 2,
+          "width": 1
+        },
+        "TIMEOUT_ERROR": {
+          "lsb": 3,
+          "width": 1
+        },
+        "LFSR_FSM_ERROR": {
+          "lsb": 4,
+          "width": 1
+        },
+        "SCRAMBLING_FSM_ERROR": {
+          "lsb": 5,
+          "width": 1
+        },
+        "KEY_DERIV_FSM_ERROR": {
+          "lsb": 6,
+          "width": 1
+        },
+        "BUS_INTEG_ERROR": {
+          "lsb": 7,
+          "width": 1
+        },
+        "DAI_IDLE": {
+          "lsb": 8,
+          "width": 1
+        },
+        "CHECK_PENDING": {
+          "lsb": 9,
+          "width": 1
+        }
+      }
+    },
+    "rstmgr": {
+      "ALERT_INFO_CTRL": {
+        "EN": {
+          "lsb": 0,
+          "width": 1
+        },
+        "INDEX": {
+          "lsb": 4,
+          "width": 4
+        }
+      },
+      "CPU_INFO_CTRL": {
+        "EN": {
+          "lsb": 0,
+          "width": 1
+        },
+        "INDEX": {
+          "lsb": 4,
+          "width": 4
+        }
+      },
+      "CPU_REGWEN": {
+        "EN": {
+          "lsb": 0,
+          "width": 1
+        }
+      }
+    }
+  },
   "otp_ctrl": {
     "partitions": {
       "VENDOR_TEST": {

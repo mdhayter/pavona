@@ -14,6 +14,8 @@ use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::path::Path;
 
+use crate::util::bitfield::BitField;
+
 /// Environment variable naming the top to use when none is given on the command line.
 pub const TOP_ENV_VAR: &str = "TARGET_CHIP_TOP";
 
@@ -193,6 +195,19 @@ pub enum Register {
     },
 }
 
+/// A bit field of a register in the description.
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
+pub struct Field {
+    pub lsb: u32,
+    pub width: u32,
+}
+
+impl From<Field> for BitField {
+    fn from(field: Field) -> BitField {
+        BitField::new(field.lsb, field.width)
+    }
+}
+
 /// The OTP memory map, by the partition and item names of the top's OTP map
 /// (`HW_CFG0`, `DEVICE_ID`).
 #[derive(Clone, Debug, Default, Deserialize)]
@@ -219,6 +234,10 @@ pub struct TopDescription {
     /// multiregister of `ERR_CODE_0`, `ERR_CODE_1`, ...). See `register_offset()`.
     #[serde(default)]
     pub per_top_used_regs: BTreeMap<String, BTreeMap<String, Register>>,
+    /// Fields of the registers whose bit positions host code uses, by block type, register
+    /// and field name (`otp_ctrl`, `STATUS`, `DAI_IDLE`). See `field()`.
+    #[serde(default)]
+    pub per_top_used_fields: BTreeMap<String, BTreeMap<String, BTreeMap<String, Field>>>,
     /// The OTP memory map. Absent on tops whose OTP controller is not generated with ipgen.
     #[serde(default)]
     pub otp_ctrl: Option<OtpCtrl>,
@@ -339,6 +358,39 @@ impl TopDescription {
             return Ok(offset + n * stride);
         }
         bail!("Top {} has no {ip} register {reg:?}", self.name)
+    }
+
+    /// Returns field `field` (`DAI_IDLE`) of register `reg` (`STATUS`) of IP block type
+    /// `ip` (`otp_ctrl`).
+    pub fn field(&self, ip: &str, reg: &str, field: &str) -> Result<BitField> {
+        match self
+            .per_top_used_fields
+            .get(ip)
+            .and_then(|regs| regs.get(reg))
+            .and_then(|fields| fields.get(field))
+        {
+            Some(&field) => Ok(field.into()),
+            None => bail!("Top {} has no {ip} register field {reg}.{field}", self.name),
+        }
+    }
+
+    /// Returns the mask of field `field` of register `reg` of IP block type `ip`.
+    pub fn field_mask(&self, ip: &str, reg: &str, field: &str) -> Result<u32> {
+        Ok(self.field(ip, reg, field)?.mask())
+    }
+
+    /// Returns the mask of all the fields of register `reg` of IP block type `ip`.
+    pub fn fields_mask(&self, ip: &str, reg: &str) -> Result<u32> {
+        match self
+            .per_top_used_fields
+            .get(ip)
+            .and_then(|regs| regs.get(reg))
+        {
+            Some(fields) => Ok(fields
+                .values()
+                .fold(0, |mask, &field| mask | BitField::from(field).mask())),
+            None => bail!("Top {} has no fields for {ip} register {reg}", self.name),
+        }
     }
 
     fn otp_map(&self) -> Result<&OtpCtrl> {
@@ -577,6 +629,161 @@ mod tests {
                 "{name}"
             );
         }
+        Ok(())
+    }
+
+    /// The otp_ctrl and rstmgr fields and rstmgr registers of the top the host tools are built
+    /// for match its DIF, for the ones that host code used from the DIF.
+    #[cfg(any(feature = "egret", feature = "dragonfly"))]
+    #[test]
+    fn fields_match_dif() -> Result<()> {
+        use ot_bindgen_dif as dif;
+
+        let desc = TopDescription::embedded(crate::top::BUILT_FOR.unwrap()).unwrap()?;
+        for (ip, reg, field, value) in [
+            (
+                "otp_ctrl",
+                "DIRECT_ACCESS_CMD",
+                "DIGEST",
+                dif::OTP_CTRL_DIRECT_ACCESS_CMD_DIGEST_BIT,
+            ),
+            (
+                "otp_ctrl",
+                "DIRECT_ACCESS_CMD",
+                "RD",
+                dif::OTP_CTRL_DIRECT_ACCESS_CMD_RD_BIT,
+            ),
+            (
+                "otp_ctrl",
+                "DIRECT_ACCESS_CMD",
+                "WR",
+                dif::OTP_CTRL_DIRECT_ACCESS_CMD_WR_BIT,
+            ),
+            (
+                "otp_ctrl",
+                "STATUS",
+                "BUS_INTEG_ERROR",
+                dif::OTP_CTRL_STATUS_BUS_INTEG_ERROR_BIT,
+            ),
+            (
+                "otp_ctrl",
+                "STATUS",
+                "CHECK_PENDING",
+                dif::OTP_CTRL_STATUS_CHECK_PENDING_BIT,
+            ),
+            (
+                "otp_ctrl",
+                "STATUS",
+                "DAI_ERROR",
+                dif::OTP_CTRL_STATUS_DAI_ERROR_BIT,
+            ),
+            (
+                "otp_ctrl",
+                "STATUS",
+                "DAI_IDLE",
+                dif::OTP_CTRL_STATUS_DAI_IDLE_BIT,
+            ),
+            (
+                "otp_ctrl",
+                "STATUS",
+                "KEY_DERIV_FSM_ERROR",
+                dif::OTP_CTRL_STATUS_KEY_DERIV_FSM_ERROR_BIT,
+            ),
+            (
+                "otp_ctrl",
+                "STATUS",
+                "LCI_ERROR",
+                dif::OTP_CTRL_STATUS_LCI_ERROR_BIT,
+            ),
+            (
+                "otp_ctrl",
+                "STATUS",
+                "LFSR_FSM_ERROR",
+                dif::OTP_CTRL_STATUS_LFSR_FSM_ERROR_BIT,
+            ),
+            (
+                "otp_ctrl",
+                "STATUS",
+                "PARTITION_ERROR",
+                dif::OTP_CTRL_STATUS_PARTITION_ERROR_BIT,
+            ),
+            (
+                "otp_ctrl",
+                "STATUS",
+                "SCRAMBLING_FSM_ERROR",
+                dif::OTP_CTRL_STATUS_SCRAMBLING_FSM_ERROR_BIT,
+            ),
+            (
+                "otp_ctrl",
+                "STATUS",
+                "TIMEOUT_ERROR",
+                dif::OTP_CTRL_STATUS_TIMEOUT_ERROR_BIT,
+            ),
+            ("rstmgr", "CPU_REGWEN", "EN", dif::RSTMGR_CPU_REGWEN_EN_BIT),
+            (
+                "rstmgr",
+                "CPU_INFO_CTRL",
+                "EN",
+                dif::RSTMGR_CPU_INFO_CTRL_EN_BIT,
+            ),
+            (
+                "rstmgr",
+                "ALERT_INFO_CTRL",
+                "EN",
+                dif::RSTMGR_ALERT_INFO_CTRL_EN_BIT,
+            ),
+        ] {
+            assert_eq!(
+                desc.field(ip, reg, field)?,
+                BitField::new(value, 1),
+                "{reg}.{field}"
+            );
+        }
+        for (reg, offset, mask) in [
+            (
+                "CPU_INFO_CTRL",
+                dif::RSTMGR_CPU_INFO_CTRL_INDEX_OFFSET,
+                dif::RSTMGR_CPU_INFO_CTRL_INDEX_MASK,
+            ),
+            (
+                "ALERT_INFO_CTRL",
+                dif::RSTMGR_ALERT_INFO_CTRL_INDEX_OFFSET,
+                dif::RSTMGR_ALERT_INFO_CTRL_INDEX_MASK,
+            ),
+        ] {
+            let index = desc.field("rstmgr", reg, "INDEX")?;
+            assert_eq!(index.mask(), mask << offset, "{reg}.INDEX");
+        }
+        for (name, offset) in [
+            ("RESET_INFO", dif::RSTMGR_RESET_INFO_REG_OFFSET),
+            ("CPU_REGWEN", dif::RSTMGR_CPU_REGWEN_REG_OFFSET),
+            ("CPU_INFO_CTRL", dif::RSTMGR_CPU_INFO_CTRL_REG_OFFSET),
+            ("CPU_INFO_ATTR", dif::RSTMGR_CPU_INFO_ATTR_REG_OFFSET),
+            ("CPU_INFO", dif::RSTMGR_CPU_INFO_REG_OFFSET),
+            ("ALERT_INFO_CTRL", dif::RSTMGR_ALERT_INFO_CTRL_REG_OFFSET),
+            ("ALERT_INFO_ATTR", dif::RSTMGR_ALERT_INFO_ATTR_REG_OFFSET),
+            ("ALERT_INFO", dif::RSTMGR_ALERT_INFO_REG_OFFSET),
+        ] {
+            assert_eq!(desc.register_offset("rstmgr", name)?, offset, "{name}");
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn embedded_fields() -> Result<()> {
+        let egret = TopDescription::embedded("egret").unwrap()?;
+        assert_eq!(
+            egret.field("rstmgr", "CPU_INFO_CTRL", "INDEX")?,
+            BitField::new(4, 4)
+        );
+        assert_eq!(egret.field_mask("otp_ctrl", "STATUS", "DAI_IDLE")?, 1 << 8);
+        assert_eq!(egret.fields_mask("otp_ctrl", "STATUS")?, 0x3ff);
+        assert!(egret.field("otp_ctrl", "STATUS", "NO_SUCH_FIELD").is_err());
+        assert!(egret.fields_mask("otp_ctrl", "NO_SUCH_REG").is_err());
+        // Scafi's reset manager has no alert crash dump registers.
+        let scafi = TopDescription::embedded("scafi_deprecated").unwrap()?;
+        assert!(scafi.field("rstmgr", "ALERT_INFO_CTRL", "EN").is_err());
+        assert!(scafi.field("rstmgr", "CPU_INFO_CTRL", "EN").is_ok());
         Ok(())
     }
 

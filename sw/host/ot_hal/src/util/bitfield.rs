@@ -1,8 +1,10 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 /// Represents a single field of bits within a u32 word.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct BitField {
     /// Number of bits into the word that the field starts.
     pub offset: u32,

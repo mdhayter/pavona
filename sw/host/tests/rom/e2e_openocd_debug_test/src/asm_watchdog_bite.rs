@@ -69,7 +69,7 @@ fn asm_watchdog_bite(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
 
     // Clear RESET_INFO.
     dbg.write_u32(
-        top.base_addr("rstmgr_aon")? as u32 + ot_hal::dif::rstmgr::RstmgrReg::ResetInfo as u32,
+        top.base_addr("rstmgr_aon")? as u32 + top.register_offset("rstmgr", "RESET_INFO")?,
         0,
     )?;
 
@@ -100,7 +100,7 @@ fn asm_watchdog_bite(opts: &Opts, transport: &TransportWrapper) -> Result<()> {
 
     // Check the reset reason as well
     let reset_info = dbg.read_u32(
-        top.base_addr("rstmgr_aon")? as u32 + ot_hal::dif::rstmgr::RstmgrReg::ResetInfo as u32,
+        top.base_addr("rstmgr_aon")? as u32 + top.register_offset("rstmgr", "RESET_INFO")?,
     )?;
 
     // Check that the reset is caused by watchdog.
