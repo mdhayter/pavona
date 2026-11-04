@@ -46,10 +46,6 @@ pub mod uart_regs;
 pub mod usbdev_regs;
 
 pub mod aon_timer;
-// The "Scafi_Deprecated" variant of the chip doesn't have the same
-// set of CSRs as the "egret" chip.
-#[cfg(not(feature = "scafi_deprecated"))]
-pub mod clkmgr;
 pub mod lc_ctrl;
 pub mod otp_ctrl;
 pub mod uart;

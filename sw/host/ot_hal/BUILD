@@ -114,12 +114,10 @@ rust_library(
     ] + [":{}_regs".format(ip) for ip in FIXED_IPS] + select({
         "//sw/device:is_scafi_deprecated": [],
         "//hw/top:egret": [
-            "src/dif/clkmgr.rs",
             "src/dif/pinmux.rs",
             "src/top/autogen/egret.rs",
         ],
         "//hw/top:dragonfly": [
-            "src/dif/clkmgr.rs",
             "src/dif/pinmux.rs",
             "src/top/autogen/dragonfly.rs",
         ],

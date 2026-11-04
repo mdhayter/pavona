@@ -275,6 +275,7 @@ def test_ext_clk_bypass(top):
     has_extclk = any(r.get("name") == "EXTCLK_CTRL"
                      for r in ip_hjson(name, "clkmgr")["registers"])
     assert desc["clkmgr"]["ext_clk_bypass"] == has_extclk
+    assert ("EXTCLK_CTRL" in desc["per_top_used_fields"]["clkmgr"]) == has_extclk
 
 
 def test_registers(top):
