@@ -31,6 +31,8 @@ pub mod keymgr_dpe_regs;
 #[rustfmt::skip]
 pub mod kmac_regs;
 #[rustfmt::skip]
+pub mod lc_ctrl_regs;
+#[rustfmt::skip]
 pub mod pattgen_regs;
 #[rustfmt::skip]
 pub mod rv_timer_regs;
@@ -38,6 +40,8 @@ pub mod rv_timer_regs;
 pub mod spi_device_regs;
 #[rustfmt::skip]
 pub mod spi_host_regs;
+#[rustfmt::skip]
+pub mod sram_ctrl_regs;
 #[rustfmt::skip]
 pub mod sysrst_ctrl_regs;
 #[rustfmt::skip]

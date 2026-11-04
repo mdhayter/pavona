@@ -1,21 +1,24 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
+
+use super::uart_regs as regs;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u32)]
 pub enum UartReg {
-    IntrState = ot_bindgen_dif::UART_INTR_STATE_REG_OFFSET,
-    IntrEnable = ot_bindgen_dif::UART_INTR_ENABLE_REG_OFFSET,
-    IntrTest = ot_bindgen_dif::UART_INTR_TEST_REG_OFFSET,
-    AlertTest = ot_bindgen_dif::UART_ALERT_TEST_REG_OFFSET,
-    Ctrl = ot_bindgen_dif::UART_CTRL_REG_OFFSET,
-    Status = ot_bindgen_dif::UART_STATUS_REG_OFFSET,
-    Rdata = ot_bindgen_dif::UART_RDATA_REG_OFFSET,
-    Wdata = ot_bindgen_dif::UART_WDATA_REG_OFFSET,
-    FifoCtrl = ot_bindgen_dif::UART_FIFO_CTRL_REG_OFFSET,
-    FifoStatus = ot_bindgen_dif::UART_FIFO_STATUS_REG_OFFSET,
-    Ovrd = ot_bindgen_dif::UART_OVRD_REG_OFFSET,
-    Val = ot_bindgen_dif::UART_VAL_REG_OFFSET,
-    TimeoutCtrl = ot_bindgen_dif::UART_TIMEOUT_CTRL_REG_OFFSET,
+    IntrState = regs::UART_INTR_STATE_REG_OFFSET as u32,
+    IntrEnable = regs::UART_INTR_ENABLE_REG_OFFSET as u32,
+    IntrTest = regs::UART_INTR_TEST_REG_OFFSET as u32,
+    AlertTest = regs::UART_ALERT_TEST_REG_OFFSET as u32,
+    Ctrl = regs::UART_CTRL_REG_OFFSET as u32,
+    Status = regs::UART_STATUS_REG_OFFSET as u32,
+    Rdata = regs::UART_RDATA_REG_OFFSET as u32,
+    Wdata = regs::UART_WDATA_REG_OFFSET as u32,
+    FifoCtrl = regs::UART_FIFO_CTRL_REG_OFFSET as u32,
+    FifoStatus = regs::UART_FIFO_STATUS_REG_OFFSET as u32,
+    Ovrd = regs::UART_OVRD_REG_OFFSET as u32,
+    Val = regs::UART_VAL_REG_OFFSET as u32,
+    TimeoutCtrl = regs::UART_TIMEOUT_CTRL_REG_OFFSET as u32,
 }

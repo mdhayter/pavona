@@ -31,7 +31,6 @@ rust_binary(
     deps = [
         "//sw/host/opentitanlib",
         "//sw/host/ot_hal",
-        "//sw/host/ot_hal/bindgen:dif",
         "@crate_index//:anyhow",
         "@crate_index//:clap",
         "@crate_index//:humantime",
