@@ -1,8 +1,11 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
 """Rules for generating lc_ctrl netlist constants used in SW."""
+
+load("//hw/top:defs.bzl", "pavona_require_ip")
 
 def _lc_raw_unlock_token_impl(ctx):
     output = ctx.actions.declare_file("src/" + ctx.attr.name + ".rs")
@@ -35,7 +38,7 @@ def _lc_raw_unlock_token_impl(ctx):
     )
     return [DefaultInfo(files = depset([output]), runfiles = ctx.runfiles(files = [output]))]
 
-lc_raw_unlock_token = rule(
+_lc_raw_unlock_token = rule(
     implementation = _lc_raw_unlock_token_impl,
     attrs = {
         "src": attr.label(
@@ -65,3 +68,15 @@ lc_raw_unlock_token = rule(
         ),
     },
 )
+
+def lc_raw_unlock_token(name, **kwargs):
+    """Generates the top's raw unlock token as Rust constants.
+
+    The token comes from the top's lc_ctrl secrets, so the target, and anything that uses it,
+    is incompatible with a top without lc_ctrl (skipped there instead of failing to build).
+    """
+    _lc_raw_unlock_token(
+        name = name,
+        target_compatible_with = pavona_require_ip("lc_ctrl"),
+        **kwargs
+    )
