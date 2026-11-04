@@ -31,12 +31,21 @@ pub struct AddrRange {
     pub size_bytes: usize,
 }
 
+/// A device register interface.
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
+pub struct Device {
+    #[serde(flatten)]
+    pub range: AddrRange,
+    /// The IP block type of the device's instance (`uart` for `uart0`).
+    pub ip: String,
+}
+
 /// The device, memory and named subranges (such as `mmio`) of one address space.
 #[derive(Clone, Debug, Default, Deserialize)]
 pub struct AddrSpace {
     /// Device register interfaces, keyed by instance name, with the interface name appended
     /// when the instance has more than one (`uart0`, `lc_ctrl_regs`).
-    pub devices: BTreeMap<String, AddrRange>,
+    pub devices: BTreeMap<String, Device>,
     /// Memories, keyed by instance and memory name (`sram_ctrl_main_ram`).
     pub memories: BTreeMap<String, AddrRange>,
     #[serde(default)]
@@ -46,7 +55,19 @@ pub struct AddrSpace {
 impl AddrSpace {
     /// Looks up a device or memory by name.
     pub fn range(&self, name: &str) -> Option<&AddrRange> {
-        self.devices.get(name).or_else(|| self.memories.get(name))
+        self.devices
+            .get(name)
+            .map(|device| &device.range)
+            .or_else(|| self.memories.get(name))
+    }
+
+    /// Iterates over the devices of IP block type `ip` (`uart`), as (name, device) pairs in
+    /// name order.
+    pub fn devices_of<'a>(&'a self, ip: &'a str) -> impl Iterator<Item = (&'a str, &'a Device)> {
+        self.devices
+            .iter()
+            .filter(move |(_, device)| device.ip == ip)
+            .map(|(name, device)| (name.as_str(), device))
     }
 }
 
@@ -193,7 +214,7 @@ pub struct TopDescription {
     pub pwrmgr: Pwrmgr,
     pub rstmgr: Rstmgr,
     pub clkmgr: Clkmgr,
-    /// Register offsets of the IP blocks whose layouts differ between tops, by block type
+    /// Registers of the IP blocks that host code addresses by register, by block type
     /// (`otp_ctrl`) and register name (`DIRECT_ACCESS_CMD`, or `ERR_CODE` for the
     /// multiregister of `ERR_CODE_0`, `ERR_CODE_1`, ...). See `register_offset()`.
     #[serde(default)]
@@ -268,6 +289,15 @@ impl TopDescription {
             Some(range) => Ok(range),
             None => bail!("Top {} has no device or memory {name:?}", self.name),
         }
+    }
+
+    /// Iterates over the devices of IP block type `ip` (`uart`) in the hart address space, as
+    /// (name, device) pairs in name order.
+    pub fn devices_of<'a>(
+        &'a self,
+        ip: &'a str,
+    ) -> Result<impl Iterator<Item = (&'a str, &'a Device)>> {
+        Ok(self.addr_space(HART_ADDR_SPACE)?.devices_of(ip))
     }
 
     /// Returns the base address of device or memory `name` (`rstmgr_aon`, `sram_ctrl_main_ram`)
@@ -360,6 +390,26 @@ mod tests {
     }
 
     #[test]
+    fn embedded_devices_of() -> Result<()> {
+        let names = |top, ip| -> Result<Vec<String>> {
+            let desc = TopDescription::embedded(top).unwrap()?;
+            Ok(desc
+                .devices_of(ip)?
+                .map(|(name, _)| name.to_string())
+                .collect())
+        };
+        assert_eq!(
+            names("egret", "uart")?,
+            ["uart0", "uart1", "uart2", "uart3"]
+        );
+        assert_eq!(names("egret", "otp_ctrl")?, ["otp_ctrl_core"]);
+        assert_eq!(names("egret", "pinmux")?, ["pinmux_aon"]);
+        assert_eq!(names("dragonfly", "i2c")?, ["i2c0"]);
+        assert!(names("scafi_deprecated", "i2c")?.is_empty());
+        Ok(())
+    }
+
+    #[test]
     fn embedded_reset_info_and_extclk() -> Result<()> {
         let egret = TopDescription::embedded("egret").unwrap()?;
         assert_eq!(egret.reset_info_mask("Por")?, 1 << 0);
@@ -413,15 +463,26 @@ mod tests {
     #[test]
     fn embedded_registers() -> Result<()> {
         let egret = TopDescription::embedded("egret").unwrap()?;
+        assert_eq!(egret.register_offset("pinmux", "MIO_PAD_ATTR_0")?, 1024);
+        assert_eq!(
+            egret.register_offset("pinmux", "MIO_PAD_ATTR_46")?,
+            1024 + 46 * 4
+        );
+        // Past the end of the multiregister, the multiregister itself, and unknown names.
+        assert!(egret.register_offset("pinmux", "MIO_PAD_ATTR_47").is_err());
+        assert!(egret.register_offset("pinmux", "MIO_PAD_ATTR").is_err());
+        assert!(egret.register_offset("pinmux", "NO_SUCH_REG_0").is_err());
+        assert!(egret.register_offset("no_such_ip", "INTR_ENABLE").is_err());
         assert_eq!(
             egret.register_offset("otp_ctrl", "ERR_CODE_12")?,
             0x18 + 12 * 4
         );
-        // Past the end of the multiregister, the multiregister itself, and unknown names.
-        assert!(egret.register_offset("otp_ctrl", "ERR_CODE_99").is_err());
-        assert!(egret.register_offset("otp_ctrl", "ERR_CODE").is_err());
-        assert!(egret.register_offset("otp_ctrl", "NO_SUCH_REG_0").is_err());
-        assert!(egret.register_offset("no_such_ip", "INTR_ENABLE").is_err());
+        assert!(egret.register_offset("pwm", "INVERT").is_ok());
+        // Fixed blocks take their registers from hw/ip (`dif::<ip>_regs`), not the description.
+        assert!(egret.register_offset("uart", "INTR_ENABLE").is_err());
+        let dragonfly = TopDescription::embedded("dragonfly").unwrap()?;
+        assert_eq!(dragonfly.register_offset("pinmux", "MIO_PAD_ATTR_0")?, 180);
+        assert!(dragonfly.register_offset("pwm", "INVERT").is_err());
         Ok(())
     }
 
@@ -657,7 +718,7 @@ mod tests {
                 "SPDX-License-Identifier": "Apache-2.0",
                 "name": "test",
                 "addr_spaces": {"hart": {
-                    "devices": {"uart0": {"base_addr": 4096, "size_bytes": 64}},
+                    "devices": {"uart0": {"base_addr": 4096, "size_bytes": 64, "ip": "uart"}},
                     "memories": {"ram": {"base_addr": 8192, "size_bytes": 1024}},
                     "subranges": {"mmio": {"base_addr": 4096, "size_bytes": 4096}}
                 }},

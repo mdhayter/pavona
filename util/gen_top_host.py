@@ -11,17 +11,17 @@ to a JSON file that host tools can load at run time instead:
     <outdir>/top_<topname>.host.json
 
 The description contains, for each address space, the base address and size of every
-device register block, memory and subrange (such as "mmio"). It also contains the
+device register block, memory and subrange (such as "mmio"), and the IP block type of each
+device ("uart" for uart0). It also contains the
 top's enumerations, using the same names as the generated Rust code: alert handler
 peripherals and alerts, pinmux selections and pads, power manager wakeups and reset
 requests, reset manager software resets and clock manager clocks. For the reset manager
 it gives the bit of each reset cause in RESET_INFO, and for the clock manager whether it
 supports external clock bypass (the EXTCLK registers).
 
-The register offsets of the IP blocks in REGISTER_IPS, whose layouts differ between tops,
-are under "per_top_used_regs", by block type and register name. A multiregister of
-several registers is one entry giving the offset of the first, the count and the stride
-(NAME_0, NAME_1, ... in the generated headers).
+The register offsets of the IP blocks in REGISTER_IPS are under "per_top_used_regs", by
+block type and register name. A multiregister of several registers is one entry giving the
+offset of the first, the count and the stride (NAME_0, NAME_1, ... in the generated headers).
 If the OTP controller is generated with ipgen, "otp_ctrl" gives its memory map: the
 partitions and items, with their byte offsets and sizes in OTP.
 
@@ -39,8 +39,8 @@ from basegen.typing import ConfigT
 import hjson
 
 from reggen.multi_register import MultiRegister
-from topgen.lib import (RustArrayMapping, RustEnum, TopGen, find_module, get_ip_hjson_path,
-                        is_ipgen, load_completecfg_and_blocks)
+from topgen.lib import (RustArrayMapping, RustEnum, TopGen, find_module, find_module_by_name,
+                        get_ip_hjson_path, is_ipgen, load_completecfg_and_blocks)
 from topgen.typing import IpBlocksT
 
 REPO_TOP = Path(__file__).parents[1].resolve()
@@ -60,8 +60,14 @@ IDCODE_TAP_TYPE_LC = 1 << 1
 # The reset causes at the bottom of the reset manager's RESET_INFO register, before the
 # hardware reset requests (HW_REQ), named as the register's fields.
 RESET_INFO_FIXED = ["Por", "LowPowerExit", "SwReset"]
-# The IP blocks whose register offsets the description gives, by block type.
-REGISTER_IPS = ["otp_ctrl"]
+# The IP blocks whose register offsets the description gives, by block type: those that are
+# generated per top (ipgen, or a top's own ip directory) and that host code addresses by
+# register, such as the rv_dm csr_rw test. Host code takes the registers of blocks that every
+# top takes from hw/ip from their hw/ip descriptions (FIXED_IPS in sw/host/ot_hal/BUILD).
+REGISTER_IPS = [
+    "alert_handler", "flash_ctrl", "gpio", "otp_ctrl", "pinmux", "pwm", "pwrmgr", "rstmgr",
+    "sensor_ctrl",
+]
 # The clock manager's default for ext_clk_bypass (hw/ip_templates/clkmgr/data/
 # clkmgr.tpldesc.hjson).
 CLKMGR_EXT_CLK_BYPASS_DEFAULT = True
@@ -270,8 +276,11 @@ def host_description(completecfg: ConfigT, name_to_block: IpBlocksT,
         name = addr_space["name"]
         addr_spaces[name] = {
             "devices": {
-                region.short_name.as_snake_case(): region_dict(region)
-                for _, region in helper.devices(name)
+                region.short_name.as_snake_case(): {
+                    **region_dict(region),
+                    "ip": find_module_by_name(modules, inst_name)["type"],
+                }
+                for (inst_name, _), region in helper.devices(name)
             },
             "memories": {
                 region.short_name.as_snake_case(): region_dict(region)

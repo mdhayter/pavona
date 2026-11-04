@@ -100,6 +100,27 @@ def test_addresses(top):
                 assert const_name in expected, const_name
 
 
+def test_device_ips(top):
+    """Each device gives the type of its instance, and each IP block with register offsets
+    in the description has at least one device of that type."""
+    name, desc = top
+    gen_hjson = REPO_TOP / f"hw/top_{name}/data/autogen/top_{name}.gen.hjson"
+    types = {m["name"]: m["type"] for m in hjson.loads(gen_hjson.read_text())["module"]}
+    for regions in desc["addr_spaces"].values():
+        for device, region in regions["devices"].items():
+            # The device is named after its instance, with the interface name appended
+            # when the instance has more than one.
+            assert any(region["ip"] == ip and (device == inst or device.startswith(inst + "_"))
+                       for inst, ip in types.items()), device
+    hart = desc["addr_spaces"]["hart"]["devices"]
+    for ip in desc["per_top_used_regs"]:
+        assert any(region["ip"] == ip for region in hart.values()), ip
+    if name == "egret":
+        assert [d for d, r in hart.items() if r["ip"] == "uart"] == [f"uart{n}" for n in range(4)]
+        assert hart["otp_ctrl_core"]["ip"] == "otp_ctrl"
+        assert hart["pinmux_aon"]["ip"] == "pinmux"
+
+
 def test_enums(top):
     name, desc = top
     enums = rust_enums(rust_source(name, "hart"))
@@ -270,10 +291,12 @@ def test_registers(top):
 
 
 def test_multiregisters(top):
-    """A multiregister has one entry per replicated register, and every multiregister has
-    at least two registers."""
+    """A multiregister has one entry per replicated register: the pinmux pad attributes
+    follow the pad counts, and every multiregister has at least two registers."""
     name, desc = top
     registers = desc["per_top_used_regs"]
+    assert registers["pinmux"]["MIO_PAD_ATTR"]["count"] == desc["pinmux"]["num_mio_pads"]
+    assert registers["pinmux"]["DIO_PAD_ATTR"]["count"] == desc["pinmux"]["num_dio_pads"]
     for ip, regs in registers.items():
         for reg, entry in regs.items():
             if isinstance(entry, dict):
