@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
-load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_library", "rust_test")
 load("//rules:ujson.bzl", "ujson_rust")
 
@@ -62,24 +61,6 @@ RUSTC_ENV = {
     "spi_passthru": "$(location :spi_passthru)",
     "ottf": "$(location :ottf)",
 }
-
-run_binary(
-    name = "alert_handler_rust_regs",
-    srcs = select({
-        "//hw/top:egret": ["//hw/top_egret/ip_autogen/alert_handler/data:alert_handler.hjson"],
-        "//hw/top:dragonfly": ["//hw/top_dragonfly/ip_autogen/alert_handler/data:alert_handler.hjson"],
-    }),
-    outs = ["src/otp/alert_handler_regs.rs"],
-    args = [
-        "--rust",
-        "--outfile",
-        "$(location :src/otp/alert_handler_regs.rs)",
-    ] + select({
-        "//hw/top:egret": ["$(location //hw/top_egret/ip_autogen/alert_handler/data:alert_handler.hjson)"],
-        "//hw/top:dragonfly": ["$(location //hw/top_dragonfly/ip_autogen/alert_handler/data:alert_handler.hjson)"],
-    }),
-    tool = "//util:regtool",
-)
 
 # This is the catch-all "everything" crate.
 # Before adding things here, consider if it can be made a separate crate instead.
@@ -228,7 +209,6 @@ rust_library(
         "src/util/vmem/mod.rs",
         "src/util/vmem/parser.rs",
         "src/util/voltage.rs",
-        ":src/otp/alert_handler_regs.rs",
     ] + select({
         "//sw/device:is_scafi_deprecated": [],
         "//hw/top:egret": [

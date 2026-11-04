@@ -111,6 +111,12 @@ pub struct AlertHandler {
     pub peripherals: NameTable,
     pub alerts: NameTable,
     pub alert_to_peripheral: BTreeMap<String, String>,
+    /// The numbers of alert classes, escalation phases and local alerts.
+    pub num_classes: usize,
+    pub num_phases: usize,
+    pub num_local_alerts: usize,
+    /// The value of each class (`ClassA`, ...) in the alert class registers.
+    pub class_values: NameTable,
 }
 
 #[derive(Clone, Debug, Default, Deserialize)]
@@ -784,6 +790,21 @@ mod tests {
         let scafi = TopDescription::embedded("scafi_deprecated").unwrap()?;
         assert!(scafi.field("rstmgr", "ALERT_INFO_CTRL", "EN").is_err());
         assert!(scafi.field("rstmgr", "CPU_INFO_CTRL", "EN").is_ok());
+        // The alert handler's class configuration, as the ROM's alert driver programs it.
+        let alert_handler = egret.alert_handler.as_ref().unwrap();
+        assert_eq!(
+            (
+                alert_handler.num_classes,
+                alert_handler.num_phases,
+                alert_handler.num_local_alerts
+            ),
+            (4, 4, 7)
+        );
+        assert_eq!(alert_handler.class_values.get("ClassB"), Some(1));
+        assert_eq!(
+            egret.field("alert_handler", "CLASSA_CTRL_SHADOWED", "MAP_E3")?,
+            BitField::new(12, 2)
+        );
         // Only clock managers with external clock bypass have the EXTCLK registers.
         assert_eq!(egret.register_offset("clkmgr", "EXTCLK_CTRL")?, 8);
         assert_eq!(

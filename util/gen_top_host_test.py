@@ -278,6 +278,26 @@ def test_ext_clk_bypass(top):
     assert ("EXTCLK_CTRL" in desc["per_top_used_fields"]["clkmgr"]) == has_extclk
 
 
+def test_alert_classes(top):
+    """The alert handler's class configuration matches its parameters and register enums."""
+    name, desc = top
+    if "alert_handler" not in desc:
+        pytest.skip(f"{name} has no alert handler")
+    alert_handler = desc["alert_handler"]
+    block = ip_hjson(name, "alert_handler")
+    assert alert_handler["num_classes"] == ip_param(block, "N_CLASSES")
+    assert alert_handler["num_phases"] == ip_param(block, "N_PHASES")
+    assert alert_handler["num_local_alerts"] == ip_param(block, "N_LOC_ALERT")
+    values = alert_handler["class_values"]
+    assert len(values) == alert_handler["num_classes"]
+    assert sorted(values.values()) == list(range(len(values)))
+    multiregs = {
+        r["multireg"]["name"]: r["multireg"]
+        for r in block["registers"] if "multireg" in r
+    }
+    assert multiregs["LOC_ALERT_CLASS_SHADOWED"]["count"] == "N_LOC_ALERT"
+
+
 def test_registers(top):
     """The register offsets match the constants that regtool generates for the IP."""
     name, desc = top

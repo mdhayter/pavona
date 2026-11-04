@@ -73,6 +73,7 @@ REGISTER_IPS = [
 ]
 # The registers whose fields are under "per_top_used_fields", by IP block type.
 FIELD_REGISTERS = {
+    "alert_handler": ["CLASSA_CTRL_SHADOWED"],
     "clkmgr": ["EXTCLK_CTRL", "EXTCLK_CTRL_REGWEN", "EXTCLK_STATUS"],
     "otp_ctrl": ["DIRECT_ACCESS_CMD", "STATUS"],
     "rstmgr": ["ALERT_INFO_CTRL", "CPU_INFO_CTRL", "CPU_REGWEN"],
@@ -239,6 +240,32 @@ def register_fields(block, names: List[str]) -> Dict[str, Dict[str, Dict[str, in
     return fields
 
 
+def alert_classes(block) -> Dict[str, object]:
+    """Return the alert handler's class configuration that the ROM's alert driver programs:
+    the numbers of classes, escalation phases and local alerts, and the value of each class
+    in the ALERT_CLASS_SHADOWED and LOC_ALERT_CLASS_SHADOWED registers."""
+    (reg_block, ) = block.reg_blocks.values()
+    regs = {reg.name: reg for reg in reg_block.flat_regs}
+
+    def class_values(reg: str) -> Dict[str, int]:
+        (field, ) = regs[reg].fields
+        return {entry.name: entry.value for entry in field.enum}
+
+    values = class_values("ALERT_CLASS_SHADOWED_0")
+    if values != class_values("LOC_ALERT_CLASS_SHADOWED_0"):
+        raise ValueError(f"{block.name}: alert and local alert class values differ")
+
+    def param(name: str) -> int:
+        return block.params.get(name).expand_value(f"reading {block.name}.{name}")
+
+    return {
+        "num_classes": param("N_CLASSES"),
+        "num_phases": param("N_PHASES"),
+        "num_local_alerts": param("N_LOC_ALERT"),
+        "class_values": values,
+    }
+
+
 def load_otp_mmap(completecfg: ConfigT, repo_top: Path) -> Optional[Dict[str, object]]:
     """Load the OTP memory map of the top's OTP controller from its ipgen configuration
     (hw/top_<top>/ip_autogen/otp_ctrl/data/top_<top>_otp_ctrl.ipconfig.hjson). Returns None
@@ -335,6 +362,7 @@ def host_description(completecfg: ConfigT, name_to_block: IpBlocksT,
             "peripherals": enum_dict(helper.alert_sources),
             "alerts": enum_dict(helper.alert_alerts),
             "alert_to_peripheral": mapping_dict(helper.alert_mapping),
+            **alert_classes(name_to_block["alert_handler"]),
         }
 
     if find_module(modules, "pinmux"):
