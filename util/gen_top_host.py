@@ -68,11 +68,12 @@ RESET_INFO_FIXED = ["Por", "LowPowerExit", "SwReset"]
 # register, such as the rv_dm csr_rw test. Host code takes the registers of blocks that every
 # top takes from hw/ip from their hw/ip descriptions (FIXED_IPS in sw/host/ot_hal/BUILD).
 REGISTER_IPS = [
-    "alert_handler", "flash_ctrl", "gpio", "otp_ctrl", "pinmux", "pwm", "pwrmgr", "rstmgr",
-    "sensor_ctrl",
+    "alert_handler", "clkmgr", "flash_ctrl", "gpio", "otp_ctrl", "pinmux", "pwm", "pwrmgr",
+    "rstmgr", "sensor_ctrl",
 ]
 # The registers whose fields are under "per_top_used_fields", by IP block type.
 FIELD_REGISTERS = {
+    "clkmgr": ["EXTCLK_CTRL", "EXTCLK_CTRL_REGWEN", "EXTCLK_STATUS"],
     "otp_ctrl": ["DIRECT_ACCESS_CMD", "STATUS"],
     "rstmgr": ["ALERT_INFO_CTRL", "CPU_INFO_CTRL", "CPU_REGWEN"],
 }

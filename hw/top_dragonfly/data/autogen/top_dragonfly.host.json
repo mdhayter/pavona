@@ -469,6 +469,21 @@
       "CLASSD_ESC_CNT": 1584,
       "CLASSD_STATE": 1588
     },
+    "clkmgr": {
+      "ALERT_TEST": 0,
+      "JITTER_REGWEN": 16,
+      "JITTER_ENABLE": 20,
+      "CLK_ENABLES": 24,
+      "CLK_HINTS": 28,
+      "CLK_HINTS_STATUS": 32,
+      "MEASURE_CTRL_REGWEN": 36,
+      "IO_MEAS_CTRL_EN": 40,
+      "IO_MEAS_CTRL_SHADOWED": 44,
+      "MAIN_MEAS_CTRL_EN": 48,
+      "MAIN_MEAS_CTRL_SHADOWED": 52,
+      "RECOV_ERR_CODE": 56,
+      "FATAL_ERR_CODE": 60
+    },
     "gpio": {
       "INTR_STATE": 0,
       "INTR_ENABLE": 4,
@@ -810,6 +825,7 @@
     }
   },
   "per_top_used_fields": {
+    "clkmgr": {},
     "otp_ctrl": {
       "DIRECT_ACCESS_CMD": {
         "RD": {

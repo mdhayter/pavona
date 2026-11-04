@@ -7,9 +7,6 @@ pub mod bootstrap;
 pub mod crashdump;
 pub mod e2e_command;
 pub mod epmp;
-// The "Scafi_Deprecated" variant of the chip doesn't have the same
-// set of CSRs as the "egret" chip.
-#[cfg(feature = "egret")]
 pub mod extclk;
 pub mod gpio;
 pub mod gpio_monitor;
