@@ -17,6 +17,7 @@
 #include "sw/device/lib/base/macros.h"
 #include "sw/device/lib/base/mmio.h"
 #include "sw/device/lib/dif/dif_base.h"
+#include "sw/device/lib/dif/dif_lc_ctrl_types.h"
 
 #include "sw/device/lib/dif/autogen/dif_lc_ctrl_autogen.h"
 
@@ -98,159 +99,6 @@ typedef enum dif_lc_ctrl_status_code {
 typedef uint32_t dif_lc_ctrl_status_t;
 
 /**
- * A lifecycle state.
- *
- * This enum represents all states that the lifecycle state register can be in;
- * some of these do not correspond to "real" lifecycle states, and cannot be
- * transitioned to.
- */
-typedef enum dif_lc_ctrl_state {
-  /**
-   * The initial post-manufacture state.
-   *
-   * All functions are disabled.
-   */
-  kDifLcCtrlStateRaw,
-  /**
-   * The zeroth test state.
-   *
-   * Debug functions are enabled.
-   */
-  kDifLcCtrlStateTestUnlocked0,
-  /**
-   * The zeroth locked test state.
-   *
-   * All functions are disabled.
-   */
-  kDifLcCtrlStateTestLocked0,
-  /**
-   * The first test state.
-   *
-   * Debug functions are enabled.
-   */
-  kDifLcCtrlStateTestUnlocked1,
-  /**
-   * The first locked test state.
-   *
-   * All functions are disabled.
-   */
-  kDifLcCtrlStateTestLocked1,
-  /**
-   * The second test state.
-   *
-   * Debug functions are enabled.
-   */
-  kDifLcCtrlStateTestUnlocked2,
-  /**
-   * The second locked test state.
-   *
-   * All functions are disabled.
-   */
-  kDifLcCtrlStateTestLocked2,
-  /**
-   * The third test state.
-   *
-   * Debug functions are enabled.
-   */
-  kDifLcCtrlStateTestUnlocked3,
-  /**
-   * The third locked test state.
-   *
-   * All functions are disabled.
-   */
-  kDifLcCtrlStateTestLocked3,
-  /**
-   * The fourth test state.
-   *
-   * Debug functions are enabled.
-   */
-  kDifLcCtrlStateTestUnlocked4,
-  /**
-   * The fourth locked test state.
-   *
-   * All functions are disabled.
-   */
-  kDifLcCtrlStateTestLocked4,
-  /**
-   * The fifth test state.
-   *
-   * Debug functions are enabled.
-   */
-  kDifLcCtrlStateTestUnlocked5,
-  /**
-   * The fifth locked test state.
-   *
-   * All functions are disabled.
-   */
-  kDifLcCtrlStateTestLocked5,
-  /**
-   * The sixth test state.
-   *
-   * Debug functions are enabled.
-   */
-  kDifLcCtrlStateTestUnlocked6,
-  /**
-   * The sixth locked test state.
-   *
-   * All functions are disabled.
-   */
-  kDifLcCtrlStateTestLocked6,
-  /**
-   * The seventh test state.
-   *
-   * Debug functions are enabled.
-   */
-  kDifLcCtrlStateTestUnlocked7,
-  /**
-   * The development state.
-   *
-   * Some debug functions are enabled.
-   */
-  kDifLcCtrlStateDev,
-  /**
-   * The main production state.
-   *
-   * No debug functions are enabled.
-   */
-  kDifLcCtrlStateProd,
-  /**
-   * The EOL production state.
-   *
-   * Same as Prod, except Rma cannot be transitioned to.
-   */
-  kDifLcCtrlStateProdEnd,
-  /**
-   * RMA manufacturer analysis state.
-   */
-  kDifLcCtrlStateRma,
-  /**
-   * The scrap EOL state.
-   *
-   * Cannot be transitioned from; all functions are disabled.
-   */
-  kDifLcCtrlStateScrap,
-
-  /**
-   * State entered immediately after a transition occurs.
-   *
-   * Not a real state.
-   */
-  kDifLcCtrlStatePostTransition,
-  /**
-   * State entered immediately after an alert is raised.
-   *
-   * Not a real state.
-   */
-  kDifLcCtrlStateEscalate,
-  /**
-   * Indicates that the encoded lifecycle is invalid.
-   *
-   * Not a real state.
-   */
-  kDifLcCtrlStateInvalid,
-} dif_lc_ctrl_state_t;
-
-/**
  * A personalization state, indicating whether the device has been successfully
  * personalized.
  */
@@ -268,13 +116,6 @@ typedef enum dif_lc_ctrl_id_state {
    */
   kDifLcCtrlIdStateInvalid,
 } dif_lc_ctrl_id_state_t;
-
-/**
- * A 128-bit unlock token used for certain kinds of lifecycle transitions.
- */
-typedef struct dif_lc_ctrl_token {
-  uint8_t data[128 / 8];
-} dif_lc_ctrl_token_t;
 
 /**
  * A 32-bit hardware revision number.
