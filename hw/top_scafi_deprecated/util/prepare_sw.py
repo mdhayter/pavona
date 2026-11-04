@@ -166,12 +166,6 @@ def main():
         new.write_text(text)
         (old.parent / new.name).write_text(text)
 
-    # Hack to make bindgen generate less for Scafi_Deprecated.
-    new = REPO_TOP / 'sw/host/ot_hal/bindgen/BUILD'
-    text = new.read_text()
-    text = text.replace('_TOPLEVEL = "egret"', '_TOPLEVEL = "scafi_deprecated"')
-    new.write_text(text)
-
     if not args.build:
         return
 

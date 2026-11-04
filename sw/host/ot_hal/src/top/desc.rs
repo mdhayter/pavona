@@ -435,6 +435,14 @@ impl TopDescription {
 mod tests {
     use super::*;
 
+    /// The top that this `ot_hal_<top>_test` cross-checks, named by its crate feature.
+    #[cfg(any(feature = "egret", feature = "dragonfly"))]
+    const TOP: &str = if cfg!(feature = "egret") {
+        "egret"
+    } else {
+        "dragonfly"
+    };
+
     #[test]
     fn embedded_jtag_idcodes() -> Result<()> {
         let idcodes = |name| -> Result<_> {
@@ -544,14 +552,14 @@ mod tests {
         Ok(())
     }
 
-    /// The OTP map and otp_ctrl registers of the top the host tools are built for match its
-    /// DIF, for the ones that host code used from the DIF.
+    /// The OTP map and otp_ctrl registers of the cross-checked top match its DIF, for the ones
+    /// that host code used from the DIF.
     #[cfg(any(feature = "egret", feature = "dragonfly"))]
     #[test]
     fn otp_matches_dif() -> Result<()> {
-        use ot_bindgen_dif as dif;
+        use ot_bindgen_top_dif as dif;
 
-        let desc = TopDescription::embedded(crate::top::BUILT_FOR.unwrap()).unwrap()?;
+        let desc = TopDescription::embedded(TOP).unwrap()?;
         for (name, offset) in [
             ("STATUS", dif::OTP_CTRL_STATUS_REG_OFFSET),
             (
@@ -638,14 +646,14 @@ mod tests {
         Ok(())
     }
 
-    /// The otp_ctrl and rstmgr fields and rstmgr registers of the top the host tools are built
-    /// for match its DIF, for the ones that host code used from the DIF.
+    /// The otp_ctrl and rstmgr fields and rstmgr registers of the cross-checked top match its
+    /// DIF, for the ones that host code used from the DIF.
     #[cfg(any(feature = "egret", feature = "dragonfly"))]
     #[test]
     fn fields_match_dif() -> Result<()> {
-        use ot_bindgen_dif as dif;
+        use ot_bindgen_top_dif as dif;
 
-        let desc = TopDescription::embedded(crate::top::BUILT_FOR.unwrap()).unwrap()?;
+        let desc = TopDescription::embedded(TOP).unwrap()?;
         for (ip, reg, field, value) in [
             (
                 "otp_ctrl",
@@ -817,12 +825,12 @@ mod tests {
         Ok(())
     }
 
-    /// The clock manager's EXTCLK registers and fields match the DIF of Egret, the only top
-    /// with external clock bypass that the host tools are built for.
+    /// The clock manager's EXTCLK registers and fields match Egret's generated constants
+    /// (Dragonfly's clock manager has no external clock bypass).
     #[cfg(feature = "egret")]
     #[test]
     fn extclk_matches_dif() -> Result<()> {
-        use ot_bindgen_dif as dif;
+        use ot_bindgen_top_dif as dif;
 
         let desc = TopDescription::embedded("egret").unwrap()?;
         for (name, offset) in [
@@ -870,13 +878,13 @@ mod tests {
         Ok(())
     }
 
-    /// The reset causes of the top the host tools are built for match its DIF.
+    /// The reset causes of the cross-checked top match its DIF.
     #[cfg(any(feature = "egret", feature = "dragonfly"))]
     #[test]
     fn reset_info_matches_dif() -> Result<()> {
-        use ot_bindgen_dif as dif;
+        use ot_bindgen_top_dif as dif;
 
-        let desc = TopDescription::embedded(crate::top::BUILT_FOR.unwrap()).unwrap()?;
+        let desc = TopDescription::embedded(TOP).unwrap()?;
         #[cfg(feature = "egret")]
         let hw_requests = [
             (
@@ -1061,10 +1069,15 @@ mod tests {
         assert_eq!(table.len(), count, "{what}");
     }
 
-    /// Checks the selected top's description against the generated constants and enums.
+    /// Checks the cross-checked top's description against its generated pinmux enums.
     #[cfg(any(feature = "egret", feature = "dragonfly"))]
     fn check_against_constants(desc: &TopDescription) -> Result<()> {
-        use crate::top::{
+        #[cfg(feature = "dragonfly")]
+        use crate::top::autogen::dragonfly::{
+            DirectPads, MuxedPads, PinmuxInsel, PinmuxMioOut, PinmuxOutsel, PinmuxPeripheralIn,
+        };
+        #[cfg(feature = "egret")]
+        use crate::top::autogen::egret::{
             DirectPads, MuxedPads, PinmuxInsel, PinmuxMioOut, PinmuxOutsel, PinmuxPeripheralIn,
         };
 
@@ -1085,11 +1098,10 @@ mod tests {
     #[cfg(feature = "egret")]
     #[test]
     fn egret_matches_constants() -> Result<()> {
-        use crate::top;
+        use top_egret::top_egret as top;
 
         let desc = TopDescription::embedded("egret").unwrap()?;
         check_against_constants(&desc)?;
-        assert_eq!(top::BUILT_FOR, Some("egret"));
         assert_eq!(
             *desc.mmio()?,
             AddrRange {
@@ -1161,11 +1173,10 @@ mod tests {
     #[cfg(feature = "dragonfly")]
     #[test]
     fn dragonfly_matches_constants() -> Result<()> {
-        use crate::top;
+        use top_dragonfly::top_dragonfly as top;
 
         let desc = TopDescription::embedded("dragonfly").unwrap()?;
         check_against_constants(&desc)?;
-        assert_eq!(top::BUILT_FOR, Some("dragonfly"));
         assert_eq!(
             *desc.mmio()?,
             AddrRange {
