@@ -19,6 +19,14 @@ cc_library(
     deps = ["//sw/device/lib/ujson"],
 )
 
+# The ujson messages alone, for the host tools' Rust types. They do not depend
+# on the top; the C functions are in :gpio.
+cc_library(
+    name = "gpio_headers",
+    hdrs = ["gpio.h"],
+    deps = ["//sw/device/lib/ujson"],
+)
+
 cc_library(
     name = "gpio",
     srcs = ["gpio.c"],
@@ -55,6 +63,14 @@ cc_library(
         "//hw/top:top_lib",
         "//sw/device/lib/ujson",
     ],
+)
+
+# The ujson messages alone, for the host tools' Rust types. They do not depend
+# on the top; the C functions are in :pinmux_config.
+cc_library(
+    name = "pinmux_config_headers",
+    hdrs = ["pinmux_config.h"],
+    deps = ["//sw/device/lib/ujson"],
 )
 
 cc_library(

@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -64,13 +65,16 @@ DIFS = {
         "no_ut": True,
     },
     "kmac": {},
-    "lc_ctrl": {},
+    "lc_ctrl": {
+        "deps": [":lc_ctrl_types"],
+    },
     "mbx": {
         "deps": ["//sw/device/lib/base:abs_mmio"],
     },
     "otp_ctrl": {},
     "pattgen": {},
     "pinmux": {
+        "deps": [":pinmux_types"],
         "ut_target_compatible_with": pavona_require_top("egret"),
     },
     "pwm": {},
@@ -141,6 +145,17 @@ DIFS = {
     for (ip, cfg) in DIFS.items()
     if not cfg.get("no_ut", False)
 ]
+
+# Types that do not depend on the top, so the host tools can use them.
+cc_library(
+    name = "lc_ctrl_types",
+    hdrs = ["dif_lc_ctrl_types.h"],
+)
+
+cc_library(
+    name = "pinmux_types",
+    hdrs = ["dif_pinmux_types.h"],
+)
 
 cc_library(
     name = "csrng_shared",
