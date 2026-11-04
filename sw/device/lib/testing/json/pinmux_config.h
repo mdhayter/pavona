@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -17,7 +18,9 @@ extern "C" {
 //    the C file before setting UJSON_SERDE_IMPL.
 //
 //  This avoids a lot of extra preprocessor ifs, undefs and defines.
-#if UJSON_SERDE_IMPL == 0
+//  The Rust types come from this file alone (pinmux.h defines its types only
+//  for C), so that `:pinmux_config_headers` does not depend on the top.
+#if UJSON_SERDE_IMPL == 0 && !defined(RUST_PREPROCESSOR_EMIT)
 #include "sw/device/lib/testing/json/pinmux.h"
 #endif
 // clang-format off

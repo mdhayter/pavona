@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -15,6 +16,14 @@ cc_library(
     name = "chip_specific_startup",
     srcs = ["chip_specific_startup.c"],
     hdrs = ["chip_specific_startup.h"],
+    deps = ["//sw/device/lib/ujson"],
+)
+
+# The ujson messages alone, for the host tools' Rust types. They do not depend
+# on the top; the C functions are in :gpio.
+cc_library(
+    name = "gpio_headers",
+    hdrs = ["gpio.h"],
     deps = ["//sw/device/lib/ujson"],
 )
 
@@ -56,6 +65,14 @@ cc_library(
         "//hw/top:egret": ["//hw/top_egret/sw/autogen:top_egret"],
         "//hw/top:dragonfly": ["//hw/top_dragonfly/sw/autogen:top_dragonfly"],
     }),
+)
+
+# The ujson messages alone, for the host tools' Rust types. They do not depend
+# on the top; the C functions are in :pinmux_config.
+cc_library(
+    name = "pinmux_config_headers",
+    hdrs = ["pinmux_config.h"],
+    deps = ["//sw/device/lib/ujson"],
 )
 
 cc_library(

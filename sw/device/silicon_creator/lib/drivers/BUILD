@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -49,6 +50,16 @@ filegroup(
     ],
 )
 
+# alert.h does not depend on the top, so the host tools can use it.
+cc_library(
+    name = "alert_headers",
+    hdrs = ["alert.h"],
+    deps = [
+        ":lifecycle_headers",
+        "//sw/device/silicon_creator/lib:error",
+    ],
+)
+
 dual_cc_library(
     name = "alert",
     srcs = dual_inputs(
@@ -57,7 +68,6 @@ dual_cc_library(
     ),
     hdrs = dual_inputs(
         host = ["mock_alert.h"],
-        shared = ["alert.h"],
     ),
     deps = dual_inputs(
         device = [
@@ -70,6 +80,7 @@ dual_cc_library(
             "@googletest//:gtest",
         ],
         shared = [
+            ":alert_headers",
             ":lifecycle",
             ":otp",
             "//hw/top/dt",
@@ -525,6 +536,16 @@ pavona_test(
     ],
 )
 
+# lifecycle.h does not depend on the top, so the host tools can use it.
+cc_library(
+    name = "lifecycle_headers",
+    hdrs = ["lifecycle.h"],
+    deps = [
+        "//sw/device/lib/base:hardened",
+        "//sw/device/lib/base:macros",
+    ],
+)
+
 dual_cc_library(
     name = "lifecycle",
     srcs = dual_inputs(
@@ -533,7 +554,6 @@ dual_cc_library(
     ),
     hdrs = dual_inputs(
         host = ["mock_lifecycle.h"],
-        shared = ["lifecycle.h"],
     ),
     deps = dual_inputs(
         device = [
@@ -546,6 +566,7 @@ dual_cc_library(
             "@googletest//:gtest",
         ],
         shared = [
+            ":lifecycle_headers",
             "//sw/device/lib/base:bitfield",
             "//sw/device/lib/base:hardened",
             "//sw/device/lib/base:macros",
