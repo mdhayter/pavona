@@ -3,31 +3,30 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::otp::alert_handler_regs::*;
 use crate::otp::lc_state::LcStateVal;
 use crate::otp::otp_img::OtpRead;
 
 use anyhow::{Context, Result, bail};
 use crc::{Crc, Digest};
 use ot_hal::top::TopDescription;
+use ot_hal::util::bitfield::BitField;
 
 /// ALERT_HANDLER_ALERT_CLASS related register values.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 struct AlertClassRegs {
     regwen: u32,
     ctrl: u32,
     accum_thresh: u32,
     timeout_cyc: u32,
-    phase_cycs: [u32; ALERT_HANDLER_PARAM_N_PHASES as usize],
+    /// One per escalation phase.
+    phase_cycs: Vec<u32>,
 }
 
 /// Register values for alert_handler used in CRC32 calculation.
 ///
-/// The number of alerts, which sizes the per-alert registers, comes from the top's description,
-/// so the count-dependent constants in `alert_handler_regs` (`ALERT_HANDLER_PARAM_N_ALERTS` and
-/// the per-alert `*_MULTIREG_COUNT`s) are not used. The other constants (classes, phases, local
-/// alerts, field values) still come from the alert handler of the top the crate is built for.
-#[derive(Debug, PartialEq)]
+/// The numbers of alerts, local alerts, classes and escalation phases, which size the
+/// registers, come from the top's description.
+#[derive(Clone, Debug, PartialEq)]
 pub struct AlertRegs {
     /// ALERT_HANDLER_ALERT_REGWEN, one per alert.
     regwen: Vec<u32>,
@@ -35,14 +34,14 @@ pub struct AlertRegs {
     en: Vec<u32>,
     /// ALERT_HANDLER_ALERT_CLASS_SHADOWED, one per alert.
     class: Vec<u32>,
-    /// ALERT_HANDLER_LOC_ALERT_REGWEN
-    loc_regwen: [u32; ALERT_HANDLER_LOC_ALERT_REGWEN_MULTIREG_COUNT as usize],
-    /// ALERT_HANDLER_LOC_ALERT_EN_SHADOWED
-    loc_en: [u32; ALERT_HANDLER_LOC_ALERT_EN_SHADOWED_MULTIREG_COUNT as usize],
-    /// ALERT_HANDLER_LOC_ALERT_CLASS_SHADOWED
-    loc_class: [u32; ALERT_HANDLER_LOC_ALERT_CLASS_SHADOWED_MULTIREG_COUNT as usize],
-    /// Alert handler class registers
-    class_regs: [AlertClassRegs; ALERT_HANDLER_PARAM_N_CLASSES as usize],
+    /// ALERT_HANDLER_LOC_ALERT_REGWEN, one per local alert.
+    loc_regwen: Vec<u32>,
+    /// ALERT_HANDLER_LOC_ALERT_EN_SHADOWED, one per local alert.
+    loc_en: Vec<u32>,
+    /// ALERT_HANDLER_LOC_ALERT_CLASS_SHADOWED, one per local alert.
+    loc_class: Vec<u32>,
+    /// Alert handler class registers, one per class.
+    class_regs: Vec<AlertClassRegs>,
 }
 
 // TODO: Use bindgen to produce the following enum definitions.
@@ -80,6 +79,17 @@ impl AlertClass {
             _ => AlertClass::X,
         }
     }
+
+    /// The name of the class in the top description's `class_values`.
+    fn name(&self) -> Option<&'static str> {
+        match self {
+            AlertClass::A => Some("ClassA"),
+            AlertClass::B => Some("ClassB"),
+            AlertClass::C => Some("ClassC"),
+            AlertClass::D => Some("ClassD"),
+            AlertClass::X => None,
+        }
+    }
 }
 
 #[derive(strum::FromRepr)]
@@ -105,32 +115,72 @@ struct AlertClassConfig {
     escalate: AlertEscalate,
     accum_thresh: u32,
     timeout_cyc: u32,
-    phase_cycs: [u32; ALERT_HANDLER_PARAM_N_PHASES as usize],
+    phase_cycs: Vec<u32>,
 }
 
-impl Default for AlertClassRegs {
-    fn default() -> Self {
+/// The fields of the CLASSA_CTRL_SHADOWED register, whose layout the ROM uses for every class.
+struct ClassCtrl {
+    en: BitField,
+    lock: BitField,
+    /// EN_E0 to EN_E3.
+    en_e: [BitField; 4],
+    /// MAP_E0 to MAP_E3.
+    map_e: [BitField; 4],
+}
+
+impl ClassCtrl {
+    fn new(top: &TopDescription) -> Result<Self> {
+        let field = |name: &str| top.field("alert_handler", "CLASSA_CTRL_SHADOWED", name);
+        Ok(ClassCtrl {
+            en: field("EN")?,
+            lock: field("LOCK")?,
+            en_e: [
+                field("EN_E0")?,
+                field("EN_E1")?,
+                field("EN_E2")?,
+                field("EN_E3")?,
+            ],
+            map_e: [
+                field("MAP_E0")?,
+                field("MAP_E1")?,
+                field("MAP_E2")?,
+                field("MAP_E3")?,
+            ],
+        })
+    }
+}
+
+impl AlertClassRegs {
+    /// The register values after reset of a class with `num_phases` escalation phases.
+    fn reset(num_phases: usize) -> Self {
         AlertClassRegs {
             regwen: 1,
             ctrl: 0,
             accum_thresh: 0,
             timeout_cyc: 0,
-            phase_cycs: [0; ALERT_HANDLER_PARAM_N_PHASES as usize],
+            phase_cycs: vec![0; num_phases],
         }
     }
 }
 
 impl AlertRegs {
-    /// The register values after reset of an alert handler with `num_alerts` alerts.
-    fn reset(num_alerts: usize) -> Self {
+    /// The register values after reset of an alert handler with `num_alerts` alerts,
+    /// `num_local_alerts` local alerts, and `num_classes` classes of `num_phases` escalation
+    /// phases.
+    fn reset(
+        num_alerts: usize,
+        num_local_alerts: usize,
+        num_classes: usize,
+        num_phases: usize,
+    ) -> Self {
         AlertRegs {
             regwen: vec![1; num_alerts],
-            loc_regwen: [1; ALERT_HANDLER_LOC_ALERT_REGWEN_MULTIREG_COUNT as usize],
             en: vec![0; num_alerts],
             class: vec![0; num_alerts],
-            loc_en: [0; ALERT_HANDLER_LOC_ALERT_EN_SHADOWED_MULTIREG_COUNT as usize],
-            loc_class: [0; ALERT_HANDLER_LOC_ALERT_CLASS_SHADOWED_MULTIREG_COUNT as usize],
-            class_regs: [Default::default(); ALERT_HANDLER_PARAM_N_CLASSES as usize],
+            loc_regwen: vec![1; num_local_alerts],
+            loc_en: vec![0; num_local_alerts],
+            loc_class: vec![0; num_local_alerts],
+            class_regs: vec![AlertClassRegs::reset(num_phases); num_classes],
         }
     }
 }
@@ -155,13 +205,17 @@ impl AlertRegs {
         otp: &T,
         top: &TopDescription,
     ) -> Result<Self> {
-        let num_alerts = top
+        let desc = top
             .alert_handler
             .as_ref()
-            .with_context(|| format!("Top {} has no alert handler", top.name))?
-            .alerts
-            .len();
-        let mut alert = AlertRegs::reset(num_alerts);
+            .with_context(|| format!("Top {} has no alert handler", top.name))?;
+        let num_alerts = desc.alerts.len();
+        let mut alert = AlertRegs::reset(
+            num_alerts,
+            desc.num_local_alerts,
+            desc.num_classes,
+            desc.num_phases,
+        );
 
         let lc_shift = match lc_state {
             LcStateVal::Prod => 0,
@@ -170,6 +224,18 @@ impl AlertRegs {
             LcStateVal::Rma => 3,
             LcStateVal::Test => return Ok(alert),
         };
+
+        // The value of a class in the alert class registers.
+        let class_value = |cls: &AlertClass| -> Result<Option<u32>> {
+            let Some(name) = cls.name() else {
+                return Ok(None);
+            };
+            match desc.class_values.get(name) {
+                Some(value) => Ok(Some(value)),
+                None => bail!("Top {} has no alert class {name}", top.name),
+            }
+        };
+        let ctrl = ClassCtrl::new(top)?;
 
         let class_enable = otp.read32("OWNER_SW_CFG_ROM_ALERT_CLASS_EN")?;
         let class_escalate = otp.read32("OWNER_SW_CFG_ROM_ALERT_ESCALATION")?;
@@ -180,24 +246,24 @@ impl AlertRegs {
                 .with_context(|| format!("invalid alert class value {value:#010x}"))?;
             let enable = AlertEnable::from_repr(class_enable.to_le_bytes()[cls.index()])
                 .with_context(|| format!("invalid class enable value {value:#010x}"))?;
-            alert.configure(i, cls, enable)?;
+            alert.configure(i, class_value(&cls)?, enable)?;
         }
 
-        for i in 0..ALERT_HANDLER_LOC_ALERT_CLASS_SHADOWED_MULTIREG_COUNT as usize {
+        for i in 0..desc.num_local_alerts {
             let value = otp.read32_offset("OWNER_SW_CFG_ROM_LOCAL_ALERT_CLASSIFICATION", i * 4)?;
             let cls = AlertClass::from_repr(value.to_le_bytes()[lc_shift])
                 .with_context(|| format!("invalid alert class value {value:#010x}"))?;
             let enable = AlertEnable::from_repr(class_enable.to_le_bytes()[cls.index()])
                 .with_context(|| format!("invalid class enable value {value:#010x}"))?;
-            alert.local_configure(i, cls, enable)?;
+            alert.local_configure(i, class_value(&cls)?, enable)?;
         }
 
-        for i in 0..ALERT_HANDLER_PARAM_N_CLASSES as usize {
-            let mut phase_cycs = [0; ALERT_HANDLER_PARAM_N_PHASES as usize];
-            for phase in 0..ALERT_HANDLER_PARAM_N_PHASES as usize {
-                phase_cycs[phase] = otp.read32_offset(
+        for i in 0..desc.num_classes {
+            let mut phase_cycs = vec![0; desc.num_phases];
+            for (phase, cycs) in phase_cycs.iter_mut().enumerate() {
+                *cycs = otp.read32_offset(
                     "OWNER_SW_CFG_ROM_ALERT_PHASE_CYCLES",
-                    (i * phase_cycs.len() + phase) * 4,
+                    (i * desc.num_phases + phase) * 4,
                 )?;
             }
             let config = AlertClassConfig {
@@ -210,24 +276,23 @@ impl AlertRegs {
                 timeout_cyc: otp.read32_offset("OWNER_SW_CFG_ROM_ALERT_TIMEOUT_CYCLES", i * 4)?,
                 phase_cycs,
             };
-            alert.class_configure(AlertClass::from_index(i), &config)?;
+            alert.class_configure(AlertClass::from_index(i), &config, &ctrl)?;
         }
 
         Ok(alert)
     }
 
-    fn configure(&mut self, index: usize, cls: AlertClass, enabled: AlertEnable) -> Result<()> {
+    /// Configure alert `index` with class value `class` (`None` for class X, which leaves the
+    /// alert unconfigured).
+    fn configure(&mut self, index: usize, class: Option<u32>, enabled: AlertEnable) -> Result<()> {
         if index >= self.class.len() {
             bail!("Bad alert index {}", index);
         }
 
-        self.class[index] = match cls {
-            AlertClass::A => ALERT_HANDLER_ALERT_CLASS_SHADOWED_0_CLASS_A_0_VALUE_CLASSA,
-            AlertClass::B => ALERT_HANDLER_ALERT_CLASS_SHADOWED_0_CLASS_A_0_VALUE_CLASSB,
-            AlertClass::C => ALERT_HANDLER_ALERT_CLASS_SHADOWED_0_CLASS_A_0_VALUE_CLASSC,
-            AlertClass::D => ALERT_HANDLER_ALERT_CLASS_SHADOWED_0_CLASS_A_0_VALUE_CLASSD,
-            AlertClass::X => return Ok(()),
+        let Some(class) = class else {
+            return Ok(());
         };
+        self.class[index] = class;
 
         match enabled {
             AlertEnable::None => {}
@@ -241,23 +306,21 @@ impl AlertRegs {
         Ok(())
     }
 
+    /// Configure local alert `index` with class value `class` (`None` for class X).
     fn local_configure(
         &mut self,
         index: usize,
-        cls: AlertClass,
+        class: Option<u32>,
         enabled: AlertEnable,
     ) -> Result<()> {
-        if index >= ALERT_HANDLER_LOC_ALERT_CLASS_SHADOWED_MULTIREG_COUNT as usize {
+        if index >= self.loc_class.len() {
             bail!("Bad local alert index {}", index);
         }
 
-        self.loc_class[index] = match cls {
-            AlertClass::A => ALERT_HANDLER_LOC_ALERT_CLASS_SHADOWED_0_CLASS_LA_0_VALUE_CLASSA,
-            AlertClass::B => ALERT_HANDLER_LOC_ALERT_CLASS_SHADOWED_0_CLASS_LA_0_VALUE_CLASSB,
-            AlertClass::C => ALERT_HANDLER_LOC_ALERT_CLASS_SHADOWED_0_CLASS_LA_0_VALUE_CLASSC,
-            AlertClass::D => ALERT_HANDLER_LOC_ALERT_CLASS_SHADOWED_0_CLASS_LA_0_VALUE_CLASSD,
-            AlertClass::X => return Ok(()),
+        let Some(class) = class else {
+            return Ok(());
         };
+        self.loc_class[index] = class;
 
         match enabled {
             AlertEnable::None => {}
@@ -271,64 +334,55 @@ impl AlertRegs {
         Ok(())
     }
 
-    fn class_configure(&mut self, cls: AlertClass, config: &AlertClassConfig) -> Result<()> {
+    fn class_configure(
+        &mut self,
+        cls: AlertClass,
+        config: &AlertClassConfig,
+        ctrl: &ClassCtrl,
+    ) -> Result<()> {
         let index = match cls {
-            AlertClass::A => 0,
-            AlertClass::B => 1,
-            AlertClass::C => 2,
-            AlertClass::D => 3,
             AlertClass::X => bail!("Bad class"),
+            cls => cls.index(),
         };
+        if index >= self.class_regs.len() {
+            bail!("Bad class index {}", index);
+        }
 
-        let mut reg = 0_u32;
-
-        // TODO(lowRISC/opentitan#15443): Fix this lint (clippy::erasing_op):
-        //reg |= (0 & ALERT_HANDLER_CLASSA_CTRL_SHADOWED_MAP_E0_MASK)
-        //    << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_MAP_E0_OFFSET;
-        reg |= (1 & ALERT_HANDLER_CLASSA_CTRL_SHADOWED_MAP_E1_MASK)
-            << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_MAP_E1_OFFSET;
-        reg |= (2 & ALERT_HANDLER_CLASSA_CTRL_SHADOWED_MAP_E2_MASK)
-            << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_MAP_E2_OFFSET;
-        reg |= (3 & ALERT_HANDLER_CLASSA_CTRL_SHADOWED_MAP_E3_MASK)
-            << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_MAP_E3_OFFSET;
+        // Escalation phase n goes to escalation signal n.
+        let mut reg = ctrl
+            .map_e
+            .iter()
+            .enumerate()
+            .fold(0, |reg, (phase, field)| reg | field.emplace(phase as u32));
 
         match config.enabled {
             AlertEnable::None => {}
             AlertEnable::Enabled => {
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_EN_BIT;
+                reg |= ctrl.en.emplace(1);
             }
             AlertEnable::Locked => {
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_LOCK_BIT;
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_EN_BIT;
+                reg |= ctrl.lock.emplace(1);
+                reg |= ctrl.en.emplace(1);
             }
         }
 
-        match config.escalate {
-            AlertEscalate::Phase0 => {
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_EN_E0_BIT;
-            }
-            AlertEscalate::Phase1 => {
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_EN_E0_BIT;
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_EN_E1_BIT;
-            }
-            AlertEscalate::Phase2 => {
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_EN_E0_BIT;
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_EN_E1_BIT;
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_EN_E2_BIT;
-            }
-            AlertEscalate::Phase3 => {
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_EN_E0_BIT;
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_EN_E1_BIT;
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_EN_E2_BIT;
-                reg |= 1 << ALERT_HANDLER_CLASSA_CTRL_SHADOWED_EN_E3_BIT;
-            }
-            AlertEscalate::None => {}
+        // The escalation signals enabled up to the configured phase.
+        let num_enabled = match config.escalate {
+            AlertEscalate::None => 0,
+            AlertEscalate::Phase0 => 1,
+            AlertEscalate::Phase1 => 2,
+            AlertEscalate::Phase2 => 3,
+            AlertEscalate::Phase3 => 4,
+        };
+        for field in &ctrl.en_e[..num_enabled] {
+            reg |= field.emplace(1);
         }
 
-        self.class_regs[index].ctrl = reg;
-        self.class_regs[index].accum_thresh = config.accum_thresh;
-        self.class_regs[index].timeout_cyc = config.timeout_cyc;
-        self.class_regs[index].phase_cycs = config.phase_cycs;
+        let regs = &mut self.class_regs[index];
+        regs.ctrl = reg;
+        regs.accum_thresh = config.accum_thresh;
+        regs.timeout_cyc = config.timeout_cyc;
+        regs.phase_cycs = config.phase_cycs.clone();
 
         Ok(())
     }
@@ -341,12 +395,6 @@ trait Crc32Add {
 impl Crc32Add for u32 {
     fn crc32_add(self, digest: &mut Digest<u32>) {
         digest.update(self.to_le_bytes().as_slice())
-    }
-}
-
-impl<T: Crc32Add, const N: usize> Crc32Add for [T; N] {
-    fn crc32_add(self, digest: &mut Digest<u32>) {
-        self.into_iter().for_each(|v| v.crc32_add(digest));
     }
 }
 
@@ -388,9 +436,7 @@ mod test {
     use std::sync::LazyLock;
 
     /// The tops to test, with the CRCs of `test_regs()` (and of the registers from
-    /// `TestOtpAlertsDisabled`) and of the registers from `TestOtpAlertsEnabled`. Both are
-    /// tested whichever top is built; that works only because their alert handlers differ just
-    /// in the number of alerts.
+    /// `TestOtpAlertsDisabled`) and of the registers from `TestOtpAlertsEnabled`.
     const TOPS: [(&str, u32, u32); 2] = [
         ("egret", 0xf9616122, 0x561bcb14),
         ("dragonfly", 0x07bea283, 0xa8c408b5),
@@ -406,43 +452,43 @@ mod test {
         regwen: Vec::new(),
         en: Vec::new(),
         class: Vec::new(),
-        loc_regwen: [
+        loc_regwen: vec![
             0x00000001, 0x00000001, 0x00000001, 0x00000001, 0x00000001, 0x00000001, 0x00000001,
         ],
-        loc_en: [
+        loc_en: vec![
             0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
         ],
-        loc_class: [
+        loc_class: vec![
             0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
         ],
-        class_regs: [
+        class_regs: vec![
             AlertClassRegs {
                 regwen: 0x00000001,
                 ctrl: 0x00003900,
                 accum_thresh: 0x00000000,
                 timeout_cyc: 0x00000000,
-                phase_cycs: [0x00000000, 0x0000000a, 0x0000000a, 0xffffffff],
+                phase_cycs: vec![0x00000000, 0x0000000a, 0x0000000a, 0xffffffff],
             },
             AlertClassRegs {
                 regwen: 0x00000001,
                 ctrl: 0x00003900,
                 accum_thresh: 0x00000000,
                 timeout_cyc: 0x00000000,
-                phase_cycs: [0x00000000, 0x0000000a, 0x0000000a, 0xffffffff],
+                phase_cycs: vec![0x00000000, 0x0000000a, 0x0000000a, 0xffffffff],
             },
             AlertClassRegs {
                 regwen: 0x00000001,
                 ctrl: 0x00003900,
                 accum_thresh: 0x00000000,
                 timeout_cyc: 0x00000000,
-                phase_cycs: [0x00000000, 0x00000000, 0x00000000, 0x00000000],
+                phase_cycs: vec![0x00000000, 0x00000000, 0x00000000, 0x00000000],
             },
             AlertClassRegs {
                 regwen: 0x00000001,
                 ctrl: 0x00003900,
                 accum_thresh: 0x00000000,
                 timeout_cyc: 0x00000000,
-                phase_cycs: [0x00000000, 0x00000000, 0x00000000, 0x00000000],
+                phase_cycs: vec![0x00000000, 0x00000000, 0x00000000, 0x00000000],
             },
         ],
     });
@@ -452,7 +498,7 @@ mod test {
             regwen: vec![0x00000001; num_alerts],
             en: vec![0x00000000; num_alerts],
             class: vec![0x00000000; num_alerts],
-            ..*TEST_REGS
+            ..TEST_REGS.clone()
         }
     }
 
