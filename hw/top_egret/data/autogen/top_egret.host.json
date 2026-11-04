@@ -9,195 +9,243 @@
       "devices": {
         "uart0": {
           "base_addr": 1073741824,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "uart"
         },
         "uart1": {
           "base_addr": 1073807360,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "uart"
         },
         "uart2": {
           "base_addr": 1073872896,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "uart"
         },
         "uart3": {
           "base_addr": 1073938432,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "uart"
         },
         "gpio": {
           "base_addr": 1074003968,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "gpio"
         },
         "spi_device": {
           "base_addr": 1074069504,
-          "size_bytes": 8192
+          "size_bytes": 8192,
+          "ip": "spi_device"
         },
         "i2c0": {
           "base_addr": 1074266112,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "i2c"
         },
         "i2c1": {
           "base_addr": 1074331648,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "i2c"
         },
         "i2c2": {
           "base_addr": 1074397184,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "i2c"
         },
         "pattgen": {
           "base_addr": 1074659328,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "pattgen"
         },
         "rv_timer": {
           "base_addr": 1074790400,
-          "size_bytes": 512
+          "size_bytes": 512,
+          "ip": "rv_timer"
         },
         "otp_ctrl_core": {
           "base_addr": 1074987008,
-          "size_bytes": 4096
+          "size_bytes": 4096,
+          "ip": "otp_ctrl"
         },
         "otp_macro_prim": {
           "base_addr": 1075019776,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "otp_macro"
         },
         "lc_ctrl_regs": {
           "base_addr": 1075052544,
-          "size_bytes": 256
+          "size_bytes": 256,
+          "ip": "lc_ctrl"
         },
         "lc_ctrl_dmi": {
           "base_addr": 0,
-          "size_bytes": 4096
+          "size_bytes": 4096,
+          "ip": "lc_ctrl"
         },
         "alert_handler": {
           "base_addr": 1075118080,
-          "size_bytes": 2048
+          "size_bytes": 2048,
+          "ip": "alert_handler"
         },
         "spi_host0": {
           "base_addr": 1076887552,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "spi_host"
         },
         "spi_host1": {
           "base_addr": 1076953088,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "spi_host"
         },
         "usbdev": {
           "base_addr": 1077018624,
-          "size_bytes": 4096
+          "size_bytes": 4096,
+          "ip": "usbdev"
         },
         "pwrmgr_aon": {
           "base_addr": 1077936128,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "pwrmgr"
         },
         "rstmgr_aon": {
           "base_addr": 1078001664,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "rstmgr"
         },
         "clkmgr_aon": {
           "base_addr": 1078067200,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "clkmgr"
         },
         "sysrst_ctrl_aon": {
           "base_addr": 1078132736,
-          "size_bytes": 256
+          "size_bytes": 256,
+          "ip": "sysrst_ctrl"
         },
         "adc_ctrl_aon": {
           "base_addr": 1078198272,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "adc_ctrl"
         },
         "pwm_aon": {
           "base_addr": 1078263808,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "pwm"
         },
         "pinmux_aon": {
           "base_addr": 1078329344,
-          "size_bytes": 4096
+          "size_bytes": 4096,
+          "ip": "pinmux"
         },
         "aon_timer_aon": {
           "base_addr": 1078394880,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "aon_timer"
         },
         "ast": {
           "base_addr": 1078460416,
-          "size_bytes": 1024
+          "size_bytes": 1024,
+          "ip": "ast"
         },
         "sensor_ctrl_aon": {
           "base_addr": 1078525952,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "sensor_ctrl"
         },
         "sram_ctrl_ret_aon_regs": {
           "base_addr": 1078984704,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "sram_ctrl"
         },
         "flash_ctrl_core": {
           "base_addr": 1090519040,
-          "size_bytes": 512
+          "size_bytes": 512,
+          "ip": "flash_ctrl"
         },
         "flash_macro_wrapper": {
           "base_addr": 1090551808,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "flash_macro_wrapper"
         },
         "rv_dm_regs": {
           "base_addr": 1092616192,
-          "size_bytes": 16
+          "size_bytes": 16,
+          "ip": "rv_dm"
         },
         "rv_dm_mem": {
           "base_addr": 65536,
-          "size_bytes": 4096
+          "size_bytes": 4096,
+          "ip": "rv_dm"
         },
         "rv_dm_dbg": {
           "base_addr": 4096,
-          "size_bytes": 512
+          "size_bytes": 512,
+          "ip": "rv_dm"
         },
         "rv_plic": {
           "base_addr": 1207959552,
-          "size_bytes": 134217728
+          "size_bytes": 134217728,
+          "ip": "rv_plic"
         },
         "acc": {
           "base_addr": 1093664768,
-          "size_bytes": 131072
+          "size_bytes": 131072,
+          "ip": "acc"
         },
         "aes": {
           "base_addr": 1091567616,
-          "size_bytes": 256
+          "size_bytes": 256,
+          "ip": "aes"
         },
         "hmac": {
           "base_addr": 1091633152,
-          "size_bytes": 8192
+          "size_bytes": 8192,
+          "ip": "hmac"
         },
         "kmac": {
           "base_addr": 1091698688,
-          "size_bytes": 4096
+          "size_bytes": 4096,
+          "ip": "kmac"
         },
         "keymgr": {
           "base_addr": 1091829760,
-          "size_bytes": 256
+          "size_bytes": 256,
+          "ip": "keymgr"
         },
         "csrng": {
           "base_addr": 1091895296,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "csrng"
         },
         "entropy_src": {
           "base_addr": 1091960832,
-          "size_bytes": 256
+          "size_bytes": 256,
+          "ip": "entropy_src"
         },
         "edn0": {
           "base_addr": 1092026368,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "edn"
         },
         "edn1": {
           "base_addr": 1092091904,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "edn"
         },
         "sram_ctrl_main_regs": {
           "base_addr": 1092354048,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "sram_ctrl"
         },
         "rom_ctrl_regs": {
           "base_addr": 1092485120,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "rom_ctrl"
         },
         "rv_core_ibex_cfg": {
           "base_addr": 1092550656,
-          "size_bytes": 256
+          "size_bytes": 256,
+          "ip": "rv_core_ibex"
         }
       },
       "memories": {
@@ -227,6 +275,228 @@
     }
   },
   "per_top_used_regs": {
+    "alert_handler": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "PING_TIMER_REGWEN": 12,
+      "PING_TIMEOUT_CYC_SHADOWED": 16,
+      "PING_TIMER_EN_SHADOWED": 20,
+      "ALERT_REGWEN": {
+        "offset": 24,
+        "count": 65,
+        "stride": 4
+      },
+      "ALERT_EN_SHADOWED": {
+        "offset": 284,
+        "count": 65,
+        "stride": 4
+      },
+      "ALERT_CLASS_SHADOWED": {
+        "offset": 544,
+        "count": 65,
+        "stride": 4
+      },
+      "ALERT_CAUSE": {
+        "offset": 804,
+        "count": 65,
+        "stride": 4
+      },
+      "LOC_ALERT_REGWEN": {
+        "offset": 1064,
+        "count": 7,
+        "stride": 4
+      },
+      "LOC_ALERT_EN_SHADOWED": {
+        "offset": 1092,
+        "count": 7,
+        "stride": 4
+      },
+      "LOC_ALERT_CLASS_SHADOWED": {
+        "offset": 1120,
+        "count": 7,
+        "stride": 4
+      },
+      "LOC_ALERT_CAUSE": {
+        "offset": 1148,
+        "count": 7,
+        "stride": 4
+      },
+      "CLASSA_REGWEN": 1176,
+      "CLASSA_CTRL_SHADOWED": 1180,
+      "CLASSA_CLR_REGWEN": 1184,
+      "CLASSA_CLR_SHADOWED": 1188,
+      "CLASSA_ACCUM_CNT": 1192,
+      "CLASSA_ACCUM_THRESH_SHADOWED": 1196,
+      "CLASSA_TIMEOUT_CYC_SHADOWED": 1200,
+      "CLASSA_CRASHDUMP_TRIGGER_SHADOWED": 1204,
+      "CLASSA_PHASE0_CYC_SHADOWED": 1208,
+      "CLASSA_PHASE1_CYC_SHADOWED": 1212,
+      "CLASSA_PHASE2_CYC_SHADOWED": 1216,
+      "CLASSA_PHASE3_CYC_SHADOWED": 1220,
+      "CLASSA_ESC_CNT": 1224,
+      "CLASSA_STATE": 1228,
+      "CLASSB_REGWEN": 1232,
+      "CLASSB_CTRL_SHADOWED": 1236,
+      "CLASSB_CLR_REGWEN": 1240,
+      "CLASSB_CLR_SHADOWED": 1244,
+      "CLASSB_ACCUM_CNT": 1248,
+      "CLASSB_ACCUM_THRESH_SHADOWED": 1252,
+      "CLASSB_TIMEOUT_CYC_SHADOWED": 1256,
+      "CLASSB_CRASHDUMP_TRIGGER_SHADOWED": 1260,
+      "CLASSB_PHASE0_CYC_SHADOWED": 1264,
+      "CLASSB_PHASE1_CYC_SHADOWED": 1268,
+      "CLASSB_PHASE2_CYC_SHADOWED": 1272,
+      "CLASSB_PHASE3_CYC_SHADOWED": 1276,
+      "CLASSB_ESC_CNT": 1280,
+      "CLASSB_STATE": 1284,
+      "CLASSC_REGWEN": 1288,
+      "CLASSC_CTRL_SHADOWED": 1292,
+      "CLASSC_CLR_REGWEN": 1296,
+      "CLASSC_CLR_SHADOWED": 1300,
+      "CLASSC_ACCUM_CNT": 1304,
+      "CLASSC_ACCUM_THRESH_SHADOWED": 1308,
+      "CLASSC_TIMEOUT_CYC_SHADOWED": 1312,
+      "CLASSC_CRASHDUMP_TRIGGER_SHADOWED": 1316,
+      "CLASSC_PHASE0_CYC_SHADOWED": 1320,
+      "CLASSC_PHASE1_CYC_SHADOWED": 1324,
+      "CLASSC_PHASE2_CYC_SHADOWED": 1328,
+      "CLASSC_PHASE3_CYC_SHADOWED": 1332,
+      "CLASSC_ESC_CNT": 1336,
+      "CLASSC_STATE": 1340,
+      "CLASSD_REGWEN": 1344,
+      "CLASSD_CTRL_SHADOWED": 1348,
+      "CLASSD_CLR_REGWEN": 1352,
+      "CLASSD_CLR_SHADOWED": 1356,
+      "CLASSD_ACCUM_CNT": 1360,
+      "CLASSD_ACCUM_THRESH_SHADOWED": 1364,
+      "CLASSD_TIMEOUT_CYC_SHADOWED": 1368,
+      "CLASSD_CRASHDUMP_TRIGGER_SHADOWED": 1372,
+      "CLASSD_PHASE0_CYC_SHADOWED": 1376,
+      "CLASSD_PHASE1_CYC_SHADOWED": 1380,
+      "CLASSD_PHASE2_CYC_SHADOWED": 1384,
+      "CLASSD_PHASE3_CYC_SHADOWED": 1388,
+      "CLASSD_ESC_CNT": 1392,
+      "CLASSD_STATE": 1396
+    },
+    "flash_ctrl": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "DIS": 16,
+      "EXEC": 20,
+      "INIT": 24,
+      "CTRL_REGWEN": 28,
+      "CONTROL": 32,
+      "ADDR": 36,
+      "PROG_TYPE_EN": 40,
+      "ERASE_SUSPEND": 44,
+      "REGION_CFG_REGWEN": {
+        "offset": 48,
+        "count": 8,
+        "stride": 4
+      },
+      "MP_REGION_CFG": {
+        "offset": 80,
+        "count": 8,
+        "stride": 4
+      },
+      "MP_REGION": {
+        "offset": 112,
+        "count": 8,
+        "stride": 4
+      },
+      "DEFAULT_REGION": 144,
+      "BANK0_INFO0_REGWEN": {
+        "offset": 148,
+        "count": 10,
+        "stride": 4
+      },
+      "BANK0_INFO0_PAGE_CFG": {
+        "offset": 188,
+        "count": 10,
+        "stride": 4
+      },
+      "BANK0_INFO1_REGWEN": 228,
+      "BANK0_INFO1_PAGE_CFG": 232,
+      "BANK0_INFO2_REGWEN": {
+        "offset": 236,
+        "count": 2,
+        "stride": 4
+      },
+      "BANK0_INFO2_PAGE_CFG": {
+        "offset": 244,
+        "count": 2,
+        "stride": 4
+      },
+      "BANK1_INFO0_REGWEN": {
+        "offset": 252,
+        "count": 10,
+        "stride": 4
+      },
+      "BANK1_INFO0_PAGE_CFG": {
+        "offset": 292,
+        "count": 10,
+        "stride": 4
+      },
+      "BANK1_INFO1_REGWEN": 332,
+      "BANK1_INFO1_PAGE_CFG": 336,
+      "BANK1_INFO2_REGWEN": {
+        "offset": 340,
+        "count": 2,
+        "stride": 4
+      },
+      "BANK1_INFO2_PAGE_CFG": {
+        "offset": 348,
+        "count": 2,
+        "stride": 4
+      },
+      "HW_INFO_CFG_OVERRIDE": 356,
+      "BANK_CFG_REGWEN": 360,
+      "MP_BANK_CFG_SHADOWED": 364,
+      "OP_STATUS": 368,
+      "STATUS": 372,
+      "DEBUG_STATE": 376,
+      "ERR_CODE": 380,
+      "STD_FAULT_STATUS": 384,
+      "FAULT_STATUS": 388,
+      "ERR_ADDR": 392,
+      "ECC_SINGLE_ERR_CNT": 396,
+      "ECC_SINGLE_ERR_ADDR": {
+        "offset": 400,
+        "count": 2,
+        "stride": 4
+      },
+      "PHY_ALERT_CFG": 408,
+      "PHY_STATUS": 412,
+      "Scratch": 416,
+      "FIFO_LVL": 420,
+      "FIFO_RST": 424,
+      "CURR_FIFO_LVL": 428,
+      "prog_fifo": 432,
+      "rd_fifo": 436
+    },
+    "gpio": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "DATA_IN": 16,
+      "DIRECT_OUT": 20,
+      "MASKED_OUT_LOWER": 24,
+      "MASKED_OUT_UPPER": 28,
+      "DIRECT_OE": 32,
+      "MASKED_OE_LOWER": 36,
+      "MASKED_OE_UPPER": 40,
+      "INTR_CTRL_EN_RISING": 44,
+      "INTR_CTRL_EN_FALLING": 48,
+      "INTR_CTRL_EN_LVLHIGH": 52,
+      "INTR_CTRL_EN_LVLLOW": 56,
+      "CTRL_EN_INPUT_FILTER": 60,
+      "HW_STRAPS_DATA_IN_VALID": 64,
+      "HW_STRAPS_DATA_IN": 68
+    },
     "otp_ctrl": {
       "INTR_STATE": 0,
       "INTR_ENABLE": 4,
@@ -314,6 +584,203 @@
         "stride": 4
       },
       "SW_CFG_WINDOW": 2048
+    },
+    "pinmux": {
+      "ALERT_TEST": 0,
+      "MIO_PERIPH_INSEL_REGWEN": {
+        "offset": 4,
+        "count": 57,
+        "stride": 4
+      },
+      "MIO_PERIPH_INSEL": {
+        "offset": 232,
+        "count": 57,
+        "stride": 4
+      },
+      "MIO_OUTSEL_REGWEN": {
+        "offset": 460,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_OUTSEL": {
+        "offset": 648,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_PAD_ATTR_REGWEN": {
+        "offset": 836,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_PAD_ATTR": {
+        "offset": 1024,
+        "count": 47,
+        "stride": 4
+      },
+      "DIO_PAD_ATTR_REGWEN": {
+        "offset": 1212,
+        "count": 16,
+        "stride": 4
+      },
+      "DIO_PAD_ATTR": {
+        "offset": 1276,
+        "count": 16,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_STATUS": {
+        "offset": 1340,
+        "count": 2,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_REGWEN": {
+        "offset": 1348,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_EN": {
+        "offset": 1536,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_MODE": {
+        "offset": 1724,
+        "count": 47,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_STATUS": 1912,
+      "DIO_PAD_SLEEP_REGWEN": {
+        "offset": 1916,
+        "count": 16,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_EN": {
+        "offset": 1980,
+        "count": 16,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_MODE": {
+        "offset": 2044,
+        "count": 16,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_REGWEN": {
+        "offset": 2108,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_EN": {
+        "offset": 2140,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR": {
+        "offset": 2172,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_CNT_TH": {
+        "offset": 2204,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_PADSEL": {
+        "offset": 2236,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_CAUSE": 2268
+    },
+    "pwm": {
+      "ALERT_TEST": 0,
+      "REGWEN": 4,
+      "CFG": 8,
+      "PWM_EN": 12,
+      "INVERT": 16,
+      "PWM_PARAM": {
+        "offset": 20,
+        "count": 6,
+        "stride": 4
+      },
+      "DUTY_CYCLE": {
+        "offset": 44,
+        "count": 6,
+        "stride": 4
+      },
+      "BLINK_PARAM": {
+        "offset": 68,
+        "count": 6,
+        "stride": 4
+      }
+    },
+    "pwrmgr": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CTRL_CFG_REGWEN": 16,
+      "CONTROL": 20,
+      "CFG_CDC_SYNC": 24,
+      "WAKEUP_EN_REGWEN": 28,
+      "WAKEUP_EN": 32,
+      "WAKE_STATUS": 36,
+      "RESET_EN_REGWEN": 40,
+      "RESET_EN": 44,
+      "RESET_STATUS": 48,
+      "ESCALATE_RESET_STATUS": 52,
+      "WAKE_INFO_CAPTURE_DIS": 56,
+      "WAKE_INFO": 60,
+      "FAULT_STATUS": 64
+    },
+    "rstmgr": {
+      "ALERT_TEST": 0,
+      "RESET_REQ": 4,
+      "RESET_INFO": 8,
+      "ALERT_REGWEN": 12,
+      "ALERT_INFO_CTRL": 16,
+      "ALERT_INFO_ATTR": 20,
+      "ALERT_INFO": 24,
+      "CPU_REGWEN": 28,
+      "CPU_INFO_CTRL": 32,
+      "CPU_INFO_ATTR": 36,
+      "CPU_INFO": 40,
+      "SW_RST_REGWEN": {
+        "offset": 44,
+        "count": 8,
+        "stride": 4
+      },
+      "SW_RST_CTRL_N": {
+        "offset": 76,
+        "count": 8,
+        "stride": 4
+      },
+      "ERR_CODE": 108
+    },
+    "sensor_ctrl": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CFG_REGWEN": 16,
+      "ALERT_TRIG": 20,
+      "ALERT_EN": {
+        "offset": 24,
+        "count": 11,
+        "stride": 4
+      },
+      "FATAL_ALERT_EN": 68,
+      "RECOV_ALERT": 72,
+      "FATAL_ALERT": 76,
+      "STATUS": 80,
+      "MANUAL_PAD_ATTR_REGWEN": {
+        "offset": 84,
+        "count": 4,
+        "stride": 4
+      },
+      "MANUAL_PAD_ATTR": {
+        "offset": 100,
+        "count": 4,
+        "stride": 4
+      }
     }
   },
   "otp_ctrl": {

@@ -9,191 +9,238 @@
       "devices": {
         "uart0": {
           "base_addr": 805371904,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "uart"
         },
         "gpio": {
           "base_addr": 805306368,
-          "size_bytes": 256
+          "size_bytes": 256,
+          "ip": "gpio"
         },
         "spi_device": {
           "base_addr": 808517632,
-          "size_bytes": 8192
+          "size_bytes": 8192,
+          "ip": "spi_device"
         },
         "i2c0": {
           "base_addr": 805830656,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "i2c"
         },
         "rv_timer": {
           "base_addr": 806354944,
-          "size_bytes": 512
+          "size_bytes": 512,
+          "ip": "rv_timer"
         },
         "otp_ctrl_core": {
           "base_addr": 806551552,
-          "size_bytes": 65536
+          "size_bytes": 65536,
+          "ip": "otp_ctrl"
         },
         "otp_macro_prim": {
           "base_addr": 806617088,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "otp_macro"
         },
         "lc_ctrl_regs": {
           "base_addr": 806682624,
-          "size_bytes": 256
+          "size_bytes": 256,
+          "ip": "lc_ctrl"
         },
         "alert_handler": {
           "base_addr": 806748160,
-          "size_bytes": 2048
+          "size_bytes": 2048,
+          "ip": "alert_handler"
         },
         "spi_host0": {
           "base_addr": 808452096,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "spi_host"
         },
         "pwrmgr_aon": {
           "base_addr": 809500672,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "pwrmgr"
         },
         "rstmgr_aon": {
           "base_addr": 809566208,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "rstmgr"
         },
         "clkmgr_aon": {
           "base_addr": 809631744,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "clkmgr"
         },
         "pinmux_aon": {
           "base_addr": 809893888,
-          "size_bytes": 2048
+          "size_bytes": 2048,
+          "ip": "pinmux"
         },
         "aon_timer_aon": {
           "base_addr": 809959424,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "aon_timer"
         },
         "ast": {
           "base_addr": 810024960,
-          "size_bytes": 1024
+          "size_bytes": 1024,
+          "ip": "ast"
         },
         "soc_proxy_core": {
           "base_addr": 570621952,
-          "size_bytes": 8
+          "size_bytes": 8,
+          "ip": "soc_proxy"
         },
         "sram_ctrl_ret_aon_regs": {
           "base_addr": 810549248,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "sram_ctrl"
         },
         "rv_dm_regs": {
           "base_addr": 555745280,
-          "size_bytes": 16
+          "size_bytes": 16,
+          "ip": "rv_dm"
         },
         "rv_dm_mem": {
           "base_addr": 262144,
-          "size_bytes": 4096
+          "size_bytes": 4096,
+          "ip": "rv_dm"
         },
         "rv_plic": {
           "base_addr": 671088640,
-          "size_bytes": 134217728
+          "size_bytes": 134217728,
+          "ip": "rv_plic"
         },
         "acc": {
           "base_addr": 571473920,
-          "size_bytes": 131072
+          "size_bytes": 131072,
+          "ip": "acc"
         },
         "aes": {
           "base_addr": 554696704,
-          "size_bytes": 256
+          "size_bytes": 256,
+          "ip": "aes"
         },
         "hmac": {
           "base_addr": 554762240,
-          "size_bytes": 8192
+          "size_bytes": 8192,
+          "ip": "hmac"
         },
         "kmac": {
           "base_addr": 554827776,
-          "size_bytes": 4096
+          "size_bytes": 4096,
+          "ip": "kmac"
         },
         "keymgr_dpe": {
           "base_addr": 554958848,
-          "size_bytes": 256
+          "size_bytes": 256,
+          "ip": "keymgr_dpe"
         },
         "csrng": {
           "base_addr": 555024384,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "csrng"
         },
         "entropy_src": {
           "base_addr": 555089920,
-          "size_bytes": 256
+          "size_bytes": 256,
+          "ip": "entropy_src"
         },
         "edn0": {
           "base_addr": 555155456,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "edn"
         },
         "edn1": {
           "base_addr": 555220992,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "edn"
         },
         "sram_ctrl_main_regs": {
           "base_addr": 555483136,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "sram_ctrl"
         },
         "sram_ctrl_mbox_regs": {
           "base_addr": 555548672,
-          "size_bytes": 64
+          "size_bytes": 64,
+          "ip": "sram_ctrl"
         },
         "rom_ctrl0_regs": {
           "base_addr": 555614208,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "rom_ctrl"
         },
         "rom_ctrl1_regs": {
           "base_addr": 555618304,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "rom_ctrl"
         },
         "dma": {
           "base_addr": 570490880,
-          "size_bytes": 512
+          "size_bytes": 512,
+          "ip": "dma"
         },
         "mbx0_core": {
           "base_addr": 570425344,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "mbx"
         },
         "mbx1_core": {
           "base_addr": 570425600,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "mbx"
         },
         "mbx2_core": {
           "base_addr": 570425856,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "mbx"
         },
         "mbx3_core": {
           "base_addr": 570426112,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "mbx"
         },
         "mbx4_core": {
           "base_addr": 570426368,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "mbx"
         },
         "mbx5_core": {
           "base_addr": 570426624,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "mbx"
         },
         "mbx6_core": {
           "base_addr": 570426880,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "mbx"
         },
         "mbx_jtag_core": {
           "base_addr": 570427392,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "mbx"
         },
         "mbx_pcie0_core": {
           "base_addr": 570687488,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "mbx"
         },
         "mbx_pcie1_core": {
           "base_addr": 570687744,
-          "size_bytes": 128
+          "size_bytes": 128,
+          "ip": "mbx"
         },
         "soc_dbg_ctrl_core": {
           "base_addr": 806813696,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "soc_dbg_ctrl"
         },
         "rv_core_ibex_cfg": {
           "base_addr": 555679744,
-          "size_bytes": 2048
+          "size_bytes": 2048,
+          "ip": "rv_core_ibex"
         }
       },
       "memories": {
@@ -233,47 +280,58 @@
       "devices": {
         "mbx0_soc": {
           "base_addr": 21385216,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "mbx"
         },
         "mbx1_soc": {
           "base_addr": 21385472,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "mbx"
         },
         "mbx2_soc": {
           "base_addr": 21385728,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "mbx"
         },
         "mbx3_soc": {
           "base_addr": 21385984,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "mbx"
         },
         "mbx4_soc": {
           "base_addr": 21386240,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "mbx"
         },
         "mbx5_soc": {
           "base_addr": 21386496,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "mbx"
         },
         "mbx6_soc": {
           "base_addr": 21585920,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "mbx"
         },
         "mbx_pcie0_soc": {
           "base_addr": 21364992,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "mbx"
         },
         "mbx_pcie1_soc": {
           "base_addr": 21365248,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "mbx"
         },
         "racl_ctrl": {
           "base_addr": 21372672,
-          "size_bytes": 256
+          "size_bytes": 256,
+          "ip": "racl_ctrl"
         },
         "ac_range_check": {
           "base_addr": 21381120,
-          "size_bytes": 1024
+          "size_bytes": 1024,
+          "ip": "ac_range_check"
         }
       },
       "memories": {},
@@ -283,19 +341,23 @@
       "devices": {
         "lc_ctrl_dmi": {
           "base_addr": 12288,
-          "size_bytes": 4096
+          "size_bytes": 4096,
+          "ip": "lc_ctrl"
         },
         "rv_dm_dbg": {
           "base_addr": 0,
-          "size_bytes": 512
+          "size_bytes": 512,
+          "ip": "rv_dm"
         },
         "mbx_jtag_soc": {
           "base_addr": 8704,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "mbx"
         },
         "soc_dbg_ctrl_jtag": {
           "base_addr": 8960,
-          "size_bytes": 32
+          "size_bytes": 32,
+          "ip": "soc_dbg_ctrl"
         }
       },
       "memories": {},
@@ -303,6 +365,140 @@
     }
   },
   "per_top_used_regs": {
+    "alert_handler": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "PING_TIMER_REGWEN": 12,
+      "PING_TIMEOUT_CYC_SHADOWED": 16,
+      "PING_TIMER_EN_SHADOWED": 20,
+      "ALERT_REGWEN": {
+        "offset": 24,
+        "count": 77,
+        "stride": 4
+      },
+      "ALERT_EN_SHADOWED": {
+        "offset": 332,
+        "count": 77,
+        "stride": 4
+      },
+      "ALERT_CLASS_SHADOWED": {
+        "offset": 640,
+        "count": 77,
+        "stride": 4
+      },
+      "ALERT_CAUSE": {
+        "offset": 948,
+        "count": 77,
+        "stride": 4
+      },
+      "LOC_ALERT_REGWEN": {
+        "offset": 1256,
+        "count": 7,
+        "stride": 4
+      },
+      "LOC_ALERT_EN_SHADOWED": {
+        "offset": 1284,
+        "count": 7,
+        "stride": 4
+      },
+      "LOC_ALERT_CLASS_SHADOWED": {
+        "offset": 1312,
+        "count": 7,
+        "stride": 4
+      },
+      "LOC_ALERT_CAUSE": {
+        "offset": 1340,
+        "count": 7,
+        "stride": 4
+      },
+      "CLASSA_REGWEN": 1368,
+      "CLASSA_CTRL_SHADOWED": 1372,
+      "CLASSA_CLR_REGWEN": 1376,
+      "CLASSA_CLR_SHADOWED": 1380,
+      "CLASSA_ACCUM_CNT": 1384,
+      "CLASSA_ACCUM_THRESH_SHADOWED": 1388,
+      "CLASSA_TIMEOUT_CYC_SHADOWED": 1392,
+      "CLASSA_CRASHDUMP_TRIGGER_SHADOWED": 1396,
+      "CLASSA_PHASE0_CYC_SHADOWED": 1400,
+      "CLASSA_PHASE1_CYC_SHADOWED": 1404,
+      "CLASSA_PHASE2_CYC_SHADOWED": 1408,
+      "CLASSA_PHASE3_CYC_SHADOWED": 1412,
+      "CLASSA_ESC_CNT": 1416,
+      "CLASSA_STATE": 1420,
+      "CLASSB_REGWEN": 1424,
+      "CLASSB_CTRL_SHADOWED": 1428,
+      "CLASSB_CLR_REGWEN": 1432,
+      "CLASSB_CLR_SHADOWED": 1436,
+      "CLASSB_ACCUM_CNT": 1440,
+      "CLASSB_ACCUM_THRESH_SHADOWED": 1444,
+      "CLASSB_TIMEOUT_CYC_SHADOWED": 1448,
+      "CLASSB_CRASHDUMP_TRIGGER_SHADOWED": 1452,
+      "CLASSB_PHASE0_CYC_SHADOWED": 1456,
+      "CLASSB_PHASE1_CYC_SHADOWED": 1460,
+      "CLASSB_PHASE2_CYC_SHADOWED": 1464,
+      "CLASSB_PHASE3_CYC_SHADOWED": 1468,
+      "CLASSB_ESC_CNT": 1472,
+      "CLASSB_STATE": 1476,
+      "CLASSC_REGWEN": 1480,
+      "CLASSC_CTRL_SHADOWED": 1484,
+      "CLASSC_CLR_REGWEN": 1488,
+      "CLASSC_CLR_SHADOWED": 1492,
+      "CLASSC_ACCUM_CNT": 1496,
+      "CLASSC_ACCUM_THRESH_SHADOWED": 1500,
+      "CLASSC_TIMEOUT_CYC_SHADOWED": 1504,
+      "CLASSC_CRASHDUMP_TRIGGER_SHADOWED": 1508,
+      "CLASSC_PHASE0_CYC_SHADOWED": 1512,
+      "CLASSC_PHASE1_CYC_SHADOWED": 1516,
+      "CLASSC_PHASE2_CYC_SHADOWED": 1520,
+      "CLASSC_PHASE3_CYC_SHADOWED": 1524,
+      "CLASSC_ESC_CNT": 1528,
+      "CLASSC_STATE": 1532,
+      "CLASSD_REGWEN": 1536,
+      "CLASSD_CTRL_SHADOWED": 1540,
+      "CLASSD_CLR_REGWEN": 1544,
+      "CLASSD_CLR_SHADOWED": 1548,
+      "CLASSD_ACCUM_CNT": 1552,
+      "CLASSD_ACCUM_THRESH_SHADOWED": 1556,
+      "CLASSD_TIMEOUT_CYC_SHADOWED": 1560,
+      "CLASSD_CRASHDUMP_TRIGGER_SHADOWED": 1564,
+      "CLASSD_PHASE0_CYC_SHADOWED": 1568,
+      "CLASSD_PHASE1_CYC_SHADOWED": 1572,
+      "CLASSD_PHASE2_CYC_SHADOWED": 1576,
+      "CLASSD_PHASE3_CYC_SHADOWED": 1580,
+      "CLASSD_ESC_CNT": 1584,
+      "CLASSD_STATE": 1588
+    },
+    "gpio": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "DATA_IN": 16,
+      "DIRECT_OUT": 20,
+      "MASKED_OUT_LOWER": 24,
+      "MASKED_OUT_UPPER": 28,
+      "DIRECT_OE": 32,
+      "MASKED_OE_LOWER": 36,
+      "MASKED_OE_UPPER": 40,
+      "INTR_CTRL_EN_RISING": 44,
+      "INTR_CTRL_EN_FALLING": 48,
+      "INTR_CTRL_EN_LVLHIGH": 52,
+      "INTR_CTRL_EN_LVLLOW": 56,
+      "CTRL_EN_INPUT_FILTER": 60,
+      "HW_STRAPS_DATA_IN_VALID": 64,
+      "HW_STRAPS_DATA_IN": 68,
+      "INP_PRD_CNT_CTRL": {
+        "offset": 72,
+        "count": 8,
+        "stride": 4
+      },
+      "INP_PRD_CNT_VAL": {
+        "offset": 104,
+        "count": 8,
+        "stride": 4
+      }
+    },
     "otp_ctrl": {
       "INTR_STATE": 0,
       "INTR_ENABLE": 4,
@@ -463,6 +659,154 @@
         "stride": 4
       },
       "SW_CFG_WINDOW": 32768
+    },
+    "pinmux": {
+      "ALERT_TEST": 0,
+      "MIO_PERIPH_INSEL_REGWEN": {
+        "offset": 4,
+        "count": 4,
+        "stride": 4
+      },
+      "MIO_PERIPH_INSEL": {
+        "offset": 20,
+        "count": 4,
+        "stride": 4
+      },
+      "MIO_OUTSEL_REGWEN": {
+        "offset": 36,
+        "count": 12,
+        "stride": 4
+      },
+      "MIO_OUTSEL": {
+        "offset": 84,
+        "count": 12,
+        "stride": 4
+      },
+      "MIO_PAD_ATTR_REGWEN": {
+        "offset": 132,
+        "count": 12,
+        "stride": 4
+      },
+      "MIO_PAD_ATTR": {
+        "offset": 180,
+        "count": 12,
+        "stride": 4
+      },
+      "DIO_PAD_ATTR_REGWEN": {
+        "offset": 228,
+        "count": 73,
+        "stride": 4
+      },
+      "DIO_PAD_ATTR": {
+        "offset": 520,
+        "count": 73,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_STATUS": 812,
+      "MIO_PAD_SLEEP_REGWEN": {
+        "offset": 816,
+        "count": 12,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_EN": {
+        "offset": 864,
+        "count": 12,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_MODE": {
+        "offset": 912,
+        "count": 12,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_STATUS": {
+        "offset": 960,
+        "count": 3,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_REGWEN": {
+        "offset": 972,
+        "count": 73,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_EN": {
+        "offset": 1264,
+        "count": 73,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_MODE": {
+        "offset": 1556,
+        "count": 73,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_REGWEN": {
+        "offset": 1848,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_EN": {
+        "offset": 1880,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR": {
+        "offset": 1912,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_CNT_TH": {
+        "offset": 1944,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_PADSEL": {
+        "offset": 1976,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_CAUSE": 2008
+    },
+    "pwrmgr": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CTRL_CFG_REGWEN": 16,
+      "CONTROL": 20,
+      "CFG_CDC_SYNC": 24,
+      "WAKEUP_EN_REGWEN": 28,
+      "WAKEUP_EN": 32,
+      "WAKE_STATUS": 36,
+      "RESET_EN_REGWEN": 40,
+      "RESET_EN": 44,
+      "RESET_STATUS": 48,
+      "ESCALATE_RESET_STATUS": 52,
+      "WAKE_INFO_CAPTURE_DIS": 56,
+      "WAKE_INFO": 60,
+      "FAULT_STATUS": 64
+    },
+    "rstmgr": {
+      "ALERT_TEST": 0,
+      "RESET_REQ": 4,
+      "RESET_INFO": 8,
+      "ALERT_REGWEN": 12,
+      "ALERT_INFO_CTRL": 16,
+      "ALERT_INFO_ATTR": 20,
+      "ALERT_INFO": 24,
+      "CPU_REGWEN": 28,
+      "CPU_INFO_CTRL": 32,
+      "CPU_INFO_ATTR": 36,
+      "CPU_INFO": 40,
+      "SW_RST_REGWEN": {
+        "offset": 44,
+        "count": 3,
+        "stride": 4
+      },
+      "SW_RST_CTRL_N": {
+        "offset": 56,
+        "count": 3,
+        "stride": 4
+      },
+      "ERR_CODE": 68
     }
   },
   "otp_ctrl": {
