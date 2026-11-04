@@ -17,7 +17,7 @@ ujson_rust(
 
 ujson_rust(
     name = "gpio",
-    srcs = ["//sw/device/lib/testing/json:gpio"],
+    srcs = ["//sw/device/lib/testing/json:gpio_headers"],
     defines = ["opentitanlib=crate"],
 )
 
@@ -35,7 +35,7 @@ ujson_rust(
 
 ujson_rust(
     name = "pinmux_config",
-    srcs = ["//sw/device/lib/testing/json:pinmux_config"],
+    srcs = ["//sw/device/lib/testing/json:pinmux_config_headers"],
     defines = ["opentitanlib=crate"],
 )
 
@@ -168,6 +168,7 @@ rust_library(
         "src/test_utils/mod.rs",
         "src/test_utils/object.rs",
         "src/test_utils/otp_ctrl.rs",
+        "src/test_utils/pinmux_config.rs",
         "src/test_utils/poll.rs",
         "src/test_utils/rpc.rs",
         "src/test_utils/spi_passthru.rs",
@@ -209,15 +210,7 @@ rust_library(
         "src/util/vmem/mod.rs",
         "src/util/vmem/parser.rs",
         "src/util/voltage.rs",
-    ] + select({
-        "//sw/device:is_scafi_deprecated": [],
-        "//hw/top:egret": [
-            "src/test_utils/pinmux_config.rs",
-        ],
-        "//hw/top:dragonfly": [
-            "src/test_utils/pinmux_config.rs",
-        ],
-    }),
+    ],
     compile_data = [
         ":gpio",
         ":i2c_target",
@@ -231,12 +224,6 @@ rust_library(
         "//util/openocd/target:lowrisc-egret.cfg",
         "//util/openocd/target:lowrisc-egret-lc.cfg",
     ],
-    crate_features = select({
-        "//sw/device:is_scafi_deprecated": ["scafi_deprecated"],
-        "//hw/top:egret": ["egret"],
-        "//hw/top:dragonfly": ["dragonfly"],
-        "//conditions:default": [],
-    }),
     crate_name = "opentitanlib",
     proc_macro_deps = [
         "//sw/host/opentitanlib/opentitantool_derive",

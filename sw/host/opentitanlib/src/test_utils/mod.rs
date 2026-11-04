@@ -20,9 +20,6 @@ pub mod load_sram_program;
 pub mod mem;
 pub mod object;
 pub mod otp_ctrl;
-// The "Scafi_Deprecated" variant of the chip doesn't have the same
-// set of IO and pinmux constants as the "egret" chip.
-#[cfg(not(feature = "scafi_deprecated"))]
 pub mod pinmux_config;
 pub mod poll;
 pub mod rpc;

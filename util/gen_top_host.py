@@ -4,9 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Generate a host-side description of a top level from its complete configuration.
 
-Host tools such as opentitantool are currently built for one top level and get its
-addresses and pinmux tables at compile time. This generator writes the same information
-to a JSON file that host tools can load at run time instead:
+Host tools such as opentitantool load this description at run time, so that one build of
+them works with every top. This generator writes it to a JSON file:
 
     <outdir>/top_<topname>.host.json
 
