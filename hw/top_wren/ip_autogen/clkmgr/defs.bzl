@@ -1,0 +1,14 @@
+# Copyright lowRISC contributors (OpenTitan project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+load("//rules/pavona:hw.bzl", "pavona_ip")
+
+CLKMGR = pavona_ip(
+    name = "clkmgr",
+    hjson = "//hw/top_wren/ip_autogen/clkmgr/data:clkmgr.hjson",
+    ipconfig = "//hw/top_wren/ip_autogen/clkmgr/data:top_wren_clkmgr.ipconfig.hjson",
+    regs = "//hw/top_wren/ip_autogen/clkmgr/rtl:regs",
+    extension = "//hw/top/dt:clkmgr_binding",
+    dt_hdr_deps = ["//sw/device/lib/base:bitfield"],
+    dt_src_deps = ["//hw/top:clkmgr_c_regs"],
+)

@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -39,6 +40,13 @@ config_setting(
     name = "scafi_deprecated",
     flag_values = {
         "top": "scafi_deprecated",
+    },
+)
+
+config_setting(
+    name = "wren",
+    flag_values = {
+        "top": "wren",
     },
 )
 
@@ -216,6 +224,7 @@ alias(
             "egret": "//hw/top_egret/sw/autogen:top_egret_memory",
             "dragonfly": "//hw/top_dragonfly/sw/autogen:top_dragonfly_memory",
             "scafi_deprecated": "//hw/top_scafi_deprecated/sw/autogen:top_scafi_deprecated_memory",
+            "wren": "//hw/top_wren/sw/autogen:top_wren_memory",
         },
         "//hw/top_egret/sw/autogen:top_egret_memory",
     ),

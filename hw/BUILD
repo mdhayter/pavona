@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -30,6 +31,7 @@ filegroup(
         "//hw/top_dragonfly:doc_files",
         "//hw/top_egret:doc_files",
         "//hw/top_scafi_deprecated:doc_files",
+        "//hw/top_wren:doc_files",
     ],
 )
 

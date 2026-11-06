@@ -251,7 +251,7 @@
     "//hw/top:extensions.bzl%top": {
       "general": {
         "bzlTransitiveDigest": "7VoHwvBmwXOVQiLOiFaAd/FwtsVcx1Ij6vACDW6Tqyo=",
-        "usagesDigest": "E9C6RABn7M6zO6MS5s4jSzkT/krse4skZxPmkI2svvQ=",
+        "usagesDigest": "kV8hHTAvlOCBAkHEMlrPdYMP4jPnwUn0HxlobkfjzDk=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -262,14 +262,17 @@
               "bazel_files": [
                 "@@//hw/top_egret:defs.bzl",
                 "@@//hw/top_dragonfly:defs.bzl",
-                "@@//hw/top_scafi_deprecated:defs.bzl"
+                "@@//hw/top_scafi_deprecated:defs.bzl",
+                "@@//hw/top_wren:defs.bzl"
               ],
               "top_vars": [
                 "EGRET",
                 "DRAGONFLY",
-                "SCAFI_DEPRECATED"
+                "SCAFI_DEPRECATED",
+                "WREN"
               ],
               "top_names": [
+                "",
                 "",
                 "",
                 ""
