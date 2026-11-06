@@ -44,7 +44,7 @@ module clkmgr_bind;
 
 % endfor
   // Assertions for transactional clocks.
-% for clk, sig in typed_clocks['hint_clks'].items():
+% for clk, sig in typed_clocks.get('hint_clks', {}).items():
   bind clkmgr clkmgr_trans_sva_if clkmgr_${sig['endpoint_ip']}_trans_sva_if (
     .clk(clk_${sig['src_name']}_i),
     .rst_n(rst_${sig['src_name']}_ni),
@@ -121,7 +121,7 @@ module clkmgr_bind;
 
 %endfor
   // Hint controlled gating enables.
-% for clk, sig in typed_clocks['hint_clks'].items():
+% for clk, sig in typed_clocks.get('hint_clks', {}).items():
 <% suffix = clk.split('clk_')[-1] %>\
   bind clkmgr clkmgr_cg_en_sva_if clkmgr_cg_${suffix} (
     .clk(clk_${sig['src_name']}_i),

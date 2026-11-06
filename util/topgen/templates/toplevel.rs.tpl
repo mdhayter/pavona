@@ -228,12 +228,14 @@ ${helper.pwrmgr_reset_requests.render()}
 ///
 /// The Software has full control over these clocks.
 ${helper.clkmgr_gateable_clocks.render()}
+% if helper.clkmgr_hintable_clocks.constants:
 
 /// Clock Manager Software-Hinted Clocks.
 ///
 /// The Software has partial control over these clocks. It can ask them to stop,
 /// but the clock manager is in control of whether the clock actually is stopped.
 ${helper.clkmgr_hintable_clocks.render()}
+% endif
 % endif
 % for (subspace_name, description, subspace_range) in helper.subranges[addr_space]:
 
