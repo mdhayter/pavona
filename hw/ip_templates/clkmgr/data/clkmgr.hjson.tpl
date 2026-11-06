@@ -96,7 +96,7 @@ rg_srcs = get_rg_srcs(typed_clocks)
       desc: "Gating of ${src_name} peripheral clock."
     }
 % endfor
-% for sig in typed_clocks['hint_clks'].values():
+% for sig in typed_clocks.get('hint_clks', {}).values():
 <%
   target_unit = sig['endpoint_ip'].upper()
 %>\
@@ -245,6 +245,7 @@ rg_srcs = get_rg_srcs(typed_clocks)
       act:     "rsp",
     },
 
+% if hint_names:
     { struct:  "mubi4",
       type:    "uni",
       name:    "idle",
@@ -252,6 +253,7 @@ rg_srcs = get_rg_srcs(typed_clocks)
       package: "prim_mubi_pkg",
       width:   "${len(hint_names)}"
     },
+% endif
 % if ext_clk_bypass:
     { struct:  "mubi4",
       desc:    "Indicates clocks are calibrated and frequencies accurate",
@@ -478,6 +480,7 @@ rg_srcs = get_rg_srcs(typed_clocks)
       tags: ["excl:CsrAllTests:CsrExclAll"]
     },
 
+% if hint_names:
     { name: "CLK_HINTS",
       desc: '''
         Clock hint for software gateable transactional clocks during active mode.
@@ -539,6 +542,7 @@ rg_srcs = get_rg_srcs(typed_clocks)
       tags: ["excl:CsrNonInitTests:CsrExclCheck:CsrExclCheck"]
     },
 
+% endif
     { name: "MEASURE_CTRL_REGWEN",
       desc: "Measurement control write enable",
       swaccess: "rw0c",

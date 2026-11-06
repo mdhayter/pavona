@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """
@@ -49,7 +50,7 @@ class ClkmgrIpConfig:
                 "src": clk["src_name"],
                 "module": clk["endpoint_ip"],
             }
-            for clk in self.param_values["typed_clocks"]["hint_clks"].values()
+            for clk in self.param_values["typed_clocks"].get("hint_clks", {}).values()
         ]
 
     def measurable_clks(self) -> List[str]:

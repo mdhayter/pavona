@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """Provides support functions for clkmgr ipgen."""
@@ -93,7 +94,7 @@ def get_rg_srcs(typed_clocks: ConfigT) -> List[str]:
 
 
 def get_hint_targets(typed_clocks: ConfigT) -> List[str]:
-    return [sig['endpoint_ip'] for sig in typed_clocks['hint_clks'].values()]
+    return [sig['endpoint_ip'] for sig in typed_clocks.get('hint_clks', {}).values()]
 
 
 def config_clk_meas(clk: str,

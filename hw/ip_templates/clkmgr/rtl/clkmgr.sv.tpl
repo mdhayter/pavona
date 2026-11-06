@@ -70,7 +70,9 @@ rg_srcs = get_rg_srcs(typed_clocks)
 
   // idle hints
   // SEC_CM: IDLE.INTERSIG.MUBI
+% if hint_names:
   input prim_mubi_pkg::mubi4_t [${len(hint_names)-1}:0] idle_i,
+% endif
 % if ext_clk_bypass:
 
   // life cycle state output
@@ -518,6 +520,7 @@ rg_srcs = get_rg_srcs(typed_clocks)
   // clock target
   ////////////////////////////////////////////////////
 
+% if hint_names:
   logic [${len(typed_clocks['hint_clks'])-1}:0] idle_cnt_err;
 % for clk, sig in typed_clocks['hint_clks'].items():
 
@@ -565,6 +568,10 @@ rg_srcs = get_rg_srcs(typed_clocks)
 % endfor
 % else:
   assign hw2reg.clk_hints_status.de = 1'b1;
+% endif
+% else:
+  assign hw2reg.fatal_err_code.idle_cnt.d = 1'b1;
+  assign hw2reg.fatal_err_code.idle_cnt.de = 1'b0;
 % endif
 
   // SEC_CM: JITTER.CONFIG.MUBI

@@ -298,7 +298,9 @@ ${helper.clkmgr_gateable_clocks.render()}
  * The Software has partial control over these clocks. It can ask them to stop,
  * but the clock manager is in control of whether the clock actually is stopped.
  */
+% if helper.clkmgr_hintable_clocks.constants:
 ${helper.clkmgr_hintable_clocks.render()}
+% endif
 % endif
 % for (subspace_name, description, subspace_range) in helper.subranges[addr_space]:
 

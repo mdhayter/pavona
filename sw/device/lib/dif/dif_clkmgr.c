@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -31,9 +32,11 @@ static bool clkmgr_valid_gateable_clock(dif_clkmgr_gateable_clock_t clock) {
   return clock < CLKMGR_PARAM_NUM_SW_GATEABLE_CLOCKS;
 }
 
+#if CLKMGR_PARAM_NUM_HINTABLE_CLOCKS > 0
 static bool clkmgr_valid_hintable_clock(dif_clkmgr_hintable_clock_t clock) {
   return clock < CLKMGR_PARAM_NUM_HINTABLE_CLOCKS;
 }
+#endif
 
 static bool clkmgr_measure_ctrl_regwen(const dif_clkmgr_t *clkmgr) {
   uint32_t measure_ctrl_regwen_val = mmio_region_read32(
@@ -218,6 +221,7 @@ dif_result_t dif_clkmgr_find_hintable_clock(
   return kDifError;
 }
 
+#if CLKMGR_PARAM_NUM_HINTABLE_CLOCKS > 0
 dif_result_t dif_clkmgr_hintable_clock_get_enabled(
     const dif_clkmgr_t *clkmgr, dif_clkmgr_hintable_clock_t clock,
     dif_toggle_t *state) {
@@ -263,6 +267,26 @@ dif_result_t dif_clkmgr_hintable_clock_get_hint(
 
   return kDifOk;
 }
+#else
+// This top has no hintable clocks, so it has no hint registers.
+dif_result_t dif_clkmgr_hintable_clock_get_enabled(
+    const dif_clkmgr_t *clkmgr, dif_clkmgr_hintable_clock_t clock,
+    dif_toggle_t *state) {
+  return kDifUnavailable;
+}
+
+dif_result_t dif_clkmgr_hintable_clock_set_hint(
+    const dif_clkmgr_t *clkmgr, dif_clkmgr_hintable_clock_t clock,
+    dif_toggle_t new_state) {
+  return kDifUnavailable;
+}
+
+dif_result_t dif_clkmgr_hintable_clock_get_hint(
+    const dif_clkmgr_t *clkmgr, dif_clkmgr_hintable_clock_t clock,
+    dif_toggle_t *state) {
+  return kDifUnavailable;
+}
+#endif
 
 #if OPENTITAN_CLKMGR_HAS_SW_EXTCLK_REGWEN
 dif_result_t dif_clkmgr_external_clock_control_is_locked(

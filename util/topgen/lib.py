@@ -1562,11 +1562,13 @@ class TopGen:
             clock_name = Name.from_snake_case(name).remove_part("clk")
             docstring = "Clock {} in group {}".format(name, c2g[name].name)
             hintable_clocks.add_constant(clock_name, docstring)
-        if isinstance(hintable_clocks, RustEnum):
-            hintable_clocks.add_number_of_variants(
-                "Number of Valid Hintable Clock")
-        else:
-            hintable_clocks.add_last_constant("Last Valid Hintable Clock")
+        # A top with no hint clocks has an empty enumeration, which is not rendered.
+        if by_type.hint_clks:
+            if isinstance(hintable_clocks, RustEnum):
+                hintable_clocks.add_number_of_variants(
+                    "Number of Valid Hintable Clock")
+            else:
+                hintable_clocks.add_last_constant("Last Valid Hintable Clock")
 
         self.clkmgr_gateable_clocks = gateable_clocks
         self.clkmgr_hintable_clocks = hintable_clocks
