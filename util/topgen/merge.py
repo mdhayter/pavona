@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -819,7 +820,9 @@ def connect_clocks(top: ConfigT, name_to_block: IpBlocksT):
 
         clkmgr_idle.append(ep_name + '.' + idle_signal)
 
-    top['inter_module']['connect']['{}.idle'.format(clkmgr["name"])] = clkmgr_idle
+    # A top with no hint clocks has no idle signal to connect.
+    if clkmgr_idle:
+        top['inter_module']['connect']['{}.idle'.format(clkmgr["name"])] = clkmgr_idle
 
 
 def amend_resets(top: ConfigT,
