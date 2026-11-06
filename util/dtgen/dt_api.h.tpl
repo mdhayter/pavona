@@ -15,7 +15,7 @@ if pinmux is not None:
 else:
     has_pinmux = False
 
-top_name = Name(["top", top["name"]])
+top_name = Name(["top"]) + Name.from_snake_case(top["name"])
 
 include_guard = "OPENTITAN_TOP_{}_DT_API_H_".format(top["name"].upper())
 %>\

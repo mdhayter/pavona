@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -124,6 +125,7 @@ cc_library(
         {
             "egret": ["PAVONA_IS_EGRET"],
             "dragonfly": ["PAVONA_IS_DRAGONFLY"],
+            "scafi_deprecated": ["PAVONA_IS_SCAFI_DEPRECATED"],
         },
         [],
     ),

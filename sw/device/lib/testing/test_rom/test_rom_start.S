@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -6,22 +7,13 @@
 #include "sw/device/lib/base/multibits_asm.h"
 #include "hw/top/ast_regs.h"
 #include "hw/top/clkmgr_regs.h"
-#include "hw/top/csrng_regs.h"
-#include "hw/top/edn_regs.h"
 #include "hw/top/sram_ctrl_regs.h"
 
 #if defined(OPENTITAN_IS_SCAFI_DEPRECATED)
-#include "hw/top/otp_ctrl_regs.h"
-#include "hw/top/sensor_ctrl_regs.h"
 #include "hw/top_scafi_deprecated/sw/autogen/top_scafi_deprecated_memory.h"
-#define OTP_CTRL_CORE_BASE_ADDR             TOP_SCAFI_DEPRECATED_OTP_CTRL_CORE_BASE_ADDR
 #define AST_BASE_ADDR                       TOP_SCAFI_DEPRECATED_AST_BASE_ADDR
 #define CLKMGR_AON_BASE_ADDR                TOP_SCAFI_DEPRECATED_CLKMGR_AON_BASE_ADDR
 #define SRAM_CTRL_MAIN_REGS_BASE_ADDR       TOP_SCAFI_DEPRECATED_SRAM_CTRL_MAIN_REGS_BASE_ADDR
-#define ENTROPY_SRC_BASE_ADDR               TOP_SCAFI_DEPRECATED_ENTROPY_SRC_BASE_ADDR
-#define CSRNG_BASE_ADDR                     TOP_SCAFI_DEPRECATED_CSRNG_BASE_ADDR
-#define EDN0_BASE_ADDR                      TOP_SCAFI_DEPRECATED_EDN0_BASE_ADDR
-#define SENSOR_CTRL_BASE_ADDR               TOP_SCAFI_DEPRECATED_SENSOR_CTRL_AON_BASE_ADDR
 
 #elif defined(OPENTITAN_IS_EGRET)
 #include "hw/top/otp_ctrl_regs.h"
@@ -54,6 +46,14 @@
 
 #ifdef ENTROPY_SRC_BASE_ADDR
 #include "hw/top/entropy_src_regs.h"
+#endif
+
+#ifdef CSRNG_BASE_ADDR
+#include "hw/top/csrng_regs.h"
+#endif
+
+#ifdef EDN0_BASE_ADDR
+#include "hw/top/edn_regs.h"
 #endif
 
 /**
@@ -196,6 +196,7 @@ _start:
   // NOTE: This should happen before attempting to access any address outside
   // the initial ePMP RX region at reset, e.g. `kDeviceType` which is in
   // .rodata, or the MMIO.
+#ifndef OPENTITAN_IS_SCAFI_DEPRECATED  // This top's Ibex has no PMP.
   li   t0, (0x9f << 24) // Locked NAPOT read-write-execute.
   csrw pmpcfg3, t0
   li   t0, 0x7fffffff   // NAPOT encoded region covering entire 34-bit address space.
@@ -203,7 +204,9 @@ _start:
   csrw pmpcfg0, zero
   csrw pmpcfg1, zero
   csrw pmpcfg2, zero
+#endif
 
+#ifdef HAS_OTP_CTRL
 #ifdef OPENTITAN_IS_DRAGONFLY
   // Copy all required AST words.
   li   a0, (OTP_CTRL_CORE_BASE_ADDR + \
@@ -256,6 +259,8 @@ _start:
 #endif
 
 .L_ast_init_skip:
+#endif  // HAS_OTP_CTRL
+
 #ifdef ENTROPY_SRC_BASE_ADDR
   // The following sequence enables the minimum level of entropy required to
   // initialize memory scrambling, as well as the entropy distribution network.
@@ -274,19 +279,23 @@ _start:
   sw t0, ENTROPY_SRC_MODULE_ENABLE_REG_OFFSET(a0)
 #endif
 
+#ifdef CSRNG_BASE_ADDR
   li a0, CSRNG_BASE_ADDR
   li t0, (MULTIBIT_ASM_BOOL4_TRUE << CSRNG_CTRL_ENABLE_OFFSET) | \
          (MULTIBIT_ASM_BOOL4_TRUE << CSRNG_CTRL_SW_APP_ENABLE_OFFSET) | \
          (MULTIBIT_ASM_BOOL4_TRUE << CSRNG_CTRL_READ_INT_STATE_OFFSET) | \
          (MULTIBIT_ASM_BOOL4_FALSE << CSRNG_CTRL_FIPS_FORCE_ENABLE_OFFSET)
   sw t0, CSRNG_CTRL_REG_OFFSET(a0)
+#endif
 
+#ifdef EDN0_BASE_ADDR
   li a0, EDN0_BASE_ADDR
   li t0, (MULTIBIT_ASM_BOOL4_TRUE << EDN_CTRL_EDN_ENABLE_OFFSET) | \
          (MULTIBIT_ASM_BOOL4_TRUE << EDN_CTRL_BOOT_REQ_MODE_OFFSET) | \
          (MULTIBIT_ASM_BOOL4_FALSE << EDN_CTRL_AUTO_REQ_MODE_OFFSET) | \
          (MULTIBIT_ASM_BOOL4_FALSE << EDN_CTRL_CMD_FIFO_RST_OFFSET)
   sw t0, EDN_CTRL_REG_OFFSET(a0)
+#endif
 
   // Scramble and initialize main memory (main SRAM).
   // Memory accesses will stall until initialization is complete.

@@ -1,5 +1,6 @@
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -111,7 +112,6 @@ cc_library(
     ),
     deps = [
         "//hw/top:gpio_c_regs",
-        "//hw/top:otp_ctrl_c_regs",
         "//hw/top/dt",
         "//sw/device/lib/base:abs_mmio",
         "//sw/device/lib/base:bitfield",
@@ -119,8 +119,14 @@ cc_library(
         "//sw/device/silicon_creator/lib:bootstrap",
         "//sw/device/silicon_creator/lib:error",
         "//sw/device/silicon_creator/lib/base:chip",
-        "//sw/device/silicon_creator/lib/drivers:otp",
     ] + pavona_if_ip(
+        "otp_ctrl",
+        [
+            "//hw/top:otp_ctrl_c_regs",
+            "//sw/device/silicon_creator/lib/drivers:otp",
+        ],
+        [],
+    ) + pavona_if_ip(
         "flash_ctrl",
         [
             "//hw/top:flash_ctrl_c_regs",
@@ -654,7 +660,7 @@ pavona_test(
 )
 
 filegroup(
-    name = "scafi_deprecated_test_rom_bootstrap_srcs",
+    name = "no_otp_test_rom_bootstrap_srcs",
     srcs = [
         "bootstrap.c",
         "bootstrap.h",

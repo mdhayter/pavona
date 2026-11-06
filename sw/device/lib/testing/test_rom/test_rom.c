@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -128,18 +129,20 @@ bool rom_test_main(void) {
 #endif
 #endif
 
-#ifndef OPENTITAN_IS_SCAFI_DEPRECATED
   // Initialize Ibex cpuctrl (contains icache / security feature enablements).
   uint32_t cpuctrl_csr;
   CSR_READ(CSR_REG_CPUCTRL, &cpuctrl_csr);
-  uint32_t cpuctrl_otp_val =
+#ifdef HAS_OTP_CTRL
+  uint32_t cpuctrl_val =
       abs_mmio_read32(otp_ctrl_base + OTP_CTRL_SW_CFG_WINDOW_REG_OFFSET +
                       OTP_CTRL_PARAM_CREATOR_SW_CFG_CPUCTRL_OFFSET);
-  cpuctrl_csr = bitfield_field32_write(
-      cpuctrl_csr, (bitfield_field32_t){.mask = 0x3f, .index = 0},
-      cpuctrl_otp_val);
-  CSR_WRITE(CSR_REG_CPUCTRL, cpuctrl_csr);
+#else
+  // With no OTP to configure it: icache enabled, security features disabled.
+  uint32_t cpuctrl_val = 0x1;
 #endif
+  cpuctrl_csr = bitfield_field32_write(
+      cpuctrl_csr, (bitfield_field32_t){.mask = 0x3f, .index = 0}, cpuctrl_val);
+  CSR_WRITE(CSR_REG_CPUCTRL, cpuctrl_csr);
 
   // Initial sec_mmio, required by bootstrap and its dependencies.
   sec_mmio_init();

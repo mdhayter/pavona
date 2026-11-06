@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -138,17 +139,17 @@ ld_library(
 )
 
 # TODO(#12905): Use a slightly hollowed out version of the silicon_creator
-# manifest_def implementation when building the test_framework for the
-# scafi_deprecated top level.
+# manifest_def implementation when building the test_framework for tops with no
+# OTP or life cycle controller.
 cc_library(
-    name = "scafi_deprecated_test_framework_manifest_def",
+    name = "no_otp_test_framework_manifest_def",
     srcs = [
-        "//sw/device/silicon_creator/lib:scafi_deprecated_test_framework_manifest_def_srcs",
+        "//sw/device/silicon_creator/lib:no_otp_test_framework_manifest_def_srcs",
     ],
-    # This should be built only for Scafi_Deprecated and skipped if using wildcards.
+    # This should be built only for tops with no OTP and skipped if using wildcards.
     tags = ["manual"],
     deps = [
-        "//sw/device/lib/testing/test_rom:scafi_deprecated_test_rom_manifest",
+        "//sw/device/lib/testing/test_rom:no_otp_test_rom_manifest",
     ],
     # The manifest section should be populated anytime this is added as a
     # dependency, even if the manifest is not referenced by software.
@@ -158,7 +159,7 @@ cc_library(
 alias(
     name = "test_framework_manifest_def",
     actual = select({
-        "//sw/device:is_scafi_deprecated": ":scafi_deprecated_test_framework_manifest_def",
+        "//sw/device:is_scafi_deprecated": ":no_otp_test_framework_manifest_def",
         "//conditions:default": "//sw/device/silicon_creator/lib:manifest_def",
     }),
 )

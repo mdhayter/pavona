@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -79,6 +80,29 @@ typedef enum dif_rstmgr_reset_info {
    * Device has reset due to software request.
    */
   kDifRstmgrResetInfoSw = (0x1 << 2),
+#if defined(OPENTITAN_IS_SCAFI_DEPRECATED)
+  /**
+   * Device has reset due to a peripheral request. This can be an alert
+   * escalation, watchdog or anything else.
+   */
+  kDifRstmgrResetInfoHwReq = (0xf << 3),
+  /**
+   * Device has reset due to watchdog bite.
+   */
+  kDifRstmgrResetInfoWatchdog = (1 << 3),
+  /**
+   * Device has reset due to power unstable.
+   */
+  kDifRstmgrResetInfoPowerUnstable = (1 << 4),
+  /**
+   * Device has reset due to alert escalation.
+   */
+  kDifRstmgrResetInfoEscalation = (1 << 5),
+  /**
+   * Device has reset due to non-debug-module request.
+   */
+  kDifRstmgrResetInfoNdm = (1 << 6),
+#else
   /**
    * Device has reset due to a peripheral request. This can be an alert
    * escalation, watchdog or anything else.
@@ -117,6 +141,7 @@ typedef enum dif_rstmgr_reset_info {
    * Device has reset due to non-debug-module request.
    */
   kDifRstmgrResetInfoNdm = (1 << 7),
+#endif
 } dif_rstmgr_reset_info_t;
 
 /**

@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -8,11 +9,15 @@
 #include "sw/device/lib/base/abs_mmio.h"
 #include "sw/device/lib/base/hardened.h"
 #include "sw/device/silicon_creator/lib/base/chip.h"
-#include "sw/device/silicon_creator/lib/drivers/otp.h"
 #include "sw/device/silicon_creator/lib/error.h"
 
 #include "hw/top/gpio_regs.h"
+
+#ifdef DISCRETE_OTP_MAP
+#include "sw/device/silicon_creator/lib/drivers/otp.h"
+
 #include "hw/top/otp_ctrl_regs.h"
+#endif
 
 #ifdef HAS_FLASH_CTRL
 #include "sw/device/silicon_creator/lib/drivers/flash_ctrl.h"
