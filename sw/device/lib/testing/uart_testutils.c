@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -56,7 +57,8 @@ static status_t get_uart_pads_for_channel(dt_uart_t uart_dt,
   }
   *rx_pad = kDtPadUart0Rx;
   *tx_pad = kDtPadUart0Tx;
-#elif defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED)
+#elif defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED) || \
+    defined(OPENTITAN_IS_WREN)
   // For Egret and Scafi_Deprecated platforms
   // For DV platform, each UART has its own specific mapping
   if (kDeviceType == kDeviceSimDV) {

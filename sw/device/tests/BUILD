@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -4757,6 +4758,7 @@ pavona_test(
         DRAGONFLY_TEST_ENVS,
         {
             "//hw/top_egret:silicon_creator": None,
+            "//hw/top_wren:sim_verilator": None,
         },
     ),
     deps = [

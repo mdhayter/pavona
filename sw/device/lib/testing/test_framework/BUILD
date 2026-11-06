@@ -159,6 +159,7 @@ cc_library(
 alias(
     name = "test_framework_manifest_def",
     actual = select({
+        "//hw/top:wren": ":no_otp_test_framework_manifest_def",
         "//sw/device:is_scafi_deprecated": ":no_otp_test_framework_manifest_def",
         "//conditions:default": "//sw/device/silicon_creator/lib:manifest_def",
     }),
@@ -190,7 +191,10 @@ cc_library(
         "//sw/device/lib/runtime:ibex",
         "//sw/device/lib/runtime:log",
     ] + pavona_select_top(
-        {"scafi_deprecated": []},
+        {
+            "scafi_deprecated": [],
+            "wren": [],
+        },
         [
             ":ottf_alerts",
             "//sw/device/lib/dif:alert_handler",
@@ -307,6 +311,7 @@ cc_library(
     ] + pavona_select_top(
         {
             "scafi_deprecated": [],
+            "wren": [],
         },
         [
             ":ottf_alerts",

@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -19,6 +20,7 @@ pavona_test(
         "//hw/top_dragonfly:sim_dv": None,
         "//hw/top_dragonfly:sim_verilator": None,
         "//hw/top_dragonfly:sim_verilator_rom_with_fake_keys": None,
+        "//hw/top_wren:sim_verilator": None,
     },
     verilator = verilator_params(timeout = "long"),
     deps = [

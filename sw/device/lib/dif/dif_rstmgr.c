@@ -56,7 +56,7 @@ static_assert(
     "Alert info dump max size has grown, please update the public define!");
 #elif defined(OPENTITAN_IS_DRAGONFLY)
 // TODO: equivalent assertations are not yet defined for Dragonfly
-#elif defined(OPENTITAN_IS_SCAFI_DEPRECATED)
+#elif defined(OPENTITAN_IS_SCAFI_DEPRECATED) || defined(OPENTITAN_IS_WREN)
 static_assert(kDifRstmgrResetInfoHwReq == (RSTMGR_RESET_INFO_HW_REQ_MASK
                                            << RSTMGR_RESET_INFO_HW_REQ_OFFSET),
               "kDifRstmgrResetInfoHwReq must match the register definition!");

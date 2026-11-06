@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -9,6 +10,9 @@
 #if defined(OPENTITAN_IS_SCAFI_DEPRECATED)
 #include "hw/top_scafi_deprecated/sw/autogen/top_scafi_deprecated.h"
 #define EFLASH_SIZE_BYES TOP_SCAFI_DEPRECATED_FLASH_CTRL_MEM_SIZE_BYTES
+#elif defined(OPENTITAN_IS_WREN)
+#include "hw/top_wren/sw/autogen/top_wren.h"
+#define EFLASH_SIZE_BYES TOP_WREN_FLASH_CTRL_MEM_SIZE_BYTES
 #elif defined(OPENTITAN_IS_EGRET)
 #include "hw/top_egret/sw/autogen/top_egret.h"
 #define EFLASH_SIZE_BYES TOP_EGRET_FLASH_CTRL_MEM_SIZE_BYTES

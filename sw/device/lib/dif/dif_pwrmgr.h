@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -54,7 +55,8 @@ typedef enum dif_pwrmgr_domain_option {
    * Enable input/output (IO) clock in low power state.
    */
   kDifPwrmgrDomainOptionIoClockInLowPower = (1u << 1),
-#if defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED)
+#if defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED) || \
+    defined(OPENTITAN_IS_WREN)
   /**
    * Enable USB clock in low power state.
    */

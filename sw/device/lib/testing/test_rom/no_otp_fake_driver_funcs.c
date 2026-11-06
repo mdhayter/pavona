@@ -8,11 +8,11 @@
 
 // TODO(#12905): This file includes fake definitions for the functions that are
 // used by the silicon_creator bootstrap implementation and to set reset_reason
-// but missing in tops with no OTP or life cycle controller due to hardware
-// limitations.
+// but missing in tops with no OTP or life cycle controller (Scafi_Deprecated and
+// Wren) due to hardware limitations.
 
-#ifndef OPENTITAN_IS_SCAFI_DEPRECATED
-#error "This file should be compiled only for the Scafi_Deprecated top level"
+#if !defined(OPENTITAN_IS_SCAFI_DEPRECATED) && !defined(OPENTITAN_IS_WREN)
+#error "This file should be compiled only for the Scafi_Deprecated and Wren tops"
 #endif
 
 void lifecycle_hw_rev_get(lifecycle_hw_rev_t *hw_rev) {

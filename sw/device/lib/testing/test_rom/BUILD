@@ -44,6 +44,7 @@ pavona_binary(
         "//hw/top_egret:sim_verilator_base",
         "//hw/top_dragonfly:sim_dv_base",
         "//hw/top_dragonfly:sim_verilator_base",
+        "//hw/top_wren:sim_verilator_base",
     ],
     features = ["use_lld"],
     kind = "rom",
@@ -146,6 +147,7 @@ alias(
         {
             "dragonfly": ":dragonfly_test_rom_lib",
             "scafi_deprecated": ":no_otp_test_rom_lib",
+            "wren": ":no_otp_test_rom_lib",
         },
         ":egret_test_rom_lib",
     ),
@@ -186,6 +188,7 @@ alias(
     actual = pavona_select_top(
         {
             "scafi_deprecated": ":no_otp_test_rom_manifest",
+            "wren": ":no_otp_test_rom_manifest",
         },
         "//sw/device/silicon_creator/lib:manifest",
     ),
@@ -208,6 +211,7 @@ cc_library(
     ) + pavona_select_top(
         {
             "scafi_deprecated": [],
+            "wren": [],
         },
         ["HAS_RETENTION_RAM"],
     ) + pavona_select_top(

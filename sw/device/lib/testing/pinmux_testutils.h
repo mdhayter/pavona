@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -37,7 +38,7 @@ typedef struct pinmux_testutils_mio_pin {
  *
  * Also ensures IOR0 and IOR1 outputs are disabled, for use as USB sense inputs.
  *
- * This function is specific to top_egret and top_scafi_deprecated.
+ * This function is specific to top_egret, top_scafi_deprecated and top_wren.
  */
 void pinmux_testutils_init(dif_pinmux_t *pinmux);
 

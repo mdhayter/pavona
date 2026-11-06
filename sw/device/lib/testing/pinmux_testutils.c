@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -18,7 +19,8 @@
 static const dt_gpio_t kGpioDt = kDtGpio;
 static const dt_uart_t kUart0Dt = kDtUart0;
 
-#if defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED)
+#if defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED) || \
+    defined(OPENTITAN_IS_WREN)
 static const dt_pad_t kPadUart0Tx = kDtPadIoc4;
 static const dt_pad_t kPadUart0Rx = kDtPadIoc3;
 #define HAS_UART1
@@ -168,7 +170,8 @@ status_t pinmux_testutils_connect(const dif_pinmux_t *pinmux,
 //
 // The pinout spreadsheet allocates fewer pins to GPIOs than what the GPIO IP
 // supports. This oversubscription is intentional to maximize testing.
-#if defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED)
+#if defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED) || \
+    defined(OPENTITAN_IS_WREN)
 const dt_pad_t kPinmuxTestutilsGpioPads[kDifGpioNumPins] = {
     kDtPadIoa0,  kDtPadIoa1, kDtPadIoa2,  kDtPadIoa3,  kDtPadIoa4,
     kDtPadIoa5,  kDtPadIoa6, kDtPadIoa7,  kDtPadIoa8,  kDtPadIob6,
