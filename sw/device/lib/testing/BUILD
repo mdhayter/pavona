@@ -402,6 +402,7 @@ cc_library(
     local_defines = pavona_select_top(
         {
             "scafi_deprecated": [],
+            "wren": [],
         },
         ["HAS_RETENTION_RAM"],
     ),
@@ -413,6 +414,7 @@ cc_library(
     ] + pavona_select_top(
         {
             "scafi_deprecated": [],
+            "wren": [],
         },
         ["//sw/device/silicon_creator/lib/drivers:retention_sram"],
     ),

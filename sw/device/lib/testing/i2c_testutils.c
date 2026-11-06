@@ -70,7 +70,8 @@ static status_t get_i2c_pads_for_platform(dt_i2c_t i2c_dt,
   }
   *sda_pad = kDtPadI2c0Sda;
   *scl_pad = kDtPadI2c0Scl;
-#elif defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED)
+#elif defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED) || \
+    defined(OPENTITAN_IS_WREN)
   // For Egret and Scafi_Deprecated platforms
   switch (platform) {
     case I2cPinmuxPlatformIdHyper310:  // CW310 HyperDebug

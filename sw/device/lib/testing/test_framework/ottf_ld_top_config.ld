@@ -14,9 +14,9 @@ REGION_ALIAS("ottf_storage", ctn_ram)
 REGION_ALIAS("ottf_storage", eflash)
 #endif
 
-#ifdef OPENTITAN_IS_SCAFI_DEPRECATED
+#if defined(OPENTITAN_IS_SCAFI_DEPRECATED) || defined(OPENTITAN_IS_WREN)
 /* Disable non-volatile scratch region and counters if building for
- * scafi_deprecated. This should appear before the linker script. */
+ * scafi_deprecated or wren. This should appear before the linker script. */
 no_ottf_nv_scratch = 1;
 no_ottf_nv_counter = 1;
 #endif

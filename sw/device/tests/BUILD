@@ -4756,6 +4756,7 @@ pavona_test(
         DRAGONFLY_TEST_ENVS,
         {
             "//hw/top_egret:silicon_creator": None,
+            "//hw/top_wren:sim_verilator": None,
         },
     ),
     deps = [

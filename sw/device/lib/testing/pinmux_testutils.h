@@ -37,7 +37,7 @@ typedef struct pinmux_testutils_mio_pin {
  *
  * Also ensures IOR0 and IOR1 outputs are disabled, for use as USB sense inputs.
  *
- * This function is specific to top_egret and top_scafi_deprecated.
+ * This function is specific to top_egret, top_scafi_deprecated and top_wren.
  */
 void pinmux_testutils_init(dif_pinmux_t *pinmux);
 

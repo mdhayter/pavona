@@ -16,6 +16,12 @@
 #define CLKMGR_AON_BASE_ADDR                TOP_SCAFI_DEPRECATED_CLKMGR_AON_BASE_ADDR
 #define SRAM_CTRL_MAIN_REGS_BASE_ADDR       TOP_SCAFI_DEPRECATED_SRAM_CTRL_MAIN_REGS_BASE_ADDR
 
+#elif defined(OPENTITAN_IS_WREN)
+#include "hw/top_wren/sw/autogen/top_wren_memory.h"
+#define AST_BASE_ADDR                       TOP_WREN_AST_BASE_ADDR
+#define CLKMGR_AON_BASE_ADDR                TOP_WREN_CLKMGR_AON_BASE_ADDR
+#define SRAM_CTRL_MAIN_REGS_BASE_ADDR       TOP_WREN_SRAM_CTRL_MAIN_REGS_BASE_ADDR
+
 #elif defined(OPENTITAN_IS_EGRET)
 #include "hw/top/otp_ctrl_regs.h"
 #include "hw/top/sensor_ctrl_regs.h"

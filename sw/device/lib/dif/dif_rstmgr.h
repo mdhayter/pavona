@@ -80,7 +80,7 @@ typedef enum dif_rstmgr_reset_info {
    * Device has reset due to software request.
    */
   kDifRstmgrResetInfoSw = (0x1 << 2),
-#if defined(OPENTITAN_IS_SCAFI_DEPRECATED)
+#if defined(OPENTITAN_IS_SCAFI_DEPRECATED) || defined(OPENTITAN_IS_WREN)
   /**
    * Device has reset due to a peripheral request. This can be an alert
    * escalation, watchdog or anything else.

@@ -147,6 +147,51 @@ typedef enum dif_clkmgr_recov_err_type {
    * A recoverable timeout error for USB clock.
    */
   kDifClkmgrRecovErrTypeUsbTimeout = 1u << 8,
+#elif defined(OPENTITAN_IS_WREN)
+  /**
+   * A recoverable update error for one of the clocks.
+   */
+  kDifClkmgrRecovErrTypeShadowUpdate = 1u << 0,
+  /**
+   * A recoverable measurement error for IO clock.
+   */
+  kDifClkmgrRecovErrTypeIoMeas = 1u << 1,
+  /**
+   * A recoverable measurement error for IO_DIV2 clock.
+   */
+  kDifClkmgrRecovErrTypeIoDiv2Meas = 1u << 2,
+  /**
+   * A recoverable measurement error for IO_DIV4 clock.
+   */
+  kDifClkmgrRecovErrTypeIoDiv4Meas = 1u << 3,
+  /**
+   * A recoverable measurement error for MAIN clock.
+   */
+  kDifClkmgrRecovErrTypeMainMeas = 1u << 4,
+  /**
+   * A recoverable measurement error for USB clock.
+   */
+  kDifClkmgrRecovErrTypeUsbMeas = 1u << 5,
+  /**
+   * A recoverable timeout error for IO clock.
+   */
+  kDifClkmgrRecovErrTypeIoTimeout = 1u << 6,
+  /**
+   * A recoverable timeout error for IO_DIV2 clock.
+   */
+  kDifClkmgrRecovErrTypeIoDiv2Timeout = 1u << 7,
+  /**
+   * A recoverable timeout error for IO_DIV4 clock.
+   */
+  kDifClkmgrRecovErrTypeIoDiv4Timeout = 1u << 8,
+  /**
+   * A recoverable timeout error for MAIN clock.
+   */
+  kDifClkmgrRecovErrTypeMainTimeout = 1u << 9,
+  /**
+   * A recoverable timeout error for USB clock.
+   */
+  kDifClkmgrRecovErrTypeUsbTimeout = 1u << 10,
 #else
 #error "dif_clkmgr does not support this top"
 #endif

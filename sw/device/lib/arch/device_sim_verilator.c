@@ -42,10 +42,11 @@ uint64_t to_cpu_cycles(uint64_t usec) {
 
 const uint64_t kClockFreqHiSpeedPeripheralHz = 500 * 1000;  // 500kHz
 
-// Egret and Scafi on Verilator use a 1/4 clock divider for the peripheral
+// Egret, Scafi and Wren on Verilator use a 1/4 clock divider for the peripheral
 // clock, but on Dragonfly the peripheral clock is 1:1 with the high-speed
 // domain clock.
-#if defined(PAVONA_IS_EGRET) || defined(PAVONA_IS_SCAFI_DEPRECATED)
+#if defined(PAVONA_IS_EGRET) || defined(PAVONA_IS_SCAFI_DEPRECATED) || \
+    defined(PAVONA_IS_WREN)
 const uint64_t kClockFreqPeripheralHz =
     kClockFreqHiSpeedPeripheralHz / 4;  // 125kHz
 #elif defined(PAVONA_IS_DRAGONFLY)
