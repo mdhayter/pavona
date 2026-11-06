@@ -13,6 +13,12 @@ tl_device_t xbar_devices[$] = '{
     '{"rom_ctrl__regs", '{
         '{32'h411e0000, 32'h411e007f}
     }},
+    '{"rv_dm__regs", '{
+        '{32'h41200000, 32'h4120000f}
+    }},
+    '{"rv_dm__mem", '{
+        '{32'h00010000, 32'h00010fff}
+    }},
     '{"peri", '{
         '{32'h40000000, 32'h407fffff}
     }},
@@ -24,9 +30,6 @@ tl_device_t xbar_devices[$] = '{
     }},
     '{"flash_ctrl__mem", '{
         '{32'h20000000, 32'h2000ffff}
-    }},
-    '{"aes", '{
-        '{32'h41100000, 32'h411000ff}
     }},
     '{"rv_plic", '{
         '{32'h48000000, 32'h4fffffff}
@@ -45,18 +48,34 @@ tl_device_t xbar_devices[$] = '{
 tl_host_t xbar_hosts[$] = '{
     '{"rv_core_ibex__corei", 0, '{
         "rom_ctrl__rom",
+        "rv_dm__mem",
         "sram_ctrl_main__ram",
         "flash_ctrl__mem"}}
     ,
     '{"rv_core_ibex__cored", 1, '{
         "rom_ctrl__rom",
         "rom_ctrl__regs",
+        "rv_dm__mem",
+        "rv_dm__regs",
         "sram_ctrl_main__ram",
         "flash_ctrl__mem",
         "peri",
         "flash_ctrl__core",
         "flash_macro_wrapper",
-        "aes",
+        "rv_plic",
+        "sram_ctrl_main__regs",
+        "rv_core_ibex__cfg"}}
+    ,
+    '{"rv_dm__sba", 2, '{
+        "rom_ctrl__rom",
+        "rom_ctrl__regs",
+        "rv_dm__mem",
+        "rv_dm__regs",
+        "sram_ctrl_main__ram",
+        "flash_ctrl__mem",
+        "peri",
+        "flash_ctrl__core",
+        "flash_macro_wrapper",
         "rv_plic",
         "sram_ctrl_main__regs",
         "rv_core_ibex__cfg"}}

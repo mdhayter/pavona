@@ -59,6 +59,8 @@
       spi_device: io_div2
       spi_host0: io
       usb: usb
+      spi_host1: io_div2
+      i2c0: io_div4
     }
     output_rsts:
     [
@@ -160,6 +162,34 @@
         clock: main
       }
       {
+        name: lc_aon
+        gen: true
+        type: top
+        domains:
+        [
+          Aon
+        ]
+        shadowed: false
+        sw: false
+        path: rstmgr_aon_resets.rst_lc_aon_n
+        parent: lc_src
+        clock: aon
+      }
+      {
+        name: lc_io_div2
+        gen: true
+        type: top
+        domains:
+        [
+          "0"
+        ]
+        shadowed: false
+        sw: false
+        path: rstmgr_aon_resets.rst_lc_io_div2_n
+        parent: lc_src
+        clock: io_div2
+      }
+      {
         name: lc_io_div4
         gen: true
         type: top
@@ -182,7 +212,7 @@
         [
           "0"
         ]
-        shadowed: true
+        shadowed: false
         sw: false
         path: rstmgr_aon_resets.rst_sys_n
         parent: sys_src
@@ -259,6 +289,34 @@
         path: rstmgr_aon_resets.rst_usb_n
         parent: sys_src
         clock: usb
+      }
+      {
+        name: spi_host1
+        gen: true
+        type: top
+        domains:
+        [
+          "0"
+        ]
+        shadowed: false
+        sw: true
+        path: rstmgr_aon_resets.rst_spi_host1_n
+        parent: lc_src
+        clock: io_div2
+      }
+      {
+        name: i2c0
+        gen: true
+        type: top
+        domains:
+        [
+          "0"
+        ]
+        shadowed: false
+        sw: true
+        path: rstmgr_aon_resets.rst_i2c0_n
+        parent: lc_src
+        clock: io_div4
       }
     ]
     leaf_rsts:
@@ -348,6 +406,34 @@
         clock: main
       }
       {
+        name: lc_aon
+        gen: true
+        type: top
+        domains:
+        [
+          Aon
+        ]
+        shadowed: false
+        sw: false
+        path: rstmgr_aon_resets.rst_lc_aon_n
+        parent: lc_src
+        clock: aon
+      }
+      {
+        name: lc_io_div2
+        gen: true
+        type: top
+        domains:
+        [
+          "0"
+        ]
+        shadowed: false
+        sw: false
+        path: rstmgr_aon_resets.rst_lc_io_div2_n
+        parent: lc_src
+        clock: io_div2
+      }
+      {
         name: lc_io_div4
         gen: true
         type: top
@@ -370,7 +456,7 @@
         [
           "0"
         ]
-        shadowed: true
+        shadowed: false
         sw: false
         path: rstmgr_aon_resets.rst_sys_n
         parent: sys_src
@@ -447,6 +533,34 @@
         path: rstmgr_aon_resets.rst_usb_n
         parent: sys_src
         clock: usb
+      }
+      {
+        name: spi_host1
+        gen: true
+        type: top
+        domains:
+        [
+          "0"
+        ]
+        shadowed: false
+        sw: true
+        path: rstmgr_aon_resets.rst_spi_host1_n
+        parent: lc_src
+        clock: io_div2
+      }
+      {
+        name: i2c0
+        gen: true
+        type: top
+        domains:
+        [
+          "0"
+        ]
+        shadowed: false
+        sw: true
+        path: rstmgr_aon_resets.rst_i2c0_n
+        parent: lc_src
+        clock: io_div4
       }
     ]
     rst_ni: lc_io_div4

@@ -12,7 +12,6 @@ filesets:
   files_rtl:
     depend:
       - lowrisc:ibex:ibex_pkg
-      - lowrisc:ip:aes
       - lowrisc:ip:sram_ctrl_pkg
       - lowrisc:wren_ip:flash_ctrl
     files:

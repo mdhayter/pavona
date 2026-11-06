@@ -1,6 +1,6 @@
 # Top Wren
 
-This is an experimental top intended for SCA/FI activities.
+This is an experimental top for FPGA evaluation, intended for the Digilent Genesys 2 board. It has Ibex with PMP, an instruction cache and a debug module, flash, and a set of peripherals, but no OTP, life cycle controller, alert handler or cryptographic blocks.
 
 ## Memory Map
 

@@ -160,13 +160,7 @@ module chip_sim_tb (
   prim_mubi_pkg::mubi4_t io_clk_bypass;
   // Top-level design
   top_wren #(
-    .SecAesMasking(1'b1),
-    .SecAesSBoxImpl(aes_pkg::SBoxImplDom),
-    .SecAesStartTriggerDelay(320),
-    .SecAesAllowForcingMasks(1'b1),
-    .SecAesSkipPRNGReseeding(1'b1),
     .UsbdevStub(1'b1),
-    .RvCoreIbexICache(0),
     .SramCtrlMainInstrExec(1),
     .PinmuxAonTargetCfg(PinmuxTargetCfg)
   ) top_wren (

@@ -99,6 +99,9 @@ class clkmgr_base_vseq extends cip_base_vseq #(
     meas_ctrl_regs[ClkMesrIo] = '{"io", ral.io_meas_ctrl_en,
                                    ral.io_meas_ctrl_shadowed.hi,
                                    ral.io_meas_ctrl_shadowed.lo};
+    meas_ctrl_regs[ClkMesrIoDiv2] = '{"io_div2", ral.io_div2_meas_ctrl_en,
+                                       ral.io_div2_meas_ctrl_shadowed.hi,
+                                       ral.io_div2_meas_ctrl_shadowed.lo};
     meas_ctrl_regs[ClkMesrIoDiv4] = '{"io_div4", ral.io_div4_meas_ctrl_en,
                                        ral.io_div4_meas_ctrl_shadowed.hi,
                                        ral.io_div4_meas_ctrl_shadowed.lo};
@@ -305,6 +308,10 @@ class clkmgr_base_vseq extends cip_base_vseq #(
         if (enable) $asserton(0, "tb.dut.u_io_meas.u_meas.MaxWidth_A");
         else $assertoff(0, "tb.dut.u_io_meas.u_meas.MaxWidth_A");
       end
+      ClkMesrIoDiv2: begin
+        if (enable) $asserton(0, "tb.dut.u_io_div2_meas.u_meas.MaxWidth_A");
+        else $assertoff(0, "tb.dut.u_io_div2_meas.u_meas.MaxWidth_A");
+      end
       ClkMesrIoDiv4: begin
         if (enable) $asserton(0, "tb.dut.u_io_div4_meas.u_meas.MaxWidth_A");
         else $assertoff(0, "tb.dut.u_io_div4_meas.u_meas.MaxWidth_A");
@@ -326,6 +333,10 @@ class clkmgr_base_vseq extends cip_base_vseq #(
       ClkMesrIo: begin
         if (enable) $asserton(0, "tb.dut.u_io_meas.u_meas.u_sync_ref.SrcPulseCheck_M");
         else $assertoff(0, "tb.dut.u_io_meas.u_meas.u_sync_ref.SrcPulseCheck_M");
+      end
+      ClkMesrIoDiv2: begin
+        if (enable) $asserton(0, "tb.dut.u_io_div2_meas.u_meas.u_sync_ref.SrcPulseCheck_M");
+        else $assertoff(0, "tb.dut.u_io_div2_meas.u_meas.u_sync_ref.SrcPulseCheck_M");
       end
       ClkMesrIoDiv4: begin
         if (enable) $asserton(0, "tb.dut.u_io_div4_meas.u_meas.u_sync_ref.SrcPulseCheck_M");
@@ -353,6 +364,13 @@ class clkmgr_base_vseq extends cip_base_vseq #(
         if (enable) cfg.io_clk_rst_vif.start_clk();
         else cfg.io_clk_rst_vif.stop_clk();
         control_sync_pulse_assert(.clk(ClkMesrIo), .enable(enable));
+      end
+      ClkMesrIoDiv2: begin
+        `uvm_info(`gfn, $sformatf("%sabling %s clk", enable ? "En" : "Dis", "io"),
+                  UVM_MEDIUM)
+        if (enable) cfg.io_clk_rst_vif.start_clk();
+        else cfg.io_clk_rst_vif.stop_clk();
+        control_sync_pulse_assert(.clk(ClkMesrIoDiv2), .enable(enable));
       end
       ClkMesrIoDiv4: begin
         `uvm_info(`gfn, $sformatf("%sabling %s clk", enable ? "En" : "Dis", "io"),

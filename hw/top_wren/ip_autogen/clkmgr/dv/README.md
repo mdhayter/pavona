@@ -43,7 +43,7 @@ All common types and methods defined at the package level can be found in
 
 ```systemverilog
   localparam int NUM_PERI = 4;
-  localparam int NUM_TRANS = 1;
+  localparam int NUM_TRANS = 0;
   localparam int NUM_ALERTS = 2;
 
   typedef logic [NUM_PERI-1:0] peri_enables_t;

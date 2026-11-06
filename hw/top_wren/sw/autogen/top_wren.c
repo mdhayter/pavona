@@ -15,7 +15,7 @@
  * `top_wren_plic_peripheral_t`.
  */
 const top_wren_plic_peripheral_t
-    top_wren_plic_interrupt_for_peripheral[88] = {
+    top_wren_plic_interrupt_for_peripheral[105] = {
   [kTopWrenPlicIrqIdNone] = kTopWrenPlicPeripheralUnknown,
   [kTopWrenPlicIrqIdUart0TxWatermark] = kTopWrenPlicPeripheralUart0,
   [kTopWrenPlicIrqIdUart0RxWatermark] = kTopWrenPlicPeripheralUart0,
@@ -75,8 +75,25 @@ const top_wren_plic_peripheral_t
   [kTopWrenPlicIrqIdSpiDeviceTpmHeaderNotEmpty] = kTopWrenPlicPeripheralSpiDevice,
   [kTopWrenPlicIrqIdSpiDeviceTpmRdfifoCmdEnd] = kTopWrenPlicPeripheralSpiDevice,
   [kTopWrenPlicIrqIdSpiDeviceTpmRdfifoDrop] = kTopWrenPlicPeripheralSpiDevice,
+  [kTopWrenPlicIrqIdI2c0FmtThreshold] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0RxThreshold] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0AcqThreshold] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0RxOverflow] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0ControllerHalt] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0SclInterference] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0SdaInterference] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0StretchTimeout] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0SdaUnstable] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0CmdComplete] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0TxStretch] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0TxThreshold] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0AcqStretch] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0UnexpStop] = kTopWrenPlicPeripheralI2c0,
+  [kTopWrenPlicIrqIdI2c0HostTimeout] = kTopWrenPlicPeripheralI2c0,
   [kTopWrenPlicIrqIdSpiHost0Error] = kTopWrenPlicPeripheralSpiHost0,
   [kTopWrenPlicIrqIdSpiHost0SpiEvent] = kTopWrenPlicPeripheralSpiHost0,
+  [kTopWrenPlicIrqIdSpiHost1Error] = kTopWrenPlicPeripheralSpiHost1,
+  [kTopWrenPlicIrqIdSpiHost1SpiEvent] = kTopWrenPlicPeripheralSpiHost1,
   [kTopWrenPlicIrqIdUsbdevPktReceived] = kTopWrenPlicPeripheralUsbdev,
   [kTopWrenPlicIrqIdUsbdevPktSent] = kTopWrenPlicPeripheralUsbdev,
   [kTopWrenPlicIrqIdUsbdevDisconnected] = kTopWrenPlicPeripheralUsbdev,

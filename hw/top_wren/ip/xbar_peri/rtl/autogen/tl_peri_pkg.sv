@@ -10,6 +10,9 @@ package tl_peri_pkg;
   localparam logic [31:0] ADDR_SPACE_UART1      = 32'h 40010000;
   localparam logic [31:0] ADDR_SPACE_GPIO       = 32'h 40040000;
   localparam logic [31:0] ADDR_SPACE_SPI_DEVICE = 32'h 40050000;
+  localparam logic [31:0] ADDR_SPACE_I2C0       = 32'h 40080000;
+  localparam logic [31:0] ADDR_SPACE_SPI_HOST1  = 32'h 40310000;
+  localparam logic [31:0] ADDR_SPACE_PWM_AON    = 32'h 40450000;
   localparam logic [31:0] ADDR_SPACE_SPI_HOST0  = 32'h 40060000;
   localparam logic [31:0] ADDR_SPACE_RV_TIMER   = 32'h 40100000;
   localparam logic [31:0] ADDR_SPACE_USBDEV     = 32'h 40320000;
@@ -23,31 +26,37 @@ package tl_peri_pkg;
   localparam logic [31:0] ADDR_MASK_UART1      = 32'h 0000003f;
   localparam logic [31:0] ADDR_MASK_GPIO       = 32'h 0000007f;
   localparam logic [31:0] ADDR_MASK_SPI_DEVICE = 32'h 00001fff;
+  localparam logic [31:0] ADDR_MASK_I2C0       = 32'h 0000007f;
+  localparam logic [31:0] ADDR_MASK_SPI_HOST1  = 32'h 0000003f;
+  localparam logic [31:0] ADDR_MASK_PWM_AON    = 32'h 0000007f;
   localparam logic [31:0] ADDR_MASK_SPI_HOST0  = 32'h 0000003f;
   localparam logic [31:0] ADDR_MASK_RV_TIMER   = 32'h 000001ff;
   localparam logic [31:0] ADDR_MASK_USBDEV     = 32'h 00000fff;
   localparam logic [31:0] ADDR_MASK_PWRMGR_AON = 32'h 0000007f;
-  localparam logic [31:0] ADDR_MASK_RSTMGR_AON = 32'h 0000003f;
+  localparam logic [31:0] ADDR_MASK_RSTMGR_AON = 32'h 0000007f;
   localparam logic [31:0] ADDR_MASK_CLKMGR_AON = 32'h 0000007f;
   localparam logic [31:0] ADDR_MASK_PINMUX_AON = 32'h 00000fff;
   localparam logic [31:0] ADDR_MASK_AST        = 32'h 000003ff;
 
   localparam int N_HOST   = 1;
-  localparam int N_DEVICE = 12;
+  localparam int N_DEVICE = 15;
 
   typedef enum int {
     TlUart0 = 0,
     TlUart1 = 1,
     TlGpio = 2,
     TlSpiDevice = 3,
-    TlSpiHost0 = 4,
-    TlRvTimer = 5,
-    TlUsbdev = 6,
-    TlPwrmgrAon = 7,
-    TlRstmgrAon = 8,
-    TlClkmgrAon = 9,
-    TlPinmuxAon = 10,
-    TlAst = 11
+    TlI2C0 = 4,
+    TlSpiHost1 = 5,
+    TlPwmAon = 6,
+    TlSpiHost0 = 7,
+    TlRvTimer = 8,
+    TlUsbdev = 9,
+    TlPwrmgrAon = 10,
+    TlRstmgrAon = 11,
+    TlClkmgrAon = 12,
+    TlPinmuxAon = 13,
+    TlAst = 14
   } tl_device_e;
 
   typedef enum int {

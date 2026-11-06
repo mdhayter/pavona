@@ -78,7 +78,7 @@
     { name: "NumHintableClocks",
       desc: "Number of hintable clocks",
       type: "int",
-      default: "1",
+      default: "0",
       local: "true"
     },
   ],
@@ -96,9 +96,6 @@
     { name: "CLKMGR.ENABLE.USB",
       desc: "Gating of USB peripheral clock."
     }
-    { name: "CLKMGR.HINT.AES",
-      desc: "Gating of AES transactional clock."
-    }
     { name: "CLKMGR.MEAS_CTRL.REGWEN",
       desc: '''Control modification of all clock frequency and timeout
             measurements.
@@ -106,6 +103,9 @@
     }
     { name: "CLKMGR.MEAS_CTRL.IO",
       desc: "Frequency and timeout measurements of IO clock."
+    }
+    { name: "CLKMGR.MEAS_CTRL.IO_DIV2",
+      desc: "Frequency and timeout measurements of IO_DIV2 clock."
     }
     { name: "CLKMGR.MEAS_CTRL.IO_DIV4",
       desc: "Frequency and timeout measurements of IO_DIV4 clock."
@@ -235,13 +235,6 @@
       act:     "rsp",
     },
 
-    { struct:  "mubi4",
-      type:    "uni",
-      name:    "idle",
-      act:     "rcv",
-      package: "prim_mubi_pkg",
-      width:   "1"
-    },
     { struct:  "mubi4",
       desc:    "Indicates clocks are calibrated and frequencies accurate",
       type:    "uni",
@@ -484,63 +477,6 @@
       tags: ["excl:CsrAllTests:CsrExclAll"]
     },
 
-    { name: "CLK_HINTS",
-      desc: '''
-        Clock hint for software gateable transactional clocks during active mode.
-        During low power mode, all clocks are gated off regardless of the software hint.
-
-        Transactional clocks are not fully controlled by software.  Instead software provides only a disable hint.
-
-        When software provides a disable hint, the clock manager checks to see if the associated hardware block is idle.
-        If the hardware block is idle, then the clock is disabled.
-        If the hardware block is not idle, the clock is kept on.
-
-        For the enable case, the software hint is immediately honored and the clock turned on.  Hardware does not provide any
-        feedback in this case.
-      ''',
-      swaccess: "rw",
-      hwaccess: "hro",
-      fields: [
-        {
-          bits: "0",
-          name: "CLK_MAIN_AES_HINT",
-          resval: 1,
-          desc: '''
-            0 CLK_MAIN_AES can be disabled.
-            1 CLK_MAIN_AES is enabled.
-          '''
-        }
-      ]
-      // the CLK_HINT register cannot be written.
-      // During top level randomized tests, it is possible to disable the clocks to transactional blocks
-      // and then access a register in the disabled block.  This would lead to a top level hang.
-      tags: ["excl:CsrAllTests:CsrExclAll"]
-    },
-
-    { name: "CLK_HINTS_STATUS",
-      desc: '''
-        Since the final state of !!CLK_HINTS is not always determined by software,
-        this register provides read feedback for the current clock state.
-
-      ''',
-      swaccess: "ro",
-      hwaccess: "hwo",
-      fields: [
-        {
-          bits: "0",
-          name: "CLK_MAIN_AES_VAL",
-          resval: 1,
-          desc: '''
-            0 CLK_MAIN_AES is disabled.
-            1 CLK_MAIN_AES is enabled.
-          '''
-        }
-      ]
-      // the CLK_HINT_STATUS register is read-only and cannot be checked.
-      // This register's value depends on the IDLE inputs, so cannot be predicted.
-      tags: ["excl:CsrNonInitTests:CsrExclCheck:CsrExclCheck"]
-    },
-
     { name: "MEASURE_CTRL_REGWEN",
       desc: "Measurement control write enable",
       swaccess: "rw0c",
@@ -607,6 +543,60 @@
           name: "LO",
           desc: "Min threshold for io measurement",
           resval: "470"
+        },
+      ]
+    },
+    { name: "IO_DIV2_MEAS_CTRL_EN",
+      desc: '''
+        Enable for measurement control
+      ''',
+      regwen: "MEASURE_CTRL_REGWEN",
+      swaccess: "rw",
+      hwaccess: "hrw",
+      async: "clk_io_div2_i",
+      fields: [
+        {
+          bits: "3:0",
+          name: "EN",
+          desc: "Enable measurement for io_div2",
+          mubi: true,
+          resval: false,
+        },
+      ]
+      // Measurements can cause recoverable errors depending on the
+      // thresholds which randomized CSR tests will not predict correctly.
+      // To provide better CSR coverage we allow writing the threshold
+      // fields, but not enabling the counters.
+      tags: ["excl:CsrAllTests:CsrExclWrite"]
+    },
+
+    { name: "IO_DIV2_MEAS_CTRL_SHADOWED",
+      desc: '''
+        Configuration controls for io_div2 measurement.
+
+        The threshold fields are made wider than required (by 1 bit) to ensure
+        there is room to adjust for measurement inaccuracies.
+      ''',
+      regwen: "MEASURE_CTRL_REGWEN",
+      swaccess: "rw",
+      hwaccess: "hro",
+      async: "clk_io_div2_i",
+      shadowed: "true",
+      update_err_alert: "recov_fault",
+      storage_err_alert: "fatal_fault",
+      fields: [
+        {
+          bits: "8:0",
+          name: "HI",
+          desc: "Max threshold for io_div2 measurement",
+          resval: "250"
+        },
+
+        {
+          bits: "17:9",
+          name: "LO",
+          desc: "Min threshold for io_div2 measurement",
+          resval: "230"
         },
       ]
     },
@@ -795,6 +785,14 @@
         },
         {
           bits: "2",
+          name: "IO_DIV2_MEASURE_ERR",
+          resval: 0,
+          desc: '''
+            io_div2 has encountered a measurement error.
+          '''
+        },
+        {
+          bits: "3",
           name: "IO_DIV4_MEASURE_ERR",
           resval: 0,
           desc: '''
@@ -802,7 +800,7 @@
           '''
         },
         {
-          bits: "3",
+          bits: "4",
           name: "MAIN_MEASURE_ERR",
           resval: 0,
           desc: '''
@@ -810,7 +808,7 @@
           '''
         },
         {
-          bits: "4",
+          bits: "5",
           name: "USB_MEASURE_ERR",
           resval: 0,
           desc: '''
@@ -818,7 +816,7 @@
           '''
         },
         {
-          bits: "5",
+          bits: "6",
           name: "IO_TIMEOUT_ERR",
           resval: 0,
           desc: '''
@@ -826,7 +824,15 @@
           '''
         }
         {
-          bits: "6",
+          bits: "7",
+          name: "IO_DIV2_TIMEOUT_ERR",
+          resval: 0,
+          desc: '''
+            io_div2 has timed out.
+          '''
+        }
+        {
+          bits: "8",
           name: "IO_DIV4_TIMEOUT_ERR",
           resval: 0,
           desc: '''
@@ -834,7 +840,7 @@
           '''
         }
         {
-          bits: "7",
+          bits: "9",
           name: "MAIN_TIMEOUT_ERR",
           resval: 0,
           desc: '''
@@ -842,7 +848,7 @@
           '''
         }
         {
-          bits: "8",
+          bits: "10",
           name: "USB_TIMEOUT_ERR",
           resval: 0,
           desc: '''

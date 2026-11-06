@@ -73,13 +73,11 @@ interface clkmgr_if (
   clk_hints_t clk_hints_csr;
   always_comb
     clk_hints_csr = '{
-    aes: `CLKMGR_HIER.reg2hw.clk_hints.clk_main_aes_hint.q
   };
 
   clk_hints_t clk_hints_status_csr;
   always_comb
     clk_hints_status_csr = '{
-                             aes: `CLKMGR_HIER.u_reg.clk_hints_status_clk_main_aes_val_qs
                              };
 
   prim_mubi_pkg::mubi4_t extclk_ctrl_csr_sel;
@@ -110,6 +108,19 @@ interface clkmgr_if (
     end
   end
   always_comb io_timeout_err = `CLKMGR_HIER.u_io_meas.timeout_err_o;
+
+  freq_measurement_t io_div2_freq_measurement;
+  logic io_div2_timeout_err;
+  always @(posedge `CLKMGR_HIER.u_io_div2_meas.u_meas.clk_i) begin
+    if (`CLKMGR_HIER.u_io_div2_meas.u_meas.valid_o) begin
+      io_div2_freq_measurement = '{valid: `CLKMGR_HIER.u_io_div2_meas.u_meas.valid_o,
+                                   slow: `CLKMGR_HIER.u_io_div2_meas.u_meas.slow_o,
+                                   fast: `CLKMGR_HIER.u_io_div2_meas.u_meas.fast_o};
+      `uvm_info("clkmgr_if", $sformatf(
+                "Sampled coverage for ClkMesrIoDiv2 as %p", io_div2_freq_measurement), UVM_HIGH)
+    end
+  end
+  always_comb io_div2_timeout_err = `CLKMGR_HIER.u_io_div2_meas.timeout_err_o;
 
   freq_measurement_t io_div4_freq_measurement;
   logic io_div4_timeout_err;
@@ -203,6 +214,7 @@ interface clkmgr_if (
     `uvm_info("clkmgr_if", $sformatf("Forcing count of %0s to all 1.", clk.name()), UVM_MEDIUM)
     case (clk)
       ClkMesrIo: `CLKMGR_HIER.u_io_meas.u_meas.cnt = '1;
+      ClkMesrIoDiv2: `CLKMGR_HIER.u_io_div2_meas.u_meas.cnt = '1;
       ClkMesrIoDiv4: `CLKMGR_HIER.u_io_div4_meas.u_meas.cnt = '1;
       ClkMesrMain: `CLKMGR_HIER.u_main_meas.u_meas.cnt = '1;
       ClkMesrUsb: `CLKMGR_HIER.u_usb_meas.u_meas.cnt = '1;

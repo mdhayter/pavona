@@ -32,18 +32,22 @@ wire clk_io;
 clk_rst_if clk_rst_if_io(.clk(clk_io), .rst_n(rst_n));
 wire clk_usb;
 clk_rst_if clk_rst_if_usb(.clk(clk_usb), .rst_n(rst_n));
+wire clk_io_div2;
+clk_rst_if clk_rst_if_io_div2(.clk(clk_io_div2), .rst_n(rst_n));
 wire clk_io_div4;
 clk_rst_if clk_rst_if_io_div4(.clk(clk_io_div4), .rst_n(rst_n));
 
 tl_if rv_core_ibex__corei_tl_if(clk_main, rst_n);
 tl_if rv_core_ibex__cored_tl_if(clk_main, rst_n);
+tl_if rv_dm__sba_tl_if(clk_main, rst_n);
 
 tl_if rom_ctrl__rom_tl_if(clk_main, rst_n);
 tl_if rom_ctrl__regs_tl_if(clk_main, rst_n);
+tl_if rv_dm__regs_tl_if(clk_main, rst_n);
+tl_if rv_dm__mem_tl_if(clk_main, rst_n);
 tl_if flash_ctrl__core_tl_if(clk_main, rst_n);
 tl_if flash_macro_wrapper_tl_if(clk_main, rst_n);
 tl_if flash_ctrl__mem_tl_if(clk_main, rst_n);
-tl_if aes_tl_if(clk_main, rst_n);
 tl_if rv_plic_tl_if(clk_main, rst_n);
 tl_if rv_core_ibex__cfg_tl_if(clk_main, rst_n);
 tl_if sram_ctrl_main__regs_tl_if(clk_main, rst_n);
@@ -52,6 +56,9 @@ tl_if uart0_tl_if(clk_io_div4, rst_n);
 tl_if uart1_tl_if(clk_io_div4, rst_n);
 tl_if gpio_tl_if(clk_io_div4, rst_n);
 tl_if spi_device_tl_if(clk_io_div4, rst_n);
+tl_if i2c0_tl_if(clk_io_div4, rst_n);
+tl_if spi_host1_tl_if(clk_io_div2, rst_n);
+tl_if pwm_aon_tl_if(clk_io_div4, rst_n);
 tl_if spi_host0_tl_if(clk_io, rst_n);
 tl_if rv_timer_tl_if(clk_io_div4, rst_n);
 tl_if usbdev_tl_if(clk_usb, rst_n);
@@ -77,6 +84,7 @@ initial begin
     force tb.dut.top_wren.u_xbar_main.clk_fixed_i = clk_io_div4;
     force tb.dut.top_wren.u_xbar_peri.clk_peri_i = clk_io_div4;
     force tb.dut.top_wren.u_xbar_peri.clk_spi_host0_i = clk_io;
+    force tb.dut.top_wren.u_xbar_peri.clk_spi_host1_i = clk_io_div2;
     force tb.dut.top_wren.u_xbar_peri.clk_usb_i = clk_usb;
 
     // bypass rstmgr, force resets directly
@@ -84,17 +92,20 @@ initial begin
     force tb.dut.top_wren.u_xbar_main.rst_fixed_ni = rst_n;
     force tb.dut.top_wren.u_xbar_peri.rst_peri_ni = rst_n;
     force tb.dut.top_wren.u_xbar_peri.rst_spi_host0_ni = rst_n;
+    force tb.dut.top_wren.u_xbar_peri.rst_spi_host1_ni = rst_n;
     force tb.dut.top_wren.u_xbar_peri.rst_usb_ni = rst_n;
 
 `ifndef GATE_LEVEL
     `DRIVE_CHIP_TL_HOST_IF(rv_core_ibex__corei, rv_core_ibex, corei_tl_h)
     `DRIVE_CHIP_TL_HOST_IF(rv_core_ibex__cored, rv_core_ibex, cored_tl_h)
+    `DRIVE_CHIP_TL_HOST_IF(rv_dm__sba, rv_dm, sba_tl_h)
     `DRIVE_CHIP_TL_DEVICE_IF(rom_ctrl__rom, rom_ctrl, rom_tl)
     `DRIVE_CHIP_TL_DEVICE_IF(rom_ctrl__regs, rom_ctrl, regs_tl)
+    `DRIVE_CHIP_TL_DEVICE_IF(rv_dm__regs, rv_dm, regs_tl_d)
+    `DRIVE_CHIP_TL_DEVICE_IF(rv_dm__mem, rv_dm, mem_tl_d)
     `DRIVE_CHIP_TL_DEVICE_IF(flash_ctrl__core, flash_ctrl, core_tl)
     `DRIVE_CHIP_TL_DEVICE_IF(flash_macro_wrapper, flash_macro_wrapper, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(flash_ctrl__mem, flash_ctrl, mem_tl)
-    `DRIVE_CHIP_TL_DEVICE_IF(aes, aes, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(rv_plic, rv_plic, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(rv_core_ibex__cfg, rv_core_ibex, cfg_tl_d)
     `DRIVE_CHIP_TL_DEVICE_IF(sram_ctrl_main__regs, sram_ctrl_main, regs_tl)
@@ -103,6 +114,9 @@ initial begin
     `DRIVE_CHIP_TL_DEVICE_IF(uart1, uart1, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(gpio, gpio, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(spi_device, spi_device, tl)
+    `DRIVE_CHIP_TL_DEVICE_IF(i2c0, i2c0, tl)
+    `DRIVE_CHIP_TL_DEVICE_IF(spi_host1, spi_host1, tl)
+    `DRIVE_CHIP_TL_DEVICE_IF(pwm_aon, pwm_aon, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(spi_host0, spi_host0, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(rv_timer, rv_timer, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(usbdev, usbdev, tl)
@@ -125,6 +139,8 @@ initial begin
     clk_rst_if_io.set_freq_khz(96000000 / 1000);
     clk_rst_if_usb.set_active(.drive_rst_n_val(0));
     clk_rst_if_usb.set_freq_khz(48000000 / 1000);
+    clk_rst_if_io_div2.set_active(.drive_rst_n_val(0));
+    clk_rst_if_io_div2.set_freq_khz(48000000 / 1000);
     clk_rst_if_io_div4.set_active(.drive_rst_n_val(0));
     clk_rst_if_io_div4.set_freq_khz(24000000 / 1000);
 

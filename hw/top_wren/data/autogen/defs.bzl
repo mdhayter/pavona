@@ -6,18 +6,20 @@
 # PLEASE DO NOT HAND-EDIT THIS FILE. IT HAS BEEN AUTO-GENERATED WITH THE FOLLOWING COMMAND:
 # util/gen_top_sw.py -t hw/top_wren/data/autogen/top_wren.gen.hjson
 
-load("//hw/ip/aes:defs.bzl", "AES")
 load("//hw/ip/aon_timer:defs.bzl", "AON_TIMER")
 load("//hw/top_wren/ip/ast:defs.bzl", "AST")
 load("//hw/top_wren/ip_autogen/clkmgr:defs.bzl", "CLKMGR")
 load("//hw/top_wren/ip_autogen/flash_ctrl:defs.bzl", "FLASH_CTRL")
 load("//hw/ip/flash_macro_wrapper:defs.bzl", "FLASH_MACRO_WRAPPER")
 load("//hw/top_wren/ip_autogen/gpio:defs.bzl", "GPIO")
+load("//hw/ip/i2c:defs.bzl", "I2C")
 load("//hw/top_wren/ip_autogen/pinmux:defs.bzl", "PINMUX")
+load("//hw/top_wren/ip_autogen/pwm:defs.bzl", "PWM")
 load("//hw/top_wren/ip_autogen/pwrmgr:defs.bzl", "PWRMGR")
 load("//hw/ip/rom_ctrl:defs.bzl", "ROM_CTRL")
 load("//hw/top_wren/ip_autogen/rstmgr:defs.bzl", "RSTMGR")
 load("//hw/top_wren/ip_autogen/rv_core_ibex:defs.bzl", "RV_CORE_IBEX")
+load("//hw/ip/rv_dm:defs.bzl", "RV_DM")
 load("//hw/top_wren/ip_autogen/rv_plic:defs.bzl", "RV_PLIC")
 load("//hw/ip/rv_timer:defs.bzl", "RV_TIMER")
 load("//hw/ip/spi_device:defs.bzl", "SPI_DEVICE")
@@ -27,18 +29,20 @@ load("//hw/ip/uart:defs.bzl", "UART")
 load("//hw/ip/usbdev:defs.bzl", "USBDEV")
 
 WREN_IPS = [
-    AES,
     AON_TIMER,
     AST,
     CLKMGR,
     FLASH_CTRL,
     FLASH_MACRO_WRAPPER,
     GPIO,
+    I2C,
     PINMUX,
+    PWM,
     PWRMGR,
     ROM_CTRL,
     RSTMGR,
     RV_CORE_IBEX,
+    RV_DM,
     RV_PLIC,
     RV_TIMER,
     SPI_DEVICE,

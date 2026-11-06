@@ -117,6 +117,7 @@ py_test(
         "//hw/top_scafi_deprecated/data:host_desc_inputs",
         "//hw/top_scafi_deprecated/data/autogen:top_scafi_deprecated.gen.hjson",
         "//hw/top_scafi_deprecated/sw/autogen/chip:top_scafi_deprecated.rs",
+        "//hw/top_wren:rtl/jtag_id_pkg.sv",
         "//hw/top_wren/data:host_desc_inputs",
         "//hw/top_wren/data/autogen:top_wren.gen.hjson",
         "//hw/top_wren/sw/autogen/chip:top_wren.rs",

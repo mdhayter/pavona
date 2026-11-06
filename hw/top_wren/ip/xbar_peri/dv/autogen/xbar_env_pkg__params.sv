@@ -19,6 +19,15 @@ tl_device_t xbar_devices[$] = '{
     '{"spi_device", '{
         '{32'h40050000, 32'h40051fff}
     }},
+    '{"i2c0", '{
+        '{32'h40080000, 32'h4008007f}
+    }},
+    '{"spi_host1", '{
+        '{32'h40310000, 32'h4031003f}
+    }},
+    '{"pwm_aon", '{
+        '{32'h40450000, 32'h4045007f}
+    }},
     '{"spi_host0", '{
         '{32'h40060000, 32'h4006003f}
     }},
@@ -32,7 +41,7 @@ tl_device_t xbar_devices[$] = '{
         '{32'h40400000, 32'h4040007f}
     }},
     '{"rstmgr_aon", '{
-        '{32'h40410000, 32'h4041003f}
+        '{32'h40410000, 32'h4041007f}
     }},
     '{"clkmgr_aon", '{
         '{32'h40420000, 32'h4042007f}
@@ -49,14 +58,17 @@ tl_host_t xbar_hosts[$] = '{
     '{"main", 0, '{
         "uart0",
         "uart1",
+        "i2c0",
         "gpio",
         "spi_device",
         "spi_host0",
+        "spi_host1",
         "rv_timer",
         "usbdev",
         "pwrmgr_aon",
         "rstmgr_aon",
         "clkmgr_aon",
+        "pwm_aon",
         "pinmux_aon",
         "ast"}}
 };

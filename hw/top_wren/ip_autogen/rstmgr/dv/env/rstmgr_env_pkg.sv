@@ -35,15 +35,18 @@ package rstmgr_env_pkg;
 
   // Sorted instances of rstmgr_leaf_rst instances with security checks enabled.
   parameter string LIST_OF_LEAFS[] = {
+    "u_d0_i2c0",
     "u_d0_lc",
+    "u_d0_lc_io_div2",
     "u_d0_lc_shadowed",
     "u_d0_spi_device",
     "u_d0_spi_host0",
+    "u_d0_spi_host1",
     "u_d0_sys",
     "u_d0_sys_aon",
     "u_d0_sys_io_div4",
-    "u_d0_sys_shadowed",
     "u_d0_usb",
+    "u_daon_lc_aon",
     "u_daon_por",
     "u_daon_por_io",
     "u_daon_por_io_div2",
@@ -57,7 +60,6 @@ package rstmgr_env_pkg;
   // Instances of rstmgr_leaf_rst modules which have a shadow pair.
   parameter string LIST_OF_SHADOW_LEAFS[] = {
     "u_d0_lc",
-    "u_d0_sys",
     "u_daon_por_io_div4"
   };
 

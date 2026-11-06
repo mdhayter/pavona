@@ -18,11 +18,14 @@ The main address space, shared between the CPU and DM
 | uart1               | default     | `0x40010000`   | `0x40`         | `0x10`         | uart1                         |
 | gpio                | default     | `0x40040000`   | `0x80`         | `0x20`         | gpio                          |
 | spi_device          | default     | `0x40050000`   | `0x2000`       | `0x800`        | spi_device                    |
+| i2c0                | default     | `0x40080000`   | `0x80`         | `0x20`         | i2c0                          |
 | spi_host0           | default     | `0x40060000`   | `0x40`         | `0x10`         | spi_host0                     |
 | rv_timer            | default     | `0x40100000`   | `0x200`        | `0x80`         | rv_timer                      |
 | usbdev              | default     | `0x40320000`   | `0x1000`       | `0x400`        | usbdev                        |
 | pwrmgr_aon          | default     | `0x40400000`   | `0x80`         | `0x20`         | pwrmgr_aon                    |
-| rstmgr_aon          | default     | `0x40410000`   | `0x40`         | `0x10`         | rstmgr_aon                    |
+| spi_host1           | default     | `0x40310000`   | `0x40`         | `0x10`         | spi_host1                     |
+| pwm_aon             | default     | `0x40450000`   | `0x80`         | `0x20`         | pwm_aon                       |
+| rstmgr_aon          | default     | `0x40410000`   | `0x80`         | `0x20`         | rstmgr_aon                    |
 | clkmgr_aon          | default     | `0x40420000`   | `0x80`         | `0x20`         | clkmgr_aon                    |
 | pinmux_aon          | default     | `0x40460000`   | `0x1000`       | `0x400`        | pinmux_aon                    |
 | aon_timer_aon       | default     | `0x40470000`   | `0x40`         | `0x10`         | aon_timer_aon                 |
@@ -30,9 +33,11 @@ The main address space, shared between the CPU and DM
 | flash_ctrl          | core        | `0x41000000`   | `0x200`        | `0x80`         | core device on flash_ctrl     |
 | flash_macro_wrapper | default     | `0x41008000`   | `0x80`         | `0x20`         | flash_macro_wrapper           |
 | rv_plic             | default     | `0x48000000`   | `0x8000000`    | `0x2000000`    | rv_plic                       |
-| aes                 | default     | `0x41100000`   | `0x100`        | `0x40`         | aes                           |
 | sram_ctrl_main      | regs        | `0x411C0000`   | `0x40`         | `0x10`         | regs device on sram_ctrl_main |
 | rom_ctrl            | regs        | `0x411E0000`   | `0x80`         | `0x20`         | regs device on rom_ctrl       |
+| rv_dm               | regs        | `0x41200000`   | `0x10`         | `0x4`          | regs device on rv_dm          |
+| rv_dm               | mem         | `0x10000`      | `0x1000`       | `0x400`        | mem device on rv_dm           |
+| rv_dm               | dbg         | `0x1000`       | `0x200`        | `0x80`         | dbg device on rv_dm           |
 | rv_core_ibex        | cfg         | `0x411F0000`   | `0x100`        | `0x40`         | cfg device on rv_core_ibex    |
 
 ### Memory Blocks

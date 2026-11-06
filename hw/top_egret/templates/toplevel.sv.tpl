@@ -344,6 +344,16 @@ module top_${top["name"]} #(
   % endif
 % endfor
 
+<%
+  module_types = [m["type"] for m in top["module"]]
+%>\
+% if "rv_dm" in module_types and "lc_ctrl" not in module_types:
+  // There is no life cycle controller or OTP to enable debug, so it is always enabled.
+  assign pinmux_aon_lc_hw_debug_en = lc_ctrl_pkg::On;
+  assign rv_dm_lc_hw_debug_en = lc_ctrl_pkg::On;
+  assign rv_dm_otp_dis_rv_dm_late_debug = prim_mubi_pkg::MuBi8True;
+
+% endif
   // See #7978 This below is a hack.
   // This is because ast is a comportable-like module that sits outside
   // of top_${top["name"]}'s boundary.

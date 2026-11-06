@@ -101,6 +101,24 @@ extern "C" {
 #define TOP_WREN_SPI_DEVICE_SIZE_BYTES 0x2000u
 
 /**
+ * Peripheral base address for i2c0 in top wren.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_WREN_I2C0_BASE_ADDR 0x40080000u
+
+/**
+ * Peripheral size for i2c0 in top wren.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_WREN_I2C0_BASE_ADDR and
+ * `TOP_WREN_I2C0_BASE_ADDR + TOP_WREN_I2C0_SIZE_BYTES`.
+ */
+#define TOP_WREN_I2C0_SIZE_BYTES 0x80u
+
+/**
  * Peripheral base address for spi_host0 in top wren.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
@@ -173,6 +191,42 @@ extern "C" {
 #define TOP_WREN_PWRMGR_AON_SIZE_BYTES 0x80u
 
 /**
+ * Peripheral base address for spi_host1 in top wren.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_WREN_SPI_HOST1_BASE_ADDR 0x40310000u
+
+/**
+ * Peripheral size for spi_host1 in top wren.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_WREN_SPI_HOST1_BASE_ADDR and
+ * `TOP_WREN_SPI_HOST1_BASE_ADDR + TOP_WREN_SPI_HOST1_SIZE_BYTES`.
+ */
+#define TOP_WREN_SPI_HOST1_SIZE_BYTES 0x40u
+
+/**
+ * Peripheral base address for pwm_aon in top wren.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_WREN_PWM_AON_BASE_ADDR 0x40450000u
+
+/**
+ * Peripheral size for pwm_aon in top wren.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_WREN_PWM_AON_BASE_ADDR and
+ * `TOP_WREN_PWM_AON_BASE_ADDR + TOP_WREN_PWM_AON_SIZE_BYTES`.
+ */
+#define TOP_WREN_PWM_AON_SIZE_BYTES 0x80u
+
+/**
  * Peripheral base address for rstmgr_aon in top wren.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
@@ -188,7 +242,7 @@ extern "C" {
  * address between #TOP_WREN_RSTMGR_AON_BASE_ADDR and
  * `TOP_WREN_RSTMGR_AON_BASE_ADDR + TOP_WREN_RSTMGR_AON_SIZE_BYTES`.
  */
-#define TOP_WREN_RSTMGR_AON_SIZE_BYTES 0x40u
+#define TOP_WREN_RSTMGR_AON_SIZE_BYTES 0x80u
 
 /**
  * Peripheral base address for clkmgr_aon in top wren.
@@ -317,24 +371,6 @@ extern "C" {
 #define TOP_WREN_RV_PLIC_SIZE_BYTES 0x8000000u
 
 /**
- * Peripheral base address for aes in top wren.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_WREN_AES_BASE_ADDR 0x41100000u
-
-/**
- * Peripheral size for aes in top wren.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_WREN_AES_BASE_ADDR and
- * `TOP_WREN_AES_BASE_ADDR + TOP_WREN_AES_SIZE_BYTES`.
- */
-#define TOP_WREN_AES_SIZE_BYTES 0x100u
-
-/**
  * Peripheral base address for regs device on sram_ctrl_main in top wren.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
@@ -369,6 +405,60 @@ extern "C" {
  * `TOP_WREN_ROM_CTRL_REGS_BASE_ADDR + TOP_WREN_ROM_CTRL_REGS_SIZE_BYTES`.
  */
 #define TOP_WREN_ROM_CTRL_REGS_SIZE_BYTES 0x80u
+
+/**
+ * Peripheral base address for regs device on rv_dm in top wren.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_WREN_RV_DM_REGS_BASE_ADDR 0x41200000u
+
+/**
+ * Peripheral size for regs device on rv_dm in top wren.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_WREN_RV_DM_REGS_BASE_ADDR and
+ * `TOP_WREN_RV_DM_REGS_BASE_ADDR + TOP_WREN_RV_DM_REGS_SIZE_BYTES`.
+ */
+#define TOP_WREN_RV_DM_REGS_SIZE_BYTES 0x10u
+
+/**
+ * Peripheral base address for mem device on rv_dm in top wren.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_WREN_RV_DM_MEM_BASE_ADDR 0x10000u
+
+/**
+ * Peripheral size for mem device on rv_dm in top wren.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_WREN_RV_DM_MEM_BASE_ADDR and
+ * `TOP_WREN_RV_DM_MEM_BASE_ADDR + TOP_WREN_RV_DM_MEM_SIZE_BYTES`.
+ */
+#define TOP_WREN_RV_DM_MEM_SIZE_BYTES 0x1000u
+
+/**
+ * Peripheral base address for dbg device on rv_dm in top wren.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_WREN_RV_DM_DBG_BASE_ADDR 0x1000u
+
+/**
+ * Peripheral size for dbg device on rv_dm in top wren.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_WREN_RV_DM_DBG_BASE_ADDR and
+ * `TOP_WREN_RV_DM_DBG_BASE_ADDR + TOP_WREN_RV_DM_DBG_SIZE_BYTES`.
+ */
+#define TOP_WREN_RV_DM_DBG_SIZE_BYTES 0x200u
 
 /**
  * Peripheral base address for cfg device on rv_core_ibex in top wren.
@@ -432,12 +522,14 @@ typedef enum top_wren_plic_peripheral {
   kTopWrenPlicPeripheralUart1 = 2, /**< uart1 */
   kTopWrenPlicPeripheralGpio = 3, /**< gpio */
   kTopWrenPlicPeripheralSpiDevice = 4, /**< spi_device */
-  kTopWrenPlicPeripheralSpiHost0 = 5, /**< spi_host0 */
-  kTopWrenPlicPeripheralUsbdev = 6, /**< usbdev */
-  kTopWrenPlicPeripheralPwrmgrAon = 7, /**< pwrmgr_aon */
-  kTopWrenPlicPeripheralAonTimerAon = 8, /**< aon_timer_aon */
-  kTopWrenPlicPeripheralFlashCtrl = 9, /**< flash_ctrl */
-  kTopWrenPlicPeripheralLast = 9, /**< \internal Final PLIC peripheral */
+  kTopWrenPlicPeripheralI2c0 = 5, /**< i2c0 */
+  kTopWrenPlicPeripheralSpiHost0 = 6, /**< spi_host0 */
+  kTopWrenPlicPeripheralSpiHost1 = 7, /**< spi_host1 */
+  kTopWrenPlicPeripheralUsbdev = 8, /**< usbdev */
+  kTopWrenPlicPeripheralPwrmgrAon = 9, /**< pwrmgr_aon */
+  kTopWrenPlicPeripheralAonTimerAon = 10, /**< aon_timer_aon */
+  kTopWrenPlicPeripheralFlashCtrl = 11, /**< flash_ctrl */
+  kTopWrenPlicPeripheralLast = 11, /**< \internal Final PLIC peripheral */
 } top_wren_plic_peripheral_t;
 
 /**
@@ -506,36 +598,53 @@ typedef enum top_wren_plic_irq_id {
   kTopWrenPlicIrqIdSpiDeviceTpmHeaderNotEmpty = 56, /**< spi_device_tpm_header_not_empty */
   kTopWrenPlicIrqIdSpiDeviceTpmRdfifoCmdEnd = 57, /**< spi_device_tpm_rdfifo_cmd_end */
   kTopWrenPlicIrqIdSpiDeviceTpmRdfifoDrop = 58, /**< spi_device_tpm_rdfifo_drop */
-  kTopWrenPlicIrqIdSpiHost0Error = 59, /**< spi_host0_error */
-  kTopWrenPlicIrqIdSpiHost0SpiEvent = 60, /**< spi_host0_spi_event */
-  kTopWrenPlicIrqIdUsbdevPktReceived = 61, /**< usbdev_pkt_received */
-  kTopWrenPlicIrqIdUsbdevPktSent = 62, /**< usbdev_pkt_sent */
-  kTopWrenPlicIrqIdUsbdevDisconnected = 63, /**< usbdev_disconnected */
-  kTopWrenPlicIrqIdUsbdevHostLost = 64, /**< usbdev_host_lost */
-  kTopWrenPlicIrqIdUsbdevLinkReset = 65, /**< usbdev_link_reset */
-  kTopWrenPlicIrqIdUsbdevLinkSuspend = 66, /**< usbdev_link_suspend */
-  kTopWrenPlicIrqIdUsbdevLinkResume = 67, /**< usbdev_link_resume */
-  kTopWrenPlicIrqIdUsbdevAvOutEmpty = 68, /**< usbdev_av_out_empty */
-  kTopWrenPlicIrqIdUsbdevRxFull = 69, /**< usbdev_rx_full */
-  kTopWrenPlicIrqIdUsbdevAvOverflow = 70, /**< usbdev_av_overflow */
-  kTopWrenPlicIrqIdUsbdevLinkInErr = 71, /**< usbdev_link_in_err */
-  kTopWrenPlicIrqIdUsbdevRxCrcErr = 72, /**< usbdev_rx_crc_err */
-  kTopWrenPlicIrqIdUsbdevRxPidErr = 73, /**< usbdev_rx_pid_err */
-  kTopWrenPlicIrqIdUsbdevRxBitstuffErr = 74, /**< usbdev_rx_bitstuff_err */
-  kTopWrenPlicIrqIdUsbdevFrame = 75, /**< usbdev_frame */
-  kTopWrenPlicIrqIdUsbdevPowered = 76, /**< usbdev_powered */
-  kTopWrenPlicIrqIdUsbdevLinkOutErr = 77, /**< usbdev_link_out_err */
-  kTopWrenPlicIrqIdUsbdevAvSetupEmpty = 78, /**< usbdev_av_setup_empty */
-  kTopWrenPlicIrqIdPwrmgrAonWakeup = 79, /**< pwrmgr_aon_wakeup */
-  kTopWrenPlicIrqIdAonTimerAonWkupTimerExpired = 80, /**< aon_timer_aon_wkup_timer_expired */
-  kTopWrenPlicIrqIdAonTimerAonWdogTimerBark = 81, /**< aon_timer_aon_wdog_timer_bark */
-  kTopWrenPlicIrqIdFlashCtrlProgEmpty = 82, /**< flash_ctrl_prog_empty */
-  kTopWrenPlicIrqIdFlashCtrlProgLvl = 83, /**< flash_ctrl_prog_lvl */
-  kTopWrenPlicIrqIdFlashCtrlRdFull = 84, /**< flash_ctrl_rd_full */
-  kTopWrenPlicIrqIdFlashCtrlRdLvl = 85, /**< flash_ctrl_rd_lvl */
-  kTopWrenPlicIrqIdFlashCtrlOpDone = 86, /**< flash_ctrl_op_done */
-  kTopWrenPlicIrqIdFlashCtrlCorrErr = 87, /**< flash_ctrl_corr_err */
-  kTopWrenPlicIrqIdLast = 87, /**< \internal The Last Valid Interrupt ID. */
+  kTopWrenPlicIrqIdI2c0FmtThreshold = 59, /**< i2c0_fmt_threshold */
+  kTopWrenPlicIrqIdI2c0RxThreshold = 60, /**< i2c0_rx_threshold */
+  kTopWrenPlicIrqIdI2c0AcqThreshold = 61, /**< i2c0_acq_threshold */
+  kTopWrenPlicIrqIdI2c0RxOverflow = 62, /**< i2c0_rx_overflow */
+  kTopWrenPlicIrqIdI2c0ControllerHalt = 63, /**< i2c0_controller_halt */
+  kTopWrenPlicIrqIdI2c0SclInterference = 64, /**< i2c0_scl_interference */
+  kTopWrenPlicIrqIdI2c0SdaInterference = 65, /**< i2c0_sda_interference */
+  kTopWrenPlicIrqIdI2c0StretchTimeout = 66, /**< i2c0_stretch_timeout */
+  kTopWrenPlicIrqIdI2c0SdaUnstable = 67, /**< i2c0_sda_unstable */
+  kTopWrenPlicIrqIdI2c0CmdComplete = 68, /**< i2c0_cmd_complete */
+  kTopWrenPlicIrqIdI2c0TxStretch = 69, /**< i2c0_tx_stretch */
+  kTopWrenPlicIrqIdI2c0TxThreshold = 70, /**< i2c0_tx_threshold */
+  kTopWrenPlicIrqIdI2c0AcqStretch = 71, /**< i2c0_acq_stretch */
+  kTopWrenPlicIrqIdI2c0UnexpStop = 72, /**< i2c0_unexp_stop */
+  kTopWrenPlicIrqIdI2c0HostTimeout = 73, /**< i2c0_host_timeout */
+  kTopWrenPlicIrqIdSpiHost0Error = 74, /**< spi_host0_error */
+  kTopWrenPlicIrqIdSpiHost0SpiEvent = 75, /**< spi_host0_spi_event */
+  kTopWrenPlicIrqIdSpiHost1Error = 76, /**< spi_host1_error */
+  kTopWrenPlicIrqIdSpiHost1SpiEvent = 77, /**< spi_host1_spi_event */
+  kTopWrenPlicIrqIdUsbdevPktReceived = 78, /**< usbdev_pkt_received */
+  kTopWrenPlicIrqIdUsbdevPktSent = 79, /**< usbdev_pkt_sent */
+  kTopWrenPlicIrqIdUsbdevDisconnected = 80, /**< usbdev_disconnected */
+  kTopWrenPlicIrqIdUsbdevHostLost = 81, /**< usbdev_host_lost */
+  kTopWrenPlicIrqIdUsbdevLinkReset = 82, /**< usbdev_link_reset */
+  kTopWrenPlicIrqIdUsbdevLinkSuspend = 83, /**< usbdev_link_suspend */
+  kTopWrenPlicIrqIdUsbdevLinkResume = 84, /**< usbdev_link_resume */
+  kTopWrenPlicIrqIdUsbdevAvOutEmpty = 85, /**< usbdev_av_out_empty */
+  kTopWrenPlicIrqIdUsbdevRxFull = 86, /**< usbdev_rx_full */
+  kTopWrenPlicIrqIdUsbdevAvOverflow = 87, /**< usbdev_av_overflow */
+  kTopWrenPlicIrqIdUsbdevLinkInErr = 88, /**< usbdev_link_in_err */
+  kTopWrenPlicIrqIdUsbdevRxCrcErr = 89, /**< usbdev_rx_crc_err */
+  kTopWrenPlicIrqIdUsbdevRxPidErr = 90, /**< usbdev_rx_pid_err */
+  kTopWrenPlicIrqIdUsbdevRxBitstuffErr = 91, /**< usbdev_rx_bitstuff_err */
+  kTopWrenPlicIrqIdUsbdevFrame = 92, /**< usbdev_frame */
+  kTopWrenPlicIrqIdUsbdevPowered = 93, /**< usbdev_powered */
+  kTopWrenPlicIrqIdUsbdevLinkOutErr = 94, /**< usbdev_link_out_err */
+  kTopWrenPlicIrqIdUsbdevAvSetupEmpty = 95, /**< usbdev_av_setup_empty */
+  kTopWrenPlicIrqIdPwrmgrAonWakeup = 96, /**< pwrmgr_aon_wakeup */
+  kTopWrenPlicIrqIdAonTimerAonWkupTimerExpired = 97, /**< aon_timer_aon_wkup_timer_expired */
+  kTopWrenPlicIrqIdAonTimerAonWdogTimerBark = 98, /**< aon_timer_aon_wdog_timer_bark */
+  kTopWrenPlicIrqIdFlashCtrlProgEmpty = 99, /**< flash_ctrl_prog_empty */
+  kTopWrenPlicIrqIdFlashCtrlProgLvl = 100, /**< flash_ctrl_prog_lvl */
+  kTopWrenPlicIrqIdFlashCtrlRdFull = 101, /**< flash_ctrl_rd_full */
+  kTopWrenPlicIrqIdFlashCtrlRdLvl = 102, /**< flash_ctrl_rd_lvl */
+  kTopWrenPlicIrqIdFlashCtrlOpDone = 103, /**< flash_ctrl_op_done */
+  kTopWrenPlicIrqIdFlashCtrlCorrErr = 104, /**< flash_ctrl_corr_err */
+  kTopWrenPlicIrqIdLast = 104, /**< \internal The Last Valid Interrupt ID. */
 } top_wren_plic_irq_id_t;
 
 /**
@@ -545,7 +654,7 @@ typedef enum top_wren_plic_irq_id {
  * `top_wren_plic_peripheral_t`.
  */
 extern const top_wren_plic_peripheral_t
-    top_wren_plic_interrupt_for_peripheral[88];
+    top_wren_plic_interrupt_for_peripheral[105];
 
 /**
  * PLIC Interrupt Target.
@@ -604,10 +713,16 @@ typedef enum top_wren_pinmux_peripheral_in {
   kTopWrenPinmuxPeripheralInGpioGpio29 = 29, /**< Peripheral Input 29 */
   kTopWrenPinmuxPeripheralInGpioGpio30 = 30, /**< Peripheral Input 30 */
   kTopWrenPinmuxPeripheralInGpioGpio31 = 31, /**< Peripheral Input 31 */
-  kTopWrenPinmuxPeripheralInUart0Rx = 32, /**< Peripheral Input 32 */
-  kTopWrenPinmuxPeripheralInUart1Rx = 33, /**< Peripheral Input 33 */
-  kTopWrenPinmuxPeripheralInUsbdevSense = 34, /**< Peripheral Input 34 */
-  kTopWrenPinmuxPeripheralInLast = 34, /**< \internal Last valid peripheral input */
+  kTopWrenPinmuxPeripheralInI2c0Sda = 32, /**< Peripheral Input 32 */
+  kTopWrenPinmuxPeripheralInI2c0Scl = 33, /**< Peripheral Input 33 */
+  kTopWrenPinmuxPeripheralInSpiHost1Sd0 = 34, /**< Peripheral Input 34 */
+  kTopWrenPinmuxPeripheralInSpiHost1Sd1 = 35, /**< Peripheral Input 35 */
+  kTopWrenPinmuxPeripheralInSpiHost1Sd2 = 36, /**< Peripheral Input 36 */
+  kTopWrenPinmuxPeripheralInSpiHost1Sd3 = 37, /**< Peripheral Input 37 */
+  kTopWrenPinmuxPeripheralInUart0Rx = 38, /**< Peripheral Input 38 */
+  kTopWrenPinmuxPeripheralInUart1Rx = 39, /**< Peripheral Input 39 */
+  kTopWrenPinmuxPeripheralInUsbdevSense = 40, /**< Peripheral Input 40 */
+  kTopWrenPinmuxPeripheralInLast = 40, /**< \internal Last valid peripheral input */
 } top_wren_pinmux_peripheral_in_t;
 
 /**
@@ -759,9 +874,23 @@ typedef enum top_wren_pinmux_outsel {
   kTopWrenPinmuxOutselGpioGpio29 = 32, /**< Peripheral Output 29 */
   kTopWrenPinmuxOutselGpioGpio30 = 33, /**< Peripheral Output 30 */
   kTopWrenPinmuxOutselGpioGpio31 = 34, /**< Peripheral Output 31 */
-  kTopWrenPinmuxOutselUart0Tx = 35, /**< Peripheral Output 32 */
-  kTopWrenPinmuxOutselUart1Tx = 36, /**< Peripheral Output 33 */
-  kTopWrenPinmuxOutselLast = 36, /**< \internal Last valid outsel value */
+  kTopWrenPinmuxOutselI2c0Sda = 35, /**< Peripheral Output 32 */
+  kTopWrenPinmuxOutselI2c0Scl = 36, /**< Peripheral Output 33 */
+  kTopWrenPinmuxOutselSpiHost1Sd0 = 37, /**< Peripheral Output 34 */
+  kTopWrenPinmuxOutselSpiHost1Sd1 = 38, /**< Peripheral Output 35 */
+  kTopWrenPinmuxOutselSpiHost1Sd2 = 39, /**< Peripheral Output 36 */
+  kTopWrenPinmuxOutselSpiHost1Sd3 = 40, /**< Peripheral Output 37 */
+  kTopWrenPinmuxOutselUart0Tx = 41, /**< Peripheral Output 38 */
+  kTopWrenPinmuxOutselUart1Tx = 42, /**< Peripheral Output 39 */
+  kTopWrenPinmuxOutselSpiHost1Sck = 43, /**< Peripheral Output 40 */
+  kTopWrenPinmuxOutselSpiHost1Csb = 44, /**< Peripheral Output 41 */
+  kTopWrenPinmuxOutselPwmAonPwm0 = 45, /**< Peripheral Output 42 */
+  kTopWrenPinmuxOutselPwmAonPwm1 = 46, /**< Peripheral Output 43 */
+  kTopWrenPinmuxOutselPwmAonPwm2 = 47, /**< Peripheral Output 44 */
+  kTopWrenPinmuxOutselPwmAonPwm3 = 48, /**< Peripheral Output 45 */
+  kTopWrenPinmuxOutselPwmAonPwm4 = 49, /**< Peripheral Output 46 */
+  kTopWrenPinmuxOutselPwmAonPwm5 = 50, /**< Peripheral Output 47 */
+  kTopWrenPinmuxOutselLast = 50, /**< \internal Last valid outsel value */
 } top_wren_pinmux_outsel_t;
 
 /**
@@ -856,7 +985,9 @@ typedef enum top_wren_reset_manager_sw_resets {
   kTopWrenResetManagerSwResetsSpiDevice = 0, /**<  */
   kTopWrenResetManagerSwResetsSpiHost0 = 1, /**<  */
   kTopWrenResetManagerSwResetsUsb = 2, /**<  */
-  kTopWrenResetManagerSwResetsLast = 2, /**< \internal Last valid rstmgr software reset request */
+  kTopWrenResetManagerSwResetsSpiHost1 = 3, /**<  */
+  kTopWrenResetManagerSwResetsI2c0 = 4, /**<  */
+  kTopWrenResetManagerSwResetsLast = 4, /**< \internal Last valid rstmgr software reset request */
 } top_wren_reset_manager_sw_resets_t;
 
 /**
@@ -886,10 +1017,6 @@ typedef enum top_wren_gateable_clocks {
  * The Software has partial control over these clocks. It can ask them to stop,
  * but the clock manager is in control of whether the clock actually is stopped.
  */
-typedef enum top_wren_hintable_clocks {
-  kTopWrenHintableClocksMainAes = 0, /**< Clock clk_main_aes in group trans */
-  kTopWrenHintableClocksLast = 0, /**< \internal Last Valid Hintable Clock */
-} top_wren_hintable_clocks_t;
 
 /**
  * MMIO Region
