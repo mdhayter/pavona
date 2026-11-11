@@ -126,7 +126,8 @@ def test_enums(top):
     enums = rust_enums(rust_source(name, "hart"))
     for (section, key), rust_name in RUST_ENUMS.items():
         if section in desc:
-            assert desc[section][key] == enums[rust_name], rust_name
+            # topgen does not render an enumeration with no entries.
+            assert desc[section][key] == enums.get(rust_name, {}), rust_name
         else:
             assert rust_name not in enums, rust_name
 
@@ -158,12 +159,17 @@ CPUTAPID_RE = re.compile(r"^\s*set _CPUTAPID (0x[0-9A-Fa-f]+)$", re.MULTILINE)
 
 def test_jtag_idcodes(top):
     name, desc = top
-    cfgs = {key: REPO_TOP / path.format(name) for key, path in OPENOCD_CFGS.items()}
-    if not all(cfg.exists() for cfg in cfgs.values()):
-        assert "dm_idcode" not in desc and "lc_idcode" not in desc
-        pytest.skip("no OpenOCD configuration")
-    for key, cfg in cfgs.items():
+    # Each TAP is checked on its own: a top without lc_ctrl has no lc_ctrl TAP and no -lc
+    # configuration, but still needs a configuration for its rv_dm TAP.
+    for key, path in OPENOCD_CFGS.items():
+        cfg = REPO_TOP / path.format(name)
+        if key not in desc:
+            assert not cfg.exists(), f"{cfg.name} exists but the description has no {key}"
+            continue
+        assert cfg.exists(), f"the description has {key} but there is no {cfg.name}"
         assert desc[key] == int(CPUTAPID_RE.search(cfg.read_text()).group(1), 0), key
+    if not any(key in desc for key in OPENOCD_CFGS):
+        pytest.skip("no JTAG IDCODEs")
 
 
 def test_localparam_literals():
