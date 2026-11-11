@@ -7,6 +7,7 @@
 #include "sw/device/lib/base/multibits_asm.h"
 #include "hw/top/ast_regs.h"
 #include "hw/top/clkmgr_regs.h"
+#include "hw/top/rv_core_ibex_regs.h"
 #include "hw/top/sram_ctrl_regs.h"
 
 #if defined(OPENTITAN_IS_SCAFI_DEPRECATED)
@@ -203,6 +204,8 @@ _start:
   // NOTE: This should happen before attempting to access any address outside
   // the initial ePMP RX region at reset, e.g. `kDeviceType` which is in
   // .rodata, or the MMIO.
+  // A core without PMP traps on any access to the PMP CSRs.
+#if RV_CORE_IBEX_PARAM_PMP_PRESENT
   li   t0, (0x9f << 24) // Locked NAPOT read-write-execute.
   csrw pmpcfg3, t0
   li   t0, 0x7fffffff   // NAPOT encoded region covering entire 34-bit address space.
@@ -210,6 +213,7 @@ _start:
   csrw pmpcfg0, zero
   csrw pmpcfg1, zero
   csrw pmpcfg2, zero
+#endif
 
 #ifdef HAS_OTP_CTRL
 #ifdef OPENTITAN_IS_DRAGONFLY

@@ -516,6 +516,13 @@
       default: "${num_regions}",
       local: "true"
     },
+    { name: "PmpPresent",
+      desc: '''Whether Ibex has PMP: 1 if the top sets PMPEnable, 0 if not.
+            For software, which cannot see PMPEnable itself.''',
+      type: "int",
+      default: "${int(pmp_enable)}",
+      local: "true"
+    },
     { name:    "NumScratchWords",
       type:    "int",
       desc:    "Number of scratch words maintained."

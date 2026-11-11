@@ -237,6 +237,7 @@ cc_library(
         ":test_rom_manifest",
         "//hw/top:ast_c_regs",
         "//hw/top:clkmgr_c_regs",
+        "//hw/top:rv_core_ibex_c_regs",
         "//hw/top:sram_ctrl_c_regs",
         "//hw/top:top_lib",
         "//sw/device/lib/arch:device",

@@ -9,6 +9,7 @@ package rv_core_ibex_reg_pkg;
   // Param list
   parameter int NumSwAlerts = 2;
   parameter int NumRegions = 32;
+  parameter int PmpPresent = 1;
   parameter int NumScratchWords = 8;
   parameter int NumAlerts = 4;
 

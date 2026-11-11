@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """Generate ipgen IP configuration files from a complete top configuration.
@@ -25,7 +26,7 @@ from topgen.resets import Resets
 from topgen.params import (get_alert_handler_params, get_pinmux_params, get_pwrmgr_params,
                            get_rstmgr_params, get_flash_ctrl_params, get_otp_ctrl_params,
                            get_ac_range_check_params, get_racl_params, get_rv_plic_params,
-                           get_basic_ipgen_params)
+                           get_basic_ipgen_params, get_rv_core_ibex_params)
 
 
 REPO_TOP = Path(__file__).parents[1].resolve()
@@ -69,6 +70,8 @@ def get_params(topcfg: Dict[str, object], module: Dict, cfg_path: Path) -> Param
             return get_rv_plic_params(topcfg, module["name"])
         case "clkmgr":
             return get_clkmgr_params(topcfg)
+        case "rv_core_ibex":
+            return get_rv_core_ibex_params(topcfg)
         case _:
             return get_basic_ipgen_params(topcfg, module["template_type"])
 

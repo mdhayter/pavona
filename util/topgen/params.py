@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 from copy import deepcopy
@@ -482,4 +483,20 @@ def get_basic_ipgen_params(topcfg: Dict[str, object], template_type: str) -> Dic
     ipgen_params.update({
         "module_instance_name": module["type"]
     })
+    return ipgen_params
+
+
+def get_rv_core_ibex_params(topcfg: Dict[str, object]) -> Dict[str, object]:
+    """Gets parameters for rv_core_ibex ipgen from top config.
+
+    Adds pmp_enable, the top's PMPEnable parameter for Ibex, so that the
+    template can describe it to software.
+    """
+    ipgen_params = get_basic_ipgen_params(topcfg, "rv_core_ibex")
+    module = find_module(topcfg["module"], "rv_core_ibex")
+    # The template's default for PMPEnable is 1'b0.
+    pmp_enable = str(module.get("param_decl", {}).get("PMPEnable", "0")).strip()
+    if pmp_enable not in ["0", "1", "1'b0", "1'b1"]:
+        raise ValueError(f"rv_core_ibex: cannot read PMPEnable value '{pmp_enable}'")
+    ipgen_params["pmp_enable"] = pmp_enable in ["1", "1'b1"]
     return ipgen_params
