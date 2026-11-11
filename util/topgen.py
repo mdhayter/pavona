@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 r"""Top Module Generator
@@ -45,7 +46,7 @@ from topgen.validate import validate_seed_cfg
 from topgen.params import (get_alert_handler_params, get_pinmux_params, get_pwrmgr_params,
                            get_rstmgr_params, get_flash_ctrl_params, get_otp_ctrl_params,
                            get_ac_range_check_params, get_racl_params, get_rv_plic_params,
-                           get_basic_ipgen_params)
+                           get_basic_ipgen_params, get_rv_core_ibex_params)
 
 # Common header for generated files
 warnhdr = """//
@@ -497,7 +498,7 @@ def create_ipgen_blocks(topcfg: ConfigT, alias_cfgs: Dict[str, ConfigT],
 
     if "rv_core_ibex" in ipgen_instances:
         instance = ipgen_instances["rv_core_ibex"][0]
-        insert_ip_attrs(instance, get_basic_ipgen_params(topcfg, "rv_core_ibex"))
+        insert_ip_attrs(instance, get_rv_core_ibex_params(topcfg))
 
     # Pinmux depends on flash_ctrl and otp_ctrl
     if "pinmux" in ipgen_instances:
@@ -655,7 +656,7 @@ def generate_full_ipgens(args: argparse.Namespace, topcfg: ConfigT,
     generate_modules("gpio", single_instance=True)
 
     # Generate rv_core_ibex if there is an instance
-    generate_modules("rv_core_ibex", single_instance=True)
+    generate_modules("rv_core_ibex", single_instance=True, get_params=get_rv_core_ibex_params)
     # Generate pwm if there is an instance
     generate_modules("pwm", single_instance=True)
 
