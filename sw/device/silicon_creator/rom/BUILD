@@ -586,7 +586,7 @@ pavona_test(
 )
 
 filegroup(
-    name = "scafi_deprecated_test_rom_bootstrap_srcs",
+    name = "no_otp_test_rom_bootstrap_srcs",
     srcs = [
         "bootstrap.c",
         "bootstrap.h",
