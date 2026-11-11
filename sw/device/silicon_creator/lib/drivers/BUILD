@@ -42,7 +42,6 @@ filegroup(
         "flash_ctrl.h",
         "flash_ctrl_info_pages.c",
         "lifecycle.h",
-        "otp.h",
         "rstmgr.h",
         "spi_device.c",
         "spi_device.h",
@@ -187,11 +186,21 @@ dual_cc_library(
         host = ["mock_flash_ctrl.h"],
         shared = ["flash_ctrl.h"],
     ),
+    local_defines = pavona_if_ip(
+        "otp_ctrl",
+        ["HAS_OTP_CTRL"],
+        [],
+    ),
     visibility = ["//visibility:public"],
     deps = dual_inputs(
-        device = [
-            "//hw/top:otp_ctrl_c_regs",
-        ],
+        device = pavona_if_ip(
+            "otp_ctrl",
+            [
+                "//hw/top:otp_ctrl_c_regs",
+                "//sw/device/silicon_creator/lib/drivers:otp",
+            ],
+            [],
+        ),
         host = [
             "//sw/device/lib/base:global_mock",
             "//sw/device/silicon_creator/testing:rom_test",
@@ -207,7 +216,6 @@ dual_cc_library(
             "//sw/device/lib/base:multibits",
             "//sw/device/silicon_creator/lib:error",
             "//sw/device/silicon_creator/lib/base:sec_mmio",
-            "//sw/device/silicon_creator/lib/drivers:otp",
         ],
     ),
 )

@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -59,6 +60,7 @@ static_assert(
 #error "dif_rstmgr does not support this top"
 #endif
 
+#ifdef RSTMGR_ALERT_INFO_CTRL_REG_OFFSET
 /**
  * Checks whether alert_info capture is disabled.
  */
@@ -69,6 +71,7 @@ static bool alert_capture_is_locked(mmio_region_t base_addr) {
   // When bit is cleared, alert capture is disabled.
   return !bitfield_bit32_read(bitfield, RSTMGR_ALERT_REGWEN_EN_BIT);
 }
+#endif
 
 /**
  * Checks whether CPU info capture is disabled.
@@ -183,6 +186,7 @@ dif_result_t dif_rstmgr_reset_info_clear(const dif_rstmgr_t *handle) {
   return kDifOk;
 }
 
+#ifdef RSTMGR_ALERT_INFO_CTRL_REG_OFFSET
 dif_result_t dif_rstmgr_alert_info_set_enabled(const dif_rstmgr_t *handle,
                                                dif_toggle_t state) {
   if (handle == NULL) {
@@ -271,6 +275,29 @@ dif_result_t dif_rstmgr_alert_info_dump_read(
 
   return kDifOk;
 }
+#else
+// This top's reset manager has no alert crash dump registers.
+dif_result_t dif_rstmgr_alert_info_set_enabled(const dif_rstmgr_t *handle,
+                                               dif_toggle_t state) {
+  return kDifUnavailable;
+}
+
+dif_result_t dif_rstmgr_alert_info_get_enabled(const dif_rstmgr_t *handle,
+                                               dif_toggle_t *state) {
+  return kDifUnavailable;
+}
+
+dif_result_t dif_rstmgr_alert_info_get_size(const dif_rstmgr_t *handle,
+                                            size_t *size) {
+  return kDifUnavailable;
+}
+
+dif_result_t dif_rstmgr_alert_info_dump_read(
+    const dif_rstmgr_t *handle, dif_rstmgr_alert_info_dump_segment_t *dump,
+    size_t dump_size, size_t *segments_read) {
+  return kDifUnavailable;
+}
+#endif
 
 dif_result_t dif_rstmgr_cpu_info_set_enabled(const dif_rstmgr_t *handle,
                                              dif_toggle_t state) {
