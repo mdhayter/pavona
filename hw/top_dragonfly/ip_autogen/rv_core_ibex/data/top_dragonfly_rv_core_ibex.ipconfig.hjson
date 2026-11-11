@@ -7,6 +7,7 @@
   {
     num_regions: 32
     module_instance_name: rv_core_ibex
+    pmp_enable: true
     topname: dragonfly
     uniquified_modules: {}
     racl_support: false
