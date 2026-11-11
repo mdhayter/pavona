@@ -113,7 +113,6 @@ cc_library(
     ),
     deps = [
         "//hw/top:gpio_c_regs",
-        "//hw/top:otp_ctrl_c_regs",
         "//hw/top/dt",
         "//sw/device/lib/base:abs_mmio",
         "//sw/device/lib/base:bitfield",
@@ -121,8 +120,14 @@ cc_library(
         "//sw/device/silicon_creator/lib:bootstrap",
         "//sw/device/silicon_creator/lib:error",
         "//sw/device/silicon_creator/lib/base:chip",
-        "//sw/device/silicon_creator/lib/drivers:otp",
     ] + pavona_if_ip(
+        "otp_ctrl",
+        [
+            "//hw/top:otp_ctrl_c_regs",
+            "//sw/device/silicon_creator/lib/drivers:otp",
+        ],
+        [],
+    ) + pavona_if_ip(
         "flash_ctrl",
         [
             "//hw/top:flash_ctrl_c_regs",

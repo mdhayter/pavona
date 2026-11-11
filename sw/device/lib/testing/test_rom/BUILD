@@ -105,6 +105,15 @@ cc_library(
         "//sw/device/silicon_creator/lib/drivers:no_otp_test_rom_driver_srcs",
         "//sw/device/silicon_creator/rom:no_otp_test_rom_bootstrap_srcs",
     ],
+    local_defines = pavona_if_ip(
+        "otp_ctrl",
+        ["HAS_OTP_CTRL"],
+        [],
+    ) + pavona_if_ip(
+        "lc_ctrl",
+        ["HAS_LC_CTRL"],
+        [],
+    ),
     # This should be built only for tops with no OTP and skipped if using wildcards.
     tags = ["manual"],
     deps = [
@@ -112,9 +121,10 @@ cc_library(
         "//hw/top:gpio_c_regs",
         "//hw/top:spi_device_c_regs",
         "//hw/top:top_lib",
+        "//hw/top/dt",
         "//sw/device/lib/base:abs_mmio",
         "//sw/device/lib/base:multibits",
-        "//sw/device/lib/dif:rstmgr_intf",
+        "//sw/device/lib/dif:rstmgr",
         "//sw/device/silicon_creator/lib:stack_utilization",
         "//sw/device/silicon_creator/lib/base:chip",
         "//sw/device/silicon_creator/lib/base:sec_mmio",
@@ -177,6 +187,7 @@ cc_library(
         "//hw/top:spi_device_c_regs",
         "//hw/top:top_lib",
         "//hw/top:top_memory",
+        "//hw/top/dt",
         "//sw/device/lib/base:abs_mmio",
         "//sw/device/lib/base:macros",
         "//sw/device/lib/base:multibits",

@@ -22,6 +22,6 @@ REGION_ALIAS("ottf_storage", eflash)
 /* Disable non-volatile scratch region and counters if building for
  * scafi_deprecated, or for a top that sets the ottf_no_nv_storage attribute
  * (OTTF_NO_NV_STORAGE). This should appear before the linker script. */
-no_ottf_nv_scratch = 1
-no_ottf_nv_counter = 1
+no_ottf_nv_scratch = 1;
+no_ottf_nv_counter = 1;
 #endif

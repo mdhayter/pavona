@@ -7,8 +7,6 @@
 #include "sw/device/lib/base/multibits_asm.h"
 #include "hw/top/ast_regs.h"
 #include "hw/top/clkmgr_regs.h"
-#include "hw/top/csrng_regs.h"
-#include "hw/top/edn_regs.h"
 #include "hw/top/sram_ctrl_regs.h"
 
 #include "hw/top/top_memory.h"
@@ -23,6 +21,14 @@
 
 #ifdef TOP_ENTROPY_SRC_BASE_ADDR
 #include "hw/top/entropy_src_regs.h"
+#endif
+
+#ifdef TOP_CSRNG_BASE_ADDR
+#include "hw/top/csrng_regs.h"
+#endif
+
+#ifdef TOP_EDN0_BASE_ADDR
+#include "hw/top/edn_regs.h"
 #endif
 
 /**
@@ -173,6 +179,7 @@ _start:
   csrw pmpcfg1, zero
   csrw pmpcfg2, zero
 
+#ifdef TOP_OTP_CTRL_CORE_BASE_ADDR
 #ifdef AST_INIT_SIZED
   // Copy as many AST words as OTP says (the top's `ast_init_sized`
   // attribute).
@@ -202,6 +209,7 @@ _start:
             OTP_CTRL_PARAM_CREATOR_SW_CFG_AST_CFG_OFFSET)
   call crt_section_copy
 #endif
+#endif  // TOP_OTP_CTRL_CORE_BASE_ADDR
 
 #if defined(TOP_SENSOR_CTRL_AON_BASE_ADDR) && defined(TOP_OTP_CTRL_CORE_BASE_ADDR)
   // Wait for AST initialization to complete.
@@ -244,19 +252,23 @@ _start:
   sw t0, ENTROPY_SRC_MODULE_ENABLE_REG_OFFSET(a0)
 #endif
 
+#ifdef TOP_CSRNG_BASE_ADDR
   li a0, TOP_CSRNG_BASE_ADDR
   li t0, (MULTIBIT_ASM_BOOL4_TRUE << CSRNG_CTRL_ENABLE_OFFSET) | \
          (MULTIBIT_ASM_BOOL4_TRUE << CSRNG_CTRL_SW_APP_ENABLE_OFFSET) | \
          (MULTIBIT_ASM_BOOL4_TRUE << CSRNG_CTRL_READ_INT_STATE_OFFSET) | \
          (MULTIBIT_ASM_BOOL4_FALSE << CSRNG_CTRL_FIPS_FORCE_ENABLE_OFFSET)
   sw t0, CSRNG_CTRL_REG_OFFSET(a0)
+#endif
 
+#ifdef TOP_EDN0_BASE_ADDR
   li a0, TOP_EDN0_BASE_ADDR
   li t0, (MULTIBIT_ASM_BOOL4_TRUE << EDN_CTRL_EDN_ENABLE_OFFSET) | \
          (MULTIBIT_ASM_BOOL4_TRUE << EDN_CTRL_BOOT_REQ_MODE_OFFSET) | \
          (MULTIBIT_ASM_BOOL4_FALSE << EDN_CTRL_AUTO_REQ_MODE_OFFSET) | \
          (MULTIBIT_ASM_BOOL4_FALSE << EDN_CTRL_CMD_FIFO_RST_OFFSET)
   sw t0, EDN_CTRL_REG_OFFSET(a0)
+#endif
 
   // Scramble and initialize main memory (main SRAM).
   // Memory accesses will stall until initialization is complete.
