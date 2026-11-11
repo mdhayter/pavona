@@ -124,6 +124,7 @@ cc_library(
         {
             "egret": ["PAVONA_IS_EGRET"],
             "dragonfly": ["PAVONA_IS_DRAGONFLY"],
+            "scafi_deprecated": ["PAVONA_IS_SCAFI_DEPRECATED"],
         },
         [],
     ),

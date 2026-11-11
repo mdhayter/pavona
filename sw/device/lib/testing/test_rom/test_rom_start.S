@@ -11,17 +11,10 @@
 #include "hw/top/sram_ctrl_regs.h"
 
 #if defined(OPENTITAN_IS_SCAFI_DEPRECATED)
-#include "hw/top/otp_ctrl_regs.h"
-#include "hw/top/sensor_ctrl_regs.h"
 #include "hw/top_scafi_deprecated/sw/autogen/top_scafi_deprecated_memory.h"
-#define OTP_CTRL_CORE_BASE_ADDR             TOP_SCAFI_DEPRECATED_OTP_CTRL_CORE_BASE_ADDR
 #define AST_BASE_ADDR                       TOP_SCAFI_DEPRECATED_AST_BASE_ADDR
 #define CLKMGR_AON_BASE_ADDR                TOP_SCAFI_DEPRECATED_CLKMGR_AON_BASE_ADDR
 #define SRAM_CTRL_MAIN_REGS_BASE_ADDR       TOP_SCAFI_DEPRECATED_SRAM_CTRL_MAIN_REGS_BASE_ADDR
-#define ENTROPY_SRC_BASE_ADDR               TOP_SCAFI_DEPRECATED_ENTROPY_SRC_BASE_ADDR
-#define CSRNG_BASE_ADDR                     TOP_SCAFI_DEPRECATED_CSRNG_BASE_ADDR
-#define EDN0_BASE_ADDR                      TOP_SCAFI_DEPRECATED_EDN0_BASE_ADDR
-#define SENSOR_CTRL_BASE_ADDR               TOP_SCAFI_DEPRECATED_SENSOR_CTRL_AON_BASE_ADDR
 
 #elif defined(OPENTITAN_IS_EGRET)
 #include "hw/top/otp_ctrl_regs.h"
