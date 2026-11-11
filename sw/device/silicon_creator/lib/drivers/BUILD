@@ -36,7 +36,7 @@ load("//hw/top_egret/data/otp:defs.bzl", "EGRET_STD_OTP_OVERLAYS_WITHOUT_SECRET_
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
-    name = "scafi_deprecated_test_rom_driver_srcs",
+    name = "no_otp_test_rom_driver_srcs",
     srcs = [
         "flash_ctrl.c",
         "flash_ctrl.h",
