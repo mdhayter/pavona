@@ -365,7 +365,7 @@ dual_cc_library(
 )
 
 filegroup(
-    name = "scafi_deprecated_test_framework_manifest_def_srcs",
+    name = "no_otp_test_framework_manifest_def_srcs",
     srcs = [
         "manifest_def.c",
         "manifest_def.h",
@@ -385,7 +385,7 @@ cc_test(
 )
 
 filegroup(
-    name = "scafi_deprecated_test_rom_manifest_srcs",
+    name = "no_otp_test_rom_manifest_srcs",
     srcs = [
         "manifest.c",
         "manifest.h",

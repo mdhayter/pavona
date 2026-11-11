@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -92,15 +93,16 @@ legacy_rom_targets(
 ]
 
 # TODO(#12905): Use a slightly hollowed out version of the silicon_creator bootstrap
-# and other functions necessary to build the test_rom for the Scafi_Deprecated top level.
+# and other functions necessary to build the test_rom for tops with no OTP or life cycle
+# controller.
 cc_library(
-    name = "scafi_deprecated_test_rom_lib",
+    name = "no_otp_test_rom_lib",
     srcs = [
-        "scafi_deprecated_fake_driver_funcs.c",
-        "//sw/device/silicon_creator/lib/drivers:scafi_deprecated_test_rom_driver_srcs",
-        "//sw/device/silicon_creator/rom:scafi_deprecated_test_rom_bootstrap_srcs",
+        "no_otp_fake_driver_funcs.c",
+        "//sw/device/silicon_creator/lib/drivers:no_otp_test_rom_driver_srcs",
+        "//sw/device/silicon_creator/rom:no_otp_test_rom_bootstrap_srcs",
     ],
-    # This should be built only for Scafi_Deprecated and skipped if using wildcards.
+    # This should be built only for tops with no OTP and skipped if using wildcards.
     tags = ["manual"],
     deps = [
         "//hw/top:flash_ctrl_c_regs",
@@ -142,7 +144,7 @@ alias(
     actual = pavona_select_top(
         {
             "dragonfly": ":dragonfly_test_rom_lib",
-            "scafi_deprecated": ":scafi_deprecated_test_rom_lib",
+            "scafi_deprecated": ":no_otp_test_rom_lib",
         },
         ":egret_test_rom_lib",
     ),
@@ -150,14 +152,14 @@ alias(
 )
 
 # TODO(#12905): Use a slightly hollowed out version of the silicon_creator manifest
-# implementation when building the test_rom for the Scafi_Deprecated top level.
+# implementation when building the test_rom for tops with no OTP or life cycle controller.
 cc_library(
-    name = "scafi_deprecated_test_rom_manifest",
+    name = "no_otp_test_rom_manifest",
     srcs = [
-        "//sw/device/silicon_creator/lib:scafi_deprecated_test_rom_manifest_srcs",
-        "//sw/device/silicon_creator/lib/drivers:scafi_deprecated_test_rom_driver_srcs",
+        "//sw/device/silicon_creator/lib:no_otp_test_rom_manifest_srcs",
+        "//sw/device/silicon_creator/lib/drivers:no_otp_test_rom_driver_srcs",
     ],
-    # This should be built only for Scafi_Deprecated and skipped if using wildcards.
+    # This should be built only for tops with no OTP and skipped if using wildcards.
     tags = ["manual"],
     deps = [
         "//hw/top:flash_ctrl_c_regs",
@@ -181,7 +183,7 @@ alias(
     name = "test_rom_manifest",
     actual = pavona_select_top(
         {
-            "scafi_deprecated": ":scafi_deprecated_test_rom_manifest",
+            "scafi_deprecated": ":no_otp_test_rom_manifest",
         },
         "//sw/device/silicon_creator/lib:manifest",
     ),
