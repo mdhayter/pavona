@@ -344,6 +344,27 @@ module top_${top["name"]} #(
   % endif
 % endfor
 
+<%
+  # A top with no life cycle controller or OTP can list debug enables as
+  # top-level signals. Tie each one listed so that debug is always enabled.
+  has_lc_ctrl = any(m["type"] == "lc_ctrl" for m in top["module"])
+  has_otp_ctrl = any(m.get("template_type") == "otp_ctrl" for m in top["module"])
+  debug_ties = []
+  for s in top["inter_module"]["top"]:
+    sig = s.split(".")[-1]
+    if sig == "lc_hw_debug_en" and not has_lc_ctrl:
+      debug_ties.append((s, "lc_ctrl_pkg::On"))
+    elif sig == "otp_dis_rv_dm_late_debug" and not has_otp_ctrl:
+      debug_ties.append((s, "prim_mubi_pkg::MuBi8True"))
+%>\
+% if debug_ties:
+  // There is no life cycle controller or OTP to enable debug, so it is always
+  // enabled, without waiting for software to set the late debug enable.
+  % for s, value in debug_ties:
+  assign ${s.replace(".", "_")} = ${value};
+  % endfor
+
+% endif
   // See #7978 This below is a hack.
   // This is because ast is a comportable-like module that sits outside
   // of top_${top["name"]}'s boundary.
