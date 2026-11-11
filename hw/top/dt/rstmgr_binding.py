@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """This contains a class which is used to help generate the device tables (DT)
@@ -167,11 +168,12 @@ class RstmgrExt(Extension):
             sw_rsts[str(idx)] = Name.from_snake_case(rst)
         hw_reqs = {}
         for (idx, reset) in enumerate(self.ipconfig.hw_reset_req_list()):
-            # NOTE Scafi_Deprecated pretends to have an escalation signal but
-            # in fact does not have an alert_handler so we need to special case
-            # that. Similarly there is no rv_dm.
-            if self.ip_helper.top_helper.top["name"] == "scafi_deprecated" and \
-                    reset["module"] in ["alert_handler", "rv_dm"]:
+            # NOTE A top can list a reset request from alert_handler (the
+            # escalation signal) or rv_dm without instantiating the block, as
+            # Scafi_Deprecated does, so treat the source as unknown then.
+            top = self.ip_helper.top_helper.top
+            if reset["module"] in ["alert_handler", "rv_dm"] and \
+                    not any(m["name"] == reset["module"] for m in top["module"]):
                 inst_id = Name(["unknown"])
             else:
                 inst_id = Name.from_snake_case(reset["module"])
