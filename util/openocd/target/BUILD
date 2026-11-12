@@ -8,4 +8,5 @@ exports_files([
     "lowrisc-egret.cfg",
     "lowrisc-egret-lc.cfg",
     "lowrisc-egret-z1-silicon.cfg",
+    "lowrisc-wren.cfg",
 ])

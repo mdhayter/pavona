@@ -1,5 +1,6 @@
 CAPI=2:
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 name: "lowrisc:systems:top_wren:0.1"
@@ -23,7 +24,7 @@ filesets:
       - lowrisc:ip:rv_timer
       - lowrisc:ip:spi_device
       - lowrisc:ip:spi_host
-      - lowrisc:ip:aes
+      - lowrisc:ip:i2c
       - lowrisc:ip:entropy_src
       - lowrisc:ip:flash_macro_wrapper
       - lowrisc:ip:hmac
@@ -40,11 +41,14 @@ filesets:
       - lowrisc:wren_ip:rstmgr
       - lowrisc:wren_ip:rv_plic
       - lowrisc:wren_ip:gpio
+      - lowrisc:wren_ip:pwm
       - lowrisc:wren_ip:rv_core_ibex
       - lowrisc:ip:rom_ctrl
       - lowrisc:ip:aon_timer
       - lowrisc:tlul:headers
       - lowrisc:systems:top_wren_pkg
+      - lowrisc:constants:top_wren_jtag_id_pkg
+      - lowrisc:constants:top_wren_ibex_pmp_reset_pkg
       - lowrisc:wren_constants:top_pkg
     files:
       - rtl/autogen/top_wren.sv

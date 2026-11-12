@@ -17,6 +17,7 @@ filegroup(
         "//hw/top_wren/ip_autogen/flash_ctrl:rtl_files",
         "//hw/top_wren/ip_autogen/gpio:rtl_files",
         "//hw/top_wren/ip_autogen/pinmux:rtl_files",
+        "//hw/top_wren/ip_autogen/pwm:rtl_files",
         "//hw/top_wren/ip_autogen/pwrmgr:rtl_files",
         "//hw/top_wren/ip_autogen/rstmgr:rtl_files",
         "//hw/top_wren/ip_autogen/rv_core_ibex:rtl_files",
