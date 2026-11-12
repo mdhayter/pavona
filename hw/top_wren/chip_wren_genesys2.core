@@ -1,12 +1,13 @@
 CAPI=2:
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
-name: "lowrisc:systems:chip_wren_cw305:0.1"
-description: "Wren toplevel for the ChipWhisperer CW305 board"
+name: "lowrisc:systems:chip_wren_genesys2:0.1"
+description: "Wren toplevel for the Digilent Genesys 2 board"
 
 filesets:
-  files_rtl_cw305:
+  files_rtl_genesys2:
     depend:
       - lowrisc:prim_xilinx:prim_xilinx_default_pkg
       - lowrisc:systems:top_wren:0.1
@@ -19,12 +20,12 @@ filesets:
     files:
       - rtl/clkgen_xil7series.sv
       - rtl/usr_access_xil7series.sv
-      - rtl/autogen/chip_wren_cw305.sv
+      - rtl/autogen/chip_wren_genesys2.sv
     file_type: systemVerilogSource
 
   files_constraints:
     files:
-      - data/pins_cw305.xdc
+      - data/pins_genesys2.xdc
       - data/clocks.xdc
     file_type: xdc
 
@@ -41,7 +42,7 @@ filesets:
 parameters:
   # XXX: This parameter needs to be absolute, or relative to the *.runs/synth_1
   # directory. It's best to pass it as absolute path when invoking fusesoc, e.g.
-  # --BootRomInitFile=$PWD/build-bin/sw/device/lib/testing/test_rom/test_rom_fpga_cw305.32.vmem
+  # --BootRomInitFile=$PWD/build-bin/sw/device/lib/testing/test_rom/test_rom_fpga_genesys2.32.vmem
   # XXX: The VMEM file should be added to the sources of the Vivado project to
   # make the Vivado dependency tracking work. However this requires changes to
   # fusesoc first.
@@ -53,23 +54,40 @@ parameters:
   AST_BYPASS_CLK:
     datatype: bool
     paramtype: vlogdefine
+  SYNTHESIS:
+    datatype: bool
+    paramtype: vlogdefine
 
 targets:
   default: &default_target
     filesets:
-      - files_rtl_cw305
-    toplevel: chip_wren_cw305
+      - files_rtl_genesys2
+    toplevel: chip_wren_genesys2
+    parameters:
+      - AST_BYPASS_CLK=true
 
   synth:
     default_tool: vivado
     filesets:
-      - files_rtl_cw305
+      - files_rtl_genesys2
       - files_constraints
       - files_tcl
-    toplevel: chip_wren_cw305
+    toplevel: chip_wren_genesys2
     parameters:
       - BootRomInitFile
       - AST_BYPASS_CLK=true
     tools:
       vivado:
-        part: "xc7a100tftg256-2" # CW305 Board
+        part: "xc7k325tffg900-2" # Genesys 2
+
+  lint:
+    <<: *default_target
+    default_tool: verilator
+    parameters:
+      - SYNTHESIS=true
+      - AST_BYPASS_CLK=true
+    tools:
+      verilator:
+        mode: lint-only
+        verilator_options:
+          - "-Wall"

@@ -1130,48 +1130,49 @@
   // to override the JTAG and strap locations indices, since the testing and DFT
   // setups may differ among the targets.
   targets: [
-    { name: 'cw305',
+    { name: 'genesys2',
       pinout: {
         remove_ports: [],
         remove_pads: [
+          // Not on the Genesys 2 board.
           'CC1', 'CC2',
-          'SPI_DEV_D2', 'SPI_DEV_D3'
-          'SPI_HOST_CLK', 'SPI_HOST_CS_L',
-          'SPI_HOST_D0', 'SPI_HOST_D1', 'SPI_HOST_D2', 'SPI_HOST_D3',
           'FLASH_TEST_VOLT',
           'FLASH_TEST_MODE0', 'FLASH_TEST_MODE1',
-          'IOB7', 'IOB8', 'IOB9', 'IOB10', 'IOB11', 'IOB12',
-          'IOC6', 'IOC7', 'IOC9', 'IOC10', 'IOC11', 'IOC12',
-          'IOR0', 'IOR1', 'IOR2', 'IOR3', 'IOR5', 'IOR6', 'IOR7', 'IOR10', 'IOR11', 'IOR12', 'IOR13'
+          // spi_host0 goes to the on-board flash in a later step (its SCK needs STARTUPE2).
+          'SPI_HOST_CLK', 'SPI_HOST_CS_L',
+          'SPI_HOST_D0', 'SPI_HOST_D1', 'SPI_HOST_D2', 'SPI_HOST_D3',
+          // The FT2232H's DSPI port carries single-lane SPI only.
+          'SPI_DEV_D2', 'SPI_DEV_D3',
+          // TAP and DFT straps: the chip level ties the TAP strap to rv_dm.
+          'IOC5', 'IOC8', 'IOR5', 'IOR7',
         ],
 
         add_pads: [
-          // Additional infrastructure pads
-          { name: 'IO_CLK',           type: 'InputStd', bank: 'VCC', connection: 'manual', desc: 'Extra clock input for FPGA target'}
-          { name: 'POR_BUTTON_N',     type: 'InputStd', bank: 'VCC', connection: 'manual', desc: 'POR from the push-button'}
-          // Custom USB pads
-          { name: 'IO_USB_SENSE0',    type: 'BidirStd', bank: 'VCC', connection: 'manual', desc: 'Manual USB signal for FPGA target'}
-          { name: 'IO_USB_DNPULLUP0', type: 'BidirStd', bank: 'VCC', connection: 'manual', desc: 'Manual USB signal for FPGA target'}
-          { name: 'IO_USB_DPPULLUP0', type: 'BidirStd', bank: 'VCC', connection: 'manual', desc: 'Manual USB signal for FPGA target'}
-          // ChipWhisperer IO
-          { name: 'IO_CLKOUT',        type: 'BidirStd', bank: 'VCC', connection: 'manual', desc: 'Manual clock output for SCA setup'}
-          { name: 'IO_TRIGGER',       type: 'BidirStd', bank: 'VCC', connection: 'manual', desc: 'Manual trigger output for SCA setup'}
+          // Reset from the FT2232H (PROG_D7), ANDed with the CPU reset button on POR_N.
+          { name: 'IO_FTDI_RST_N',    type: 'InputStd', bank: 'VCC', connection: 'manual', desc: 'Reset from the FT2232H, active low'}
+          // Enables the FT2232H channel A SPI path (PROG_SPIEN), driven high.
+          { name: 'IO_SPIEN',         type: 'BidirStd', bank: 'VCC', connection: 'manual', desc: 'FT2232H SPI enable output'}
+          // PmodUSBUART CTS# input, driven low so a host using flow control still sends.
+          { name: 'IO_UART1_CTS_N',   type: 'BidirStd', bank: 'VCC', connection: 'manual', desc: 'PmodUSBUART CTS# output'}
+          // D+ pull-up switch on the Dual USB PMOD.
+          { name: 'IO_USB_DPPULLUP0', type: 'BidirStd', bank: 'VCC', connection: 'manual', desc: 'Manual USB D+ pull-up enable'}
         ],
       }
 
       pinmux: {
         special_signals: [
-          // Straps
-          { name: 'tap0',   pad: 'IOC8',         desc: 'TAP strap signal.'                       },
-          { name: 'tap1',   pad: 'IOC5',         desc: 'TAP strap signal.'                       },
-          { name: 'dft0',   pad: 'IOR5',         desc: 'DFT strap signal.'                       },
-          { name: 'dft1',   pad: 'IOR7',         desc: 'DFT strap signal.'                       },
-          // JTAG
-          { name: 'tck',    pad: 'SPI_DEV_CLK' , desc: 'JTAG tck signal, overlaid on SPI_DEV.'   },
-          { name: 'tms',    pad: 'SPI_DEV_CS_L', desc: 'JTAG tms signal, overlaid on SPI_DEV.'   },
-          { name: 'trst_n', pad: 'IOR4',         desc: 'JTAG trst_n signal.'                     },
-          { name: 'tdi',    pad: 'SPI_DEV_D0'  , desc: 'JTAG tdi signal, overlaid on SPI_DEV.'   },
-          { name: 'tdo',    pad: 'SPI_DEV_D1'  , desc: 'JTAG tdo signal, overlaid on SPI_DEV.'   },
+          // Straps: the pads are removed above, and the chip level ties the
+          // TAP strap to select rv_dm.
+          { name: 'tap0',   pad: 'IOC8', desc: 'TAP strap signal.'   },
+          { name: 'tap1',   pad: 'IOC5', desc: 'TAP strap signal.'   },
+          { name: 'dft0',   pad: 'IOR5', desc: 'DFT strap signal.'   },
+          { name: 'dft1',   pad: 'IOR7', desc: 'DFT strap signal.'   },
+          // JTAG for rv_dm, on Pmod JD.
+          { name: 'tck',    pad: 'IOR3', desc: 'JTAG tck signal.'    },
+          { name: 'tms',    pad: 'IOR0', desc: 'JTAG tms signal.'    },
+          { name: 'trst_n', pad: 'IOR4', desc: 'JTAG trst_n signal.' },
+          { name: 'tdi',    pad: 'IOR2', desc: 'JTAG tdi signal.'    },
+          { name: 'tdo',    pad: 'IOR1', desc: 'JTAG tdo signal.'    },
         ],
       }
     }

@@ -8745,7 +8745,7 @@
   targets:
   [
     {
-      name: cw305
+      name: genesys2
       pinout:
       {
         remove_ports: []
@@ -8753,73 +8753,46 @@
         [
           CC1
           CC2
-          SPI_DEV_D2
-          SPI_DEV_D3
+          FLASH_TEST_VOLT
+          FLASH_TEST_MODE0
+          FLASH_TEST_MODE1
           SPI_HOST_CLK
           SPI_HOST_CS_L
           SPI_HOST_D0
           SPI_HOST_D1
           SPI_HOST_D2
           SPI_HOST_D3
-          FLASH_TEST_VOLT
-          FLASH_TEST_MODE0
-          FLASH_TEST_MODE1
-          IOB7
-          IOB8
-          IOB9
-          IOB10
-          IOB11
-          IOB12
-          IOC6
-          IOC7
-          IOC9
-          IOC10
-          IOC11
-          IOC12
-          IOR0
-          IOR1
-          IOR2
-          IOR3
+          SPI_DEV_D2
+          SPI_DEV_D3
+          IOC5
+          IOC8
           IOR5
-          IOR6
           IOR7
-          IOR10
-          IOR11
-          IOR12
-          IOR13
         ]
         add_pads:
         [
           {
-            name: IO_CLK
+            name: IO_FTDI_RST_N
             type: InputStd
             bank: VCC
             connection: manual
-            desc: Extra clock input for FPGA target
+            desc: Reset from the FT2232H, active low
             port_type: inout
           }
           {
-            name: POR_BUTTON_N
-            type: InputStd
-            bank: VCC
-            connection: manual
-            desc: POR from the push-button
-            port_type: inout
-          }
-          {
-            name: IO_USB_SENSE0
+            name: IO_SPIEN
             type: BidirStd
             bank: VCC
             connection: manual
-            desc: Manual USB signal for FPGA target
+            desc: FT2232H SPI enable output
             port_type: inout
           }
           {
-            name: IO_USB_DNPULLUP0
+            name: IO_UART1_CTS_N
             type: BidirStd
             bank: VCC
             connection: manual
-            desc: Manual USB signal for FPGA target
+            desc: PmodUSBUART CTS# output
             port_type: inout
           }
           {
@@ -8827,23 +8800,7 @@
             type: BidirStd
             bank: VCC
             connection: manual
-            desc: Manual USB signal for FPGA target
-            port_type: inout
-          }
-          {
-            name: IO_CLKOUT
-            type: BidirStd
-            bank: VCC
-            connection: manual
-            desc: Manual clock output for SCA setup
-            port_type: inout
-          }
-          {
-            name: IO_TRIGGER
-            type: BidirStd
-            bank: VCC
-            connection: manual
-            desc: Manual trigger output for SCA setup
+            desc: Manual USB D+ pull-up enable
             port_type: inout
           }
         ]
@@ -8878,15 +8835,15 @@
           }
           {
             name: tck
-            pad: SPI_DEV_CLK
-            desc: JTAG tck signal, overlaid on SPI_DEV.
-            idx: 57
+            pad: IOR3
+            desc: JTAG tck signal.
+            idx: 38
           }
           {
             name: tms
-            pad: SPI_DEV_CS_L
-            desc: JTAG tms signal, overlaid on SPI_DEV.
-            idx: 58
+            pad: IOR0
+            desc: JTAG tms signal.
+            idx: 35
           }
           {
             name: trst_n
@@ -8896,15 +8853,15 @@
           }
           {
             name: tdi
-            pad: SPI_DEV_D0
-            desc: JTAG tdi signal, overlaid on SPI_DEV.
-            idx: 51
+            pad: IOR2
+            desc: JTAG tdi signal.
+            idx: 37
           }
           {
             name: tdo
-            pad: SPI_DEV_D1
-            desc: JTAG tdo signal, overlaid on SPI_DEV.
-            idx: 52
+            pad: IOR1
+            desc: JTAG tdo signal.
+            idx: 36
           }
         ]
       }

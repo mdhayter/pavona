@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -169,8 +170,7 @@ status_t pinmux_testutils_connect(const dif_pinmux_t *pinmux,
 //
 // The pinout spreadsheet allocates fewer pins to GPIOs than what the GPIO IP
 // supports. This oversubscription is intentional to maximize testing.
-#if defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED) || \
-    defined(OPENTITAN_IS_WREN)
+#if defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED)
 const dt_pad_t kPinmuxTestutilsGpioPads[kDifGpioNumPins] = {
     kDtPadIoa0,  kDtPadIoa1, kDtPadIoa2,  kDtPadIoa3,  kDtPadIoa4,
     kDtPadIoa5,  kDtPadIoa6, kDtPadIoa7,  kDtPadIoa8,  kDtPadIob6,
@@ -179,6 +179,19 @@ const dt_pad_t kPinmuxTestutilsGpioPads[kDifGpioNumPins] = {
     kDtPadIor0,  kDtPadIor1, kDtPadIor2,  kDtPadIor3,  kDtPadIor4,
     kDtPadIor5,  kDtPadIor6, kDtPadIor7,  kDtPadIor10, kDtPadIor11,
     kDtPadIor12, kDtPadIor13};
+#elif defined(OPENTITAN_IS_WREN)
+// Wren's GPIOs follow the Genesys 2 board: 0-7 LEDs, 8-15 switches, 16-20
+// buttons, 21 Pmod JA7, 22-24 the straps, and 25-28 the OLED's DC, RES#, VDD
+// and VBAT enables. 29-31 have no board pin: their pads are removed in the
+// genesys2 target.
+const dt_pad_t kPinmuxTestutilsGpioPads[kDifGpioNumPins] = {
+    kDtPadIob0,  kDtPadIob1,  kDtPadIob2,  kDtPadIob3,  kDtPadIob6,
+    kDtPadIob7,  kDtPadIob8,  kDtPadIoc9,  kDtPadIor10, kDtPadIor11,
+    kDtPadIor12, kDtPadIor13, kDtPadIoc10, kDtPadIoc11, kDtPadIoc12,
+    kDtPadIoa6,  kDtPadIoa7,  kDtPadIoa8,  kDtPadIob9,  kDtPadIob10,
+    kDtPadIoc6,  kDtPadIor6,  kDtPadIoc0,  kDtPadIoc1,  kDtPadIoc2,
+    kDtPadIoa0,  kDtPadIoa1,  kDtPadIoa2,  kDtPadIoa4,  kDtPadIor5,
+    kDtPadIor7,  kDtPadIoc8};
 #elif defined(OPENTITAN_IS_DRAGONFLY)
 const dt_pad_t kPinmuxTestutilsGpioPads[kDifGpioNumPins] = {
     kDtPadGpioGpio0,  kDtPadGpioGpio1,  kDtPadGpioGpio2,  kDtPadGpioGpio3,

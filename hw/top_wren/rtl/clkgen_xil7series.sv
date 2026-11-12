@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -30,9 +31,9 @@ module clkgen_xil7series # (
     .BANDWIDTH            ("OPTIMIZED"),
     .COMPENSATION         ("ZHOLD"),
     .STARTUP_WAIT         ("FALSE"),
-    .CLKIN1_PERIOD        (10.000), // f_CLKIN = 100 MHz
-    .DIVCLK_DIVIDE        (1),      // f_PFD = 100 MHz
-    .CLKFBOUT_MULT_F      (12.000), // f_VCO = 1200 MHz
+    .CLKIN1_PERIOD        (5.000),  // f_CLKIN = 200 MHz (Genesys 2 board clock)
+    .DIVCLK_DIVIDE        (1),      // f_PFD = 200 MHz
+    .CLKFBOUT_MULT_F      (6.000),  // f_VCO = 1200 MHz
     .CLKFBOUT_PHASE       (0.000),
     .CLKOUT0_DIVIDE_F     (120.0),  // f_main = 10 MHz
     .CLKOUT0_PHASE        (0.000),
