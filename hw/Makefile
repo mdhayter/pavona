@@ -50,7 +50,7 @@ IPS ?= acc                 \
        uart                \
        usbdev
 
-TOPS ?= top_dragonfly top_egret top_scafi_deprecated
+TOPS ?= top_dragonfly top_egret top_scafi_deprecated top_wren
 
 # Conditional flags: use VERBOSE=1 for adding -v flag.
 VERBOSE ?= 0

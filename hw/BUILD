@@ -30,6 +30,7 @@ filegroup(
         "//hw/top_dragonfly:doc_files",
         "//hw/top_egret:doc_files",
         "//hw/top_scafi_deprecated:doc_files",
+        "//hw/top_wren:doc_files",
     ],
 )
 

@@ -33,7 +33,7 @@ interface pwrmgr_rstreqs_sva_if
   // The timing of the escalation reset is determined by the slow clock, but will not propagate if
   // the non-slow clock is off. We use the regular clock and multiply the clock cycles times the
   // clock ratio.
-% if topname in ["egret", "scafi_deprecated"]:
+% if topname in ["egret", "scafi_deprecated", "wren"]:
   localparam int FastToSlowFreqRatio = 120;
 % elif topname == "dragonfly":
   // Dragonfly has a 16x clock ratio between the slow and fast clocks. (1GHz / 62.5MHz = 16)

@@ -57,6 +57,11 @@ hw/top_scafi_deprecated/ip/alert_handler/dv/alert_handler_env_pkg__params.sv
 hw/top_scafi_deprecated/ip/sensor_ctrl/rtl/*
 hw/top_scafi_deprecated/ip/xbar_main/xbar_main.core
 hw/top_scafi_deprecated/ip/xbar_peri/xbar_peri.core
+hw/top_wren/**/autogen/
+hw/top_wren/ip/alert_handler/dv/alert_handler_env_pkg__params.sv
+hw/top_wren/ip/sensor_ctrl/rtl/*
+hw/top_wren/ip/xbar_main/xbar_main.core
+hw/top_wren/ip/xbar_peri/xbar_peri.core
 
 # Rust Cargo build system files.
 Cargo.lock
