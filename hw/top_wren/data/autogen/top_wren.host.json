@@ -1,0 +1,744 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "generator": "util/gen_top_host.py",
+  "name": "wren",
+  "addr_spaces": {
+    "hart": {
+      "devices": {
+        "uart0": {
+          "base_addr": 1073741824,
+          "size_bytes": 64,
+          "ip": "uart"
+        },
+        "uart1": {
+          "base_addr": 1073807360,
+          "size_bytes": 64,
+          "ip": "uart"
+        },
+        "gpio": {
+          "base_addr": 1074003968,
+          "size_bytes": 128,
+          "ip": "gpio"
+        },
+        "spi_device": {
+          "base_addr": 1074069504,
+          "size_bytes": 8192,
+          "ip": "spi_device"
+        },
+        "spi_host0": {
+          "base_addr": 1074135040,
+          "size_bytes": 64,
+          "ip": "spi_host"
+        },
+        "rv_timer": {
+          "base_addr": 1074790400,
+          "size_bytes": 512,
+          "ip": "rv_timer"
+        },
+        "usbdev": {
+          "base_addr": 1077018624,
+          "size_bytes": 4096,
+          "ip": "usbdev"
+        },
+        "pwrmgr_aon": {
+          "base_addr": 1077936128,
+          "size_bytes": 128,
+          "ip": "pwrmgr"
+        },
+        "rstmgr_aon": {
+          "base_addr": 1078001664,
+          "size_bytes": 64,
+          "ip": "rstmgr"
+        },
+        "clkmgr_aon": {
+          "base_addr": 1078067200,
+          "size_bytes": 128,
+          "ip": "clkmgr"
+        },
+        "pinmux_aon": {
+          "base_addr": 1078329344,
+          "size_bytes": 4096,
+          "ip": "pinmux"
+        },
+        "aon_timer_aon": {
+          "base_addr": 1078394880,
+          "size_bytes": 64,
+          "ip": "aon_timer"
+        },
+        "ast": {
+          "base_addr": 1078460416,
+          "size_bytes": 1024,
+          "ip": "ast"
+        },
+        "flash_ctrl_core": {
+          "base_addr": 1090519040,
+          "size_bytes": 512,
+          "ip": "flash_ctrl"
+        },
+        "flash_macro_wrapper": {
+          "base_addr": 1090551808,
+          "size_bytes": 128,
+          "ip": "flash_macro_wrapper"
+        },
+        "rv_plic": {
+          "base_addr": 1207959552,
+          "size_bytes": 134217728,
+          "ip": "rv_plic"
+        },
+        "aes": {
+          "base_addr": 1091567616,
+          "size_bytes": 256,
+          "ip": "aes"
+        },
+        "sram_ctrl_main_regs": {
+          "base_addr": 1092354048,
+          "size_bytes": 64,
+          "ip": "sram_ctrl"
+        },
+        "rom_ctrl_regs": {
+          "base_addr": 1092485120,
+          "size_bytes": 128,
+          "ip": "rom_ctrl"
+        },
+        "rv_core_ibex_cfg": {
+          "base_addr": 1092550656,
+          "size_bytes": 256,
+          "ip": "rv_core_ibex"
+        }
+      },
+      "memories": {
+        "flash_ctrl_mem": {
+          "base_addr": 536870912,
+          "size_bytes": 65536
+        },
+        "sram_ctrl_main_ram": {
+          "base_addr": 268435456,
+          "size_bytes": 131072
+        },
+        "rom_ctrl_rom": {
+          "base_addr": 32768,
+          "size_bytes": 32768
+        }
+      },
+      "subranges": {
+        "mmio": {
+          "base_addr": 1073741824,
+          "size_bytes": 268435456
+        }
+      }
+    }
+  },
+  "per_top_used_regs": {
+    "clkmgr": {
+      "ALERT_TEST": 0,
+      "EXTCLK_CTRL_REGWEN": 4,
+      "EXTCLK_CTRL": 8,
+      "EXTCLK_STATUS": 12,
+      "JITTER_REGWEN": 16,
+      "JITTER_ENABLE": 20,
+      "CLK_ENABLES": 24,
+      "CLK_HINTS": 28,
+      "CLK_HINTS_STATUS": 32,
+      "MEASURE_CTRL_REGWEN": 36,
+      "IO_MEAS_CTRL_EN": 40,
+      "IO_MEAS_CTRL_SHADOWED": 44,
+      "IO_DIV4_MEAS_CTRL_EN": 48,
+      "IO_DIV4_MEAS_CTRL_SHADOWED": 52,
+      "MAIN_MEAS_CTRL_EN": 56,
+      "MAIN_MEAS_CTRL_SHADOWED": 60,
+      "USB_MEAS_CTRL_EN": 64,
+      "USB_MEAS_CTRL_SHADOWED": 68,
+      "RECOV_ERR_CODE": 72,
+      "FATAL_ERR_CODE": 76
+    },
+    "flash_ctrl": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "DIS": 16,
+      "EXEC": 20,
+      "INIT": 24,
+      "CTRL_REGWEN": 28,
+      "CONTROL": 32,
+      "ADDR": 36,
+      "PROG_TYPE_EN": 40,
+      "ERASE_SUSPEND": 44,
+      "REGION_CFG_REGWEN": {
+        "offset": 48,
+        "count": 8,
+        "stride": 4
+      },
+      "MP_REGION_CFG": {
+        "offset": 80,
+        "count": 8,
+        "stride": 4
+      },
+      "MP_REGION": {
+        "offset": 112,
+        "count": 8,
+        "stride": 4
+      },
+      "DEFAULT_REGION": 144,
+      "BANK0_INFO0_REGWEN": {
+        "offset": 148,
+        "count": 10,
+        "stride": 4
+      },
+      "BANK0_INFO0_PAGE_CFG": {
+        "offset": 188,
+        "count": 10,
+        "stride": 4
+      },
+      "BANK0_INFO1_REGWEN": 228,
+      "BANK0_INFO1_PAGE_CFG": 232,
+      "BANK0_INFO2_REGWEN": {
+        "offset": 236,
+        "count": 2,
+        "stride": 4
+      },
+      "BANK0_INFO2_PAGE_CFG": {
+        "offset": 244,
+        "count": 2,
+        "stride": 4
+      },
+      "BANK1_INFO0_REGWEN": {
+        "offset": 252,
+        "count": 10,
+        "stride": 4
+      },
+      "BANK1_INFO0_PAGE_CFG": {
+        "offset": 292,
+        "count": 10,
+        "stride": 4
+      },
+      "BANK1_INFO1_REGWEN": 332,
+      "BANK1_INFO1_PAGE_CFG": 336,
+      "BANK1_INFO2_REGWEN": {
+        "offset": 340,
+        "count": 2,
+        "stride": 4
+      },
+      "BANK1_INFO2_PAGE_CFG": {
+        "offset": 348,
+        "count": 2,
+        "stride": 4
+      },
+      "HW_INFO_CFG_OVERRIDE": 356,
+      "BANK_CFG_REGWEN": 360,
+      "MP_BANK_CFG_SHADOWED": 364,
+      "OP_STATUS": 368,
+      "STATUS": 372,
+      "DEBUG_STATE": 376,
+      "ERR_CODE": 380,
+      "STD_FAULT_STATUS": 384,
+      "FAULT_STATUS": 388,
+      "ERR_ADDR": 392,
+      "ECC_SINGLE_ERR_CNT": 396,
+      "ECC_SINGLE_ERR_ADDR": {
+        "offset": 400,
+        "count": 2,
+        "stride": 4
+      },
+      "PHY_ALERT_CFG": 408,
+      "PHY_STATUS": 412,
+      "Scratch": 416,
+      "FIFO_LVL": 420,
+      "FIFO_RST": 424,
+      "CURR_FIFO_LVL": 428,
+      "prog_fifo": 432,
+      "rd_fifo": 436
+    },
+    "gpio": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "DATA_IN": 16,
+      "DIRECT_OUT": 20,
+      "MASKED_OUT_LOWER": 24,
+      "MASKED_OUT_UPPER": 28,
+      "DIRECT_OE": 32,
+      "MASKED_OE_LOWER": 36,
+      "MASKED_OE_UPPER": 40,
+      "INTR_CTRL_EN_RISING": 44,
+      "INTR_CTRL_EN_FALLING": 48,
+      "INTR_CTRL_EN_LVLHIGH": 52,
+      "INTR_CTRL_EN_LVLLOW": 56,
+      "CTRL_EN_INPUT_FILTER": 60,
+      "HW_STRAPS_DATA_IN_VALID": 64,
+      "HW_STRAPS_DATA_IN": 68
+    },
+    "pinmux": {
+      "ALERT_TEST": 0,
+      "MIO_PERIPH_INSEL_REGWEN": {
+        "offset": 4,
+        "count": 35,
+        "stride": 4
+      },
+      "MIO_PERIPH_INSEL": {
+        "offset": 144,
+        "count": 35,
+        "stride": 4
+      },
+      "MIO_OUTSEL_REGWEN": {
+        "offset": 284,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_OUTSEL": {
+        "offset": 472,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_PAD_ATTR_REGWEN": {
+        "offset": 660,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_PAD_ATTR": {
+        "offset": 848,
+        "count": 47,
+        "stride": 4
+      },
+      "DIO_PAD_ATTR_REGWEN": {
+        "offset": 1036,
+        "count": 14,
+        "stride": 4
+      },
+      "DIO_PAD_ATTR": {
+        "offset": 1092,
+        "count": 14,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_STATUS": {
+        "offset": 1148,
+        "count": 2,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_REGWEN": {
+        "offset": 1156,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_EN": {
+        "offset": 1344,
+        "count": 47,
+        "stride": 4
+      },
+      "MIO_PAD_SLEEP_MODE": {
+        "offset": 1532,
+        "count": 47,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_STATUS": 1720,
+      "DIO_PAD_SLEEP_REGWEN": {
+        "offset": 1724,
+        "count": 14,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_EN": {
+        "offset": 1780,
+        "count": 14,
+        "stride": 4
+      },
+      "DIO_PAD_SLEEP_MODE": {
+        "offset": 1836,
+        "count": 14,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_REGWEN": {
+        "offset": 1892,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_EN": {
+        "offset": 1924,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR": {
+        "offset": 1956,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_CNT_TH": {
+        "offset": 1988,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_DETECTOR_PADSEL": {
+        "offset": 2020,
+        "count": 8,
+        "stride": 4
+      },
+      "WKUP_CAUSE": 2052
+    },
+    "pwrmgr": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "CTRL_CFG_REGWEN": 16,
+      "CONTROL": 20,
+      "CFG_CDC_SYNC": 24,
+      "WAKEUP_EN_REGWEN": 28,
+      "WAKEUP_EN": 32,
+      "WAKE_STATUS": 36,
+      "RESET_EN_REGWEN": 40,
+      "RESET_EN": 44,
+      "RESET_STATUS": 48,
+      "ESCALATE_RESET_STATUS": 52,
+      "WAKE_INFO_CAPTURE_DIS": 56,
+      "WAKE_INFO": 60,
+      "FAULT_STATUS": 64
+    },
+    "rstmgr": {
+      "ALERT_TEST": 0,
+      "RESET_REQ": 4,
+      "RESET_INFO": 8,
+      "CPU_REGWEN": 12,
+      "CPU_INFO_CTRL": 16,
+      "CPU_INFO_ATTR": 20,
+      "CPU_INFO": 24,
+      "SW_RST_REGWEN": {
+        "offset": 28,
+        "count": 3,
+        "stride": 4
+      },
+      "SW_RST_CTRL_N": {
+        "offset": 40,
+        "count": 3,
+        "stride": 4
+      },
+      "ERR_CODE": 52
+    }
+  },
+  "per_top_used_fields": {
+    "clkmgr": {
+      "EXTCLK_CTRL": {
+        "SEL": {
+          "lsb": 0,
+          "width": 4
+        },
+        "HI_SPEED_SEL": {
+          "lsb": 4,
+          "width": 4
+        }
+      },
+      "EXTCLK_CTRL_REGWEN": {
+        "EN": {
+          "lsb": 0,
+          "width": 1
+        }
+      },
+      "EXTCLK_STATUS": {
+        "ACK": {
+          "lsb": 0,
+          "width": 4
+        }
+      }
+    },
+    "rstmgr": {
+      "CPU_INFO_CTRL": {
+        "EN": {
+          "lsb": 0,
+          "width": 1
+        },
+        "INDEX": {
+          "lsb": 4,
+          "width": 4
+        }
+      },
+      "CPU_REGWEN": {
+        "EN": {
+          "lsb": 0,
+          "width": 1
+        }
+      }
+    }
+  },
+  "pinmux": {
+    "num_mio_pads": 47,
+    "num_dio_pads": 14,
+    "peripheral_in": {
+      "GpioGpio0": 0,
+      "GpioGpio1": 1,
+      "GpioGpio2": 2,
+      "GpioGpio3": 3,
+      "GpioGpio4": 4,
+      "GpioGpio5": 5,
+      "GpioGpio6": 6,
+      "GpioGpio7": 7,
+      "GpioGpio8": 8,
+      "GpioGpio9": 9,
+      "GpioGpio10": 10,
+      "GpioGpio11": 11,
+      "GpioGpio12": 12,
+      "GpioGpio13": 13,
+      "GpioGpio14": 14,
+      "GpioGpio15": 15,
+      "GpioGpio16": 16,
+      "GpioGpio17": 17,
+      "GpioGpio18": 18,
+      "GpioGpio19": 19,
+      "GpioGpio20": 20,
+      "GpioGpio21": 21,
+      "GpioGpio22": 22,
+      "GpioGpio23": 23,
+      "GpioGpio24": 24,
+      "GpioGpio25": 25,
+      "GpioGpio26": 26,
+      "GpioGpio27": 27,
+      "GpioGpio28": 28,
+      "GpioGpio29": 29,
+      "GpioGpio30": 30,
+      "GpioGpio31": 31,
+      "Uart0Rx": 32,
+      "Uart1Rx": 33,
+      "UsbdevSense": 34
+    },
+    "insel": {
+      "ConstantZero": 0,
+      "ConstantOne": 1,
+      "Ioa0": 2,
+      "Ioa1": 3,
+      "Ioa2": 4,
+      "Ioa3": 5,
+      "Ioa4": 6,
+      "Ioa5": 7,
+      "Ioa6": 8,
+      "Ioa7": 9,
+      "Ioa8": 10,
+      "Iob0": 11,
+      "Iob1": 12,
+      "Iob2": 13,
+      "Iob3": 14,
+      "Iob4": 15,
+      "Iob5": 16,
+      "Iob6": 17,
+      "Iob7": 18,
+      "Iob8": 19,
+      "Iob9": 20,
+      "Iob10": 21,
+      "Iob11": 22,
+      "Iob12": 23,
+      "Ioc0": 24,
+      "Ioc1": 25,
+      "Ioc2": 26,
+      "Ioc3": 27,
+      "Ioc4": 28,
+      "Ioc5": 29,
+      "Ioc6": 30,
+      "Ioc7": 31,
+      "Ioc8": 32,
+      "Ioc9": 33,
+      "Ioc10": 34,
+      "Ioc11": 35,
+      "Ioc12": 36,
+      "Ior0": 37,
+      "Ior1": 38,
+      "Ior2": 39,
+      "Ior3": 40,
+      "Ior4": 41,
+      "Ior5": 42,
+      "Ior6": 43,
+      "Ior7": 44,
+      "Ior10": 45,
+      "Ior11": 46,
+      "Ior12": 47,
+      "Ior13": 48
+    },
+    "mio_out": {
+      "Ioa0": 0,
+      "Ioa1": 1,
+      "Ioa2": 2,
+      "Ioa3": 3,
+      "Ioa4": 4,
+      "Ioa5": 5,
+      "Ioa6": 6,
+      "Ioa7": 7,
+      "Ioa8": 8,
+      "Iob0": 9,
+      "Iob1": 10,
+      "Iob2": 11,
+      "Iob3": 12,
+      "Iob4": 13,
+      "Iob5": 14,
+      "Iob6": 15,
+      "Iob7": 16,
+      "Iob8": 17,
+      "Iob9": 18,
+      "Iob10": 19,
+      "Iob11": 20,
+      "Iob12": 21,
+      "Ioc0": 22,
+      "Ioc1": 23,
+      "Ioc2": 24,
+      "Ioc3": 25,
+      "Ioc4": 26,
+      "Ioc5": 27,
+      "Ioc6": 28,
+      "Ioc7": 29,
+      "Ioc8": 30,
+      "Ioc9": 31,
+      "Ioc10": 32,
+      "Ioc11": 33,
+      "Ioc12": 34,
+      "Ior0": 35,
+      "Ior1": 36,
+      "Ior2": 37,
+      "Ior3": 38,
+      "Ior4": 39,
+      "Ior5": 40,
+      "Ior6": 41,
+      "Ior7": 42,
+      "Ior10": 43,
+      "Ior11": 44,
+      "Ior12": 45,
+      "Ior13": 46
+    },
+    "outsel": {
+      "ConstantZero": 0,
+      "ConstantOne": 1,
+      "ConstantHighZ": 2,
+      "GpioGpio0": 3,
+      "GpioGpio1": 4,
+      "GpioGpio2": 5,
+      "GpioGpio3": 6,
+      "GpioGpio4": 7,
+      "GpioGpio5": 8,
+      "GpioGpio6": 9,
+      "GpioGpio7": 10,
+      "GpioGpio8": 11,
+      "GpioGpio9": 12,
+      "GpioGpio10": 13,
+      "GpioGpio11": 14,
+      "GpioGpio12": 15,
+      "GpioGpio13": 16,
+      "GpioGpio14": 17,
+      "GpioGpio15": 18,
+      "GpioGpio16": 19,
+      "GpioGpio17": 20,
+      "GpioGpio18": 21,
+      "GpioGpio19": 22,
+      "GpioGpio20": 23,
+      "GpioGpio21": 24,
+      "GpioGpio22": 25,
+      "GpioGpio23": 26,
+      "GpioGpio24": 27,
+      "GpioGpio25": 28,
+      "GpioGpio26": 29,
+      "GpioGpio27": 30,
+      "GpioGpio28": 31,
+      "GpioGpio29": 32,
+      "GpioGpio30": 33,
+      "GpioGpio31": 34,
+      "Uart0Tx": 35,
+      "Uart1Tx": 36
+    },
+    "direct_pads": {
+      "SpiHost0Sd0": 0,
+      "SpiHost0Sd1": 1,
+      "SpiHost0Sd2": 2,
+      "SpiHost0Sd3": 3,
+      "SpiDeviceSd0": 4,
+      "SpiDeviceSd1": 5,
+      "SpiDeviceSd2": 6,
+      "SpiDeviceSd3": 7,
+      "UsbdevUsbDp": 8,
+      "UsbdevUsbDn": 9,
+      "SpiDeviceSck": 10,
+      "SpiDeviceCsb": 11,
+      "SpiHost0Sck": 12,
+      "SpiHost0Csb": 13
+    },
+    "muxed_pads": {
+      "Ioa0": 0,
+      "Ioa1": 1,
+      "Ioa2": 2,
+      "Ioa3": 3,
+      "Ioa4": 4,
+      "Ioa5": 5,
+      "Ioa6": 6,
+      "Ioa7": 7,
+      "Ioa8": 8,
+      "Iob0": 9,
+      "Iob1": 10,
+      "Iob2": 11,
+      "Iob3": 12,
+      "Iob4": 13,
+      "Iob5": 14,
+      "Iob6": 15,
+      "Iob7": 16,
+      "Iob8": 17,
+      "Iob9": 18,
+      "Iob10": 19,
+      "Iob11": 20,
+      "Iob12": 21,
+      "Ioc0": 22,
+      "Ioc1": 23,
+      "Ioc2": 24,
+      "Ioc3": 25,
+      "Ioc4": 26,
+      "Ioc5": 27,
+      "Ioc6": 28,
+      "Ioc7": 29,
+      "Ioc8": 30,
+      "Ioc9": 31,
+      "Ioc10": 32,
+      "Ioc11": 33,
+      "Ioc12": 34,
+      "Ior0": 35,
+      "Ior1": 36,
+      "Ior2": 37,
+      "Ior3": 38,
+      "Ior4": 39,
+      "Ior5": 40,
+      "Ior6": 41,
+      "Ior7": 42,
+      "Ior10": 43,
+      "Ior11": 44,
+      "Ior12": 45,
+      "Ior13": 46
+    }
+  },
+  "pwrmgr": {
+    "wakeups": {
+      "PinmuxAonPinWkupReq": 0,
+      "PinmuxAonUsbWkupReq": 1,
+      "AonTimerAonWkupReq": 2
+    },
+    "reset_requests": {
+      "AonTimerAonAonTimerRstReq": 0
+    }
+  },
+  "rstmgr": {
+    "sw_resets": {
+      "SpiDevice": 0,
+      "SpiHost0": 1,
+      "Usb": 2
+    },
+    "reset_info": {
+      "Por": 0,
+      "LowPowerExit": 1,
+      "SwReset": 2,
+      "AonTimerAonAonTimerRstReq": 3,
+      "MainPwr": 4,
+      "Esc": 5,
+      "Ndm": 6
+    }
+  },
+  "clkmgr": {
+    "gateable_clocks": {
+      "IoDiv4Peri": 0,
+      "IoDiv2Peri": 1,
+      "IoPeri": 2,
+      "UsbPeri": 3
+    },
+    "hintable_clocks": {
+      "MainAes": 0
+    },
+    "ext_clk_bypass": true
+  }
+}
