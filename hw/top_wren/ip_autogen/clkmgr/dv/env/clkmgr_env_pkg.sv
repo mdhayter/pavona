@@ -31,7 +31,7 @@ package clkmgr_env_pkg;
 
   // parameters
   parameter int NUM_PERI = 4;
-  parameter int NUM_TRANS = 1;
+  parameter int NUM_TRANS = 0;
 
   typedef logic [NUM_PERI-1:0] peri_enables_t;
   typedef logic [NUM_TRANS-1:0] hintables_t;
@@ -70,10 +70,8 @@ package clkmgr_env_pkg;
   } clk_enables_t;
 
   typedef enum int {
-    TransAes
   } trans_e;
   typedef struct packed {
-    logic aes;
   } clk_hints_t;
 
   typedef struct {
@@ -85,6 +83,7 @@ package clkmgr_env_pkg;
   // These are ordered per the bits in the recov_err_code register.
   typedef enum int {
     ClkMesrIo,
+    ClkMesrIoDiv2,
     ClkMesrIoDiv4,
     ClkMesrMain,
     ClkMesrUsb,
@@ -113,6 +112,7 @@ package clkmgr_env_pkg;
   // These must be after the declaration of clk_mesr_e for sizing.
   parameter int ClkInHz[ClkMesrSize] = {
     IoClkHz,
+    IoDiv2ClkHz,
     IoDiv4ClkHz,
     MainClkHz,
     UsbClkHz
@@ -121,6 +121,7 @@ package clkmgr_env_pkg;
   // Take into account if multiple aon clock cycles are needed for a measurement.
   parameter int ExpectedCounts[ClkMesrSize] = {
     ClkInHz[ClkMesrIo] / AonClkHz - 1,
+    ClkInHz[ClkMesrIoDiv2] / AonClkHz - 1,
     ClkInHz[ClkMesrIoDiv4] / AonClkHz - 1,
     ClkInHz[ClkMesrMain] / AonClkHz - 1,
     ClkInHz[ClkMesrUsb] / AonClkHz - 1

@@ -42,6 +42,7 @@
     rv_core_ibex.corei:
     [
       rom_ctrl.rom
+      rv_dm.mem
       sram_ctrl_main.ram
       flash_ctrl.mem
     ]
@@ -49,14 +50,29 @@
     [
       rom_ctrl.rom
       rom_ctrl.regs
+      rv_dm.mem
+      rv_dm.regs
       sram_ctrl_main.ram
       flash_ctrl.mem
       peri
       flash_ctrl.core
       flash_macro_wrapper
-      aes
       rv_plic
+      sram_ctrl_main.regs
+      rv_core_ibex.cfg
+    ]
+    rv_dm.sba:
+    [
+      rom_ctrl.rom
+      rom_ctrl.regs
+      rv_dm.mem
+      rv_dm.regs
       sram_ctrl_main.ram
+      flash_ctrl.mem
+      peri
+      flash_ctrl.core
+      flash_macro_wrapper
+      rv_plic
       sram_ctrl_main.regs
       rv_core_ibex.cfg
     ]
@@ -88,6 +104,19 @@
       inst_type: ""
       req_fifo_pass: true
       rsp_fifo_pass: true
+    }
+    {
+      name: rv_dm.sba
+      type: host
+      addr_space: hart
+      clock: clk_main_i
+      reset: rst_main_ni
+      req_fifo_pass: false
+      rsp_fifo_pass: false
+      xbar: false
+      stub: false
+      inst_type: ""
+      pipeline: true
     }
     {
       name: rom_ctrl.rom
@@ -130,6 +159,50 @@
       xbar: false
       stub: false
       req_fifo_pass: true
+    }
+    {
+      name: rv_dm.regs
+      type: device
+      clock: clk_main_i
+      reset: rst_main_ni
+      req_fifo_pass: false
+      rsp_fifo_pass: false
+      inst_type: rv_dm
+      addr_range:
+      [
+        {
+          base_addrs:
+          {
+            hart: 0x41200000
+          }
+          size_byte: 0x10
+        }
+      ]
+      xbar: false
+      stub: false
+      pipeline: true
+    }
+    {
+      name: rv_dm.mem
+      type: device
+      clock: clk_main_i
+      reset: rst_main_ni
+      req_fifo_pass: false
+      rsp_fifo_pass: false
+      inst_type: rv_dm
+      addr_range:
+      [
+        {
+          base_addrs:
+          {
+            hart: 0x10000
+          }
+          size_byte: 0x1000
+        }
+      ]
+      xbar: false
+      stub: false
+      pipeline: true
     }
     {
       name: peri
@@ -217,27 +290,6 @@
       xbar: false
       stub: false
       pipeline: true
-    }
-    {
-      name: aes
-      type: device
-      clock: clk_main_i
-      reset: rst_main_ni
-      pipeline: false
-      inst_type: aes
-      addr_range:
-      [
-        {
-          base_addrs:
-          {
-            hart: 0x41100000
-          }
-          size_byte: 0x100
-        }
-      ]
-      xbar: false
-      stub: false
-      req_fifo_pass: true
     }
     {
       name: rv_plic
@@ -359,6 +411,19 @@
       index: -1
     }
     {
+      name: tl_rv_dm__sba
+      struct: tl
+      package: tlul_pkg
+      type: req_rsp
+      act: rsp
+      inst_name: main
+      width: 1
+      default: ""
+      end_idx: -1
+      top_signame: main_tl_rv_dm__sba
+      index: -1
+    }
+    {
       name: tl_rom_ctrl__rom
       struct: tl
       package: tlul_pkg
@@ -380,6 +445,30 @@
       width: 1
       default: ""
       top_signame: rom_ctrl_regs_tl
+      index: -1
+    }
+    {
+      name: tl_rv_dm__regs
+      struct: tl
+      package: tlul_pkg
+      type: req_rsp
+      act: req
+      inst_name: main
+      width: 1
+      default: ""
+      top_signame: rv_dm_regs_tl_d
+      index: -1
+    }
+    {
+      name: tl_rv_dm__mem
+      struct: tl
+      package: tlul_pkg
+      type: req_rsp
+      act: req
+      inst_name: main
+      width: 1
+      default: ""
+      top_signame: rv_dm_mem_tl_d
       index: -1
     }
     {
@@ -429,18 +518,6 @@
       width: 1
       default: ""
       top_signame: flash_ctrl_mem_tl
-      index: -1
-    }
-    {
-      name: tl_aes
-      struct: tl
-      package: tlul_pkg
-      type: req_rsp
-      act: req
-      inst_name: main
-      width: 1
-      default: ""
-      top_signame: aes_tl
       index: -1
     }
     {

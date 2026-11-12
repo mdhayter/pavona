@@ -64,7 +64,6 @@
 
   // idle hints
   // SEC_CM: IDLE.INTERSIG.MUBI
-  input prim_mubi_pkg::mubi4_t [0:0] idle_i,
 
   // life cycle state output
   // SEC_CM: LC_CTRL.INTERSIG.MUBI
@@ -234,6 +233,8 @@
     .rst_shadowed_ni,
     .clk_io_i(clk_io),
     .rst_io_ni,
+    .clk_io_div2_i(clk_io_div2),
+    .rst_io_div2_ni,
     .clk_io_div4_i(clk_io_div4),
     .rst_io_div4_ni,
     .clk_main_i(clk_main),
@@ -266,6 +267,8 @@
   assign recov_alert =
     hw2reg.recov_err_code.io_measure_err.de |
     hw2reg.recov_err_code.io_timeout_err.de |
+    hw2reg.recov_err_code.io_div2_measure_err.de |
+    hw2reg.recov_err_code.io_div2_timeout_err.de |
     hw2reg.recov_err_code.io_div4_measure_err.de |
     hw2reg.recov_err_code.io_div4_timeout_err.de |
     hw2reg.recov_err_code.main_measure_err.de |
@@ -525,6 +528,7 @@
   typedef enum logic [2:0] {
     BaseIdx,
     ClkIoIdx,
+    ClkIoDiv2Idx,
     ClkIoDiv4Idx,
     ClkMainIdx,
     ClkUsbIdx,
@@ -579,6 +583,33 @@
 
   assign hw2reg.recov_err_code.io_measure_err.d = 1'b1;
   assign hw2reg.recov_err_code.io_timeout_err.d = 1'b1;
+
+
+  clkmgr_meas_chk #(
+    .Cnt(512),
+    .RefCnt(1)
+  ) u_io_div2_meas (
+    .clk_i,
+    .rst_ni,
+    .clk_src_i(clk_io_div2),
+    .rst_src_ni(rst_io_div2_ni),
+    .clk_ref_i(clk_aon),
+    .rst_ref_ni(rst_aon_ni),
+    // signals on source domain
+    .src_en_i(clk_io_div2_en & mubi4_test_true_loose(mubi4_t'(reg2hw.io_div2_meas_ctrl_en))),
+    .src_max_cnt_i(reg2hw.io_div2_meas_ctrl_shadowed.hi.q),
+    .src_min_cnt_i(reg2hw.io_div2_meas_ctrl_shadowed.lo.q),
+    .src_cfg_meas_en_i(mubi4_t'(reg2hw.io_div2_meas_ctrl_en.q)),
+    .src_cfg_meas_en_valid_o(hw2reg.io_div2_meas_ctrl_en.de),
+    .src_cfg_meas_en_o(hw2reg.io_div2_meas_ctrl_en.d),
+    // signals on local clock domain
+    .calib_rdy_i(calib_rdy[ClkIoDiv2Idx]),
+    .meas_err_o(hw2reg.recov_err_code.io_div2_measure_err.de),
+    .timeout_err_o(hw2reg.recov_err_code.io_div2_timeout_err.de)
+  );
+
+  assign hw2reg.recov_err_code.io_div2_measure_err.d = 1'b1;
+  assign hw2reg.recov_err_code.io_div2_timeout_err.d = 1'b1;
 
 
   clkmgr_meas_chk #(
@@ -697,6 +728,17 @@
     .rst_ni(rst_io_ni),
     .mubi_i(((clk_io_en) ? MuBi4False : MuBi4True)),
     .mubi_o(cg_en_o.io_infra)
+  );
+  assign clocks_o.clk_io_div2_infra = clk_io_div2_root;
+
+  // clock gated indication for alert handler
+  prim_mubi4_sender #(
+    .ResetValue(MuBi4True)
+  ) u_prim_mubi4_sender_clk_io_div2_infra (
+    .clk_i(clk_io_div2),
+    .rst_ni(rst_io_div2_ni),
+    .mubi_i(((clk_io_div2_en) ? MuBi4False : MuBi4True)),
+    .mubi_o(cg_en_o.io_div2_infra)
   );
   assign clocks_o.clk_usb_infra = clk_usb_root;
 
@@ -927,34 +969,8 @@
   // clock target
   ////////////////////////////////////////////////////
 
-  logic [0:0] idle_cnt_err;
-
-  clkmgr_trans #(
-    .FpgaBufGlobal(1'b0) // This clock is used primarily locally.
-  ) u_clk_main_aes_trans (
-    .clk_i(clk_main),
-    .clk_gated_i(clk_main_root),
-    .rst_ni(rst_main_ni),
-    .en_i(clk_main_en),
-    .idle_i(idle_i[HintMainAes]),
-    .sw_hint_i(reg2hw.clk_hints.q),
-    .scanmode_i,
-    .alert_cg_en_o(cg_en_o.main_aes),
-    .clk_o(clocks_o.clk_main_aes),
-    .clk_reg_i(clk_i),
-    .rst_reg_ni(rst_ni),
-    .reg_en_o(hw2reg.clk_hints_status.d),
-    .reg_cnt_err_o(idle_cnt_err[HintMainAes])
-  );
-  `ASSERT_PRIM_COUNT_ERROR_TRIGGER_ALERT(
-    ClkMainAesCountCheck_A,
-    u_clk_main_aes_trans.u_idle_cnt,
-    alert_tx_o[1])
   assign hw2reg.fatal_err_code.idle_cnt.d = 1'b1;
-  assign hw2reg.fatal_err_code.idle_cnt.de = |idle_cnt_err;
-
-  // state readback
-  assign hw2reg.clk_hints_status.de = 1'b1;
+  assign hw2reg.fatal_err_code.idle_cnt.de = 1'b0;
 
   // SEC_CM: JITTER.CONFIG.MUBI
   assign jitter_en_o = mubi4_t'(reg2hw.jitter_enable.q);

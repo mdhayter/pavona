@@ -159,6 +159,11 @@
           src_name: io
           endpoint_ip: peri
         }
+        clk_io_div2_infra:
+        {
+          src_name: io_div2
+          endpoint_ip: peri
+        }
         clk_usb_infra:
         {
           src_name: usb
@@ -203,19 +208,8 @@
           endpoint_ip: usbdev
         }
       }
-      hint_clks:
-      {
-        clk_main_aes:
-        {
-          src_name: main
-          endpoint_ip: aes
-        }
-      }
     }
-    hint_names:
-    {
-      clk_main_aes: HintMainAes
-    }
+    hint_names: {}
     parent_child_clks:
     {
       main:

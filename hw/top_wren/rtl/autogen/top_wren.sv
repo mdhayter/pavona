@@ -19,12 +19,16 @@ module top_wren #(
   parameter bit GpioGpioAsHwStrapsEn = 1'b1,
   // parameters for spi_device
   parameter spi_device_pkg::sram_type_e SpiDeviceSramType = spi_device_pkg::DefaultSramType,
+  // parameters for i2c0
+  parameter int I2c0InputDelayCycles = 0,
   // parameters for spi_host0
   // parameters for rv_timer
   // parameters for usbdev
   parameter bit UsbdevStub = 0,
   parameter int UsbdevRcvrWakeTimeUs = 1,
   // parameters for pwrmgr_aon
+  // parameters for spi_host1
+  // parameters for pwm_aon
   // parameters for rstmgr_aon
   parameter bit SecRstmgrAonCheck = 0,
   parameter int SecRstmgrAonMaxSyncDelay = 2,
@@ -39,12 +43,6 @@ module top_wren #(
   parameter int FlashCtrlRdFifoDepth = 16,
   // parameters for flash_macro_wrapper
   // parameters for rv_plic
-  // parameters for aes
-  parameter bit SecAesMasking = 1,
-  parameter aes_pkg::sbox_impl_e SecAesSBoxImpl = aes_pkg::SBoxImplDom,
-  parameter int unsigned SecAesStartTriggerDelay = 0,
-  parameter bit SecAesAllowForcingMasks = 1'b0,
-  parameter bit SecAesSkipPRNGReseeding = 1'b0,
   // parameters for sram_ctrl_main
   parameter int SramCtrlMainInstSize = 4096,
   parameter int SramCtrlMainNumRamInst = 1,
@@ -54,34 +52,41 @@ module top_wren #(
   // parameters for rom_ctrl
   parameter RomCtrlBootRomInitFile = "",
   parameter bit SecRomCtrlDisableScrambling = 1'b1,
+  // parameters for rv_dm
+  parameter logic [31:0] RvDmIdcodeValue = jtag_id_pkg::RV_DM_JTAG_IDCODE,
+  parameter bit RvDmUseDmiInterface = 0,
+  parameter bit SecRvDmVolatileRawUnlockEn = 1'b0,
+  parameter logic [tlul_pkg::RsvdWidth-1:0] RvDmTlulHostUserRsvdBits = '0,
   // parameters for rv_core_ibex
-  parameter bit RvCoreIbexPMPEnable = 0,
+  parameter bit RvCoreIbexPMPEnable = 1,
   parameter int unsigned RvCoreIbexPMPGranularity = 0,
   parameter int unsigned RvCoreIbexPMPNumRegions = 16,
-  parameter int unsigned RvCoreIbexMHPMCounterNum = 0,
+  parameter int unsigned RvCoreIbexMHPMCounterNum = 2,
   parameter int unsigned RvCoreIbexMHPMCounterWidth = 32,
-  parameter ibex_pkg::pmp_cfg_t RvCoreIbexPMPRstCfg[16] = ibex_pkg::PmpCfgRst,
-  parameter logic [33:0] RvCoreIbexPMPRstAddr[16] = ibex_pkg::PmpAddrRst,
-  parameter ibex_pkg::pmp_mseccfg_t RvCoreIbexPMPRstMsecCfg = ibex_pkg::PmpMseccfgRst,
+  parameter ibex_pkg::pmp_cfg_t RvCoreIbexPMPRstCfg[16] = ibex_pmp_reset_pkg::PmpCfgRst,
+  parameter logic [33:0] RvCoreIbexPMPRstAddr[16] = ibex_pmp_reset_pkg::PmpAddrRst,
+  parameter ibex_pkg::pmp_mseccfg_t RvCoreIbexPMPRstMsecCfg = ibex_pmp_reset_pkg::PmpMseccfgRst,
   parameter bit RvCoreIbexRV32E = 0,
   parameter ibex_pkg::rv32m_e RvCoreIbexRV32M = ibex_pkg::RV32MSingleCycle,
-  parameter ibex_pkg::rv32b_e RvCoreIbexRV32B = ibex_pkg::RV32BNone,
+  parameter ibex_pkg::rv32b_e RvCoreIbexRV32B = ibex_pkg::RV32BOTEarlGrey,
   parameter ibex_pkg::rv32zc_e RvCoreIbexRV32ZC = ibex_pkg::RV32ZcaZcbZcmp,
   parameter ibex_pkg::regfile_e RvCoreIbexRegFile = ibex_pkg::RegFileFF,
   parameter bit RvCoreIbexBranchTargetALU = 1,
   parameter bit RvCoreIbexWritebackStage = 1,
-  parameter bit RvCoreIbexICache = 0,
+  parameter bit RvCoreIbexICache = 1,
   parameter bit RvCoreIbexICacheECC = 0,
   parameter bit RvCoreIbexICacheScramble = 0,
   parameter int unsigned RvCoreIbexICacheNWays = 2,
   parameter bit RvCoreIbexBranchPredictor = 0,
   parameter bit RvCoreIbexDbgTriggerEn = 1,
-  parameter int RvCoreIbexDbgHwBreakNum = 1,
+  parameter int RvCoreIbexDbgHwBreakNum = 4,
   parameter bit RvCoreIbexSecureIbex = 0,
-  parameter int unsigned RvCoreIbexDmBaseAddr = 437321728,
-  parameter int unsigned RvCoreIbexDmAddrMask = 4095,
-  parameter int unsigned RvCoreIbexDmHaltAddr = 0,
-  parameter int unsigned RvCoreIbexDmExceptionAddr = 0,
+  parameter int unsigned RvCoreIbexDmBaseAddr = tl_main_pkg::ADDR_SPACE_RV_DM__MEM,
+  parameter int unsigned RvCoreIbexDmAddrMask = tl_main_pkg::ADDR_MASK_RV_DM__MEM,
+  parameter int unsigned RvCoreIbexDmHaltAddr =
+      tl_main_pkg::ADDR_SPACE_RV_DM__MEM + dm::HaltAddress[31:0],
+  parameter int unsigned RvCoreIbexDmExceptionAddr =
+      tl_main_pkg::ADDR_SPACE_RV_DM__MEM + dm::ExceptionAddress[31:0],
   parameter bit RvCoreIbexPipeLine = 0,
   parameter logic [tlul_pkg::RsvdWidth-1:0] RvCoreIbexTlulHostUserRsvdBits = '0,
   parameter logic [31:0] RvCoreIbexCsrMvendorId = '0,
@@ -172,6 +177,8 @@ module top_wren #(
   // Local Parameters
   // local parameters for spi_host0
   localparam int SpiHost0NumCS = 1;
+  // local parameters for spi_host1
+  localparam int SpiHost1NumCS = 1;
   // local parameters for sram_ctrl_main
   localparam int SramCtrlMainOutstanding = 2;
   // local parameters for rom_ctrl
@@ -180,9 +187,9 @@ module top_wren #(
   localparam bit RvCoreIbexInstructionPipeline = 1'b0;
 
   // Signals
-  logic [34:0] mio_p2d;
-  logic [33:0] mio_d2p;
-  logic [33:0] mio_en_d2p;
+  logic [40:0] mio_p2d;
+  logic [47:0] mio_d2p;
+  logic [47:0] mio_en_d2p;
   logic [13:0] dio_p2d;
   logic [13:0] dio_d2p;
   logic [13:0] dio_en_d2p;
@@ -205,6 +212,13 @@ module top_wren #(
   logic [3:0]  cio_spi_device_sd_p2d;
   logic [3:0]  cio_spi_device_sd_d2p;
   logic [3:0]  cio_spi_device_sd_en_d2p;
+  // i2c0
+  logic        cio_i2c0_sda_p2d;
+  logic        cio_i2c0_scl_p2d;
+  logic        cio_i2c0_sda_d2p;
+  logic        cio_i2c0_sda_en_d2p;
+  logic        cio_i2c0_scl_d2p;
+  logic        cio_i2c0_scl_en_d2p;
   // spi_host0
   logic [3:0]  cio_spi_host0_sd_p2d;
   logic        cio_spi_host0_sck_d2p;
@@ -223,6 +237,17 @@ module top_wren #(
   logic        cio_usbdev_usb_dn_d2p;
   logic        cio_usbdev_usb_dn_en_d2p;
   // pwrmgr_aon
+  // spi_host1
+  logic [3:0]  cio_spi_host1_sd_p2d;
+  logic        cio_spi_host1_sck_d2p;
+  logic        cio_spi_host1_sck_en_d2p;
+  logic        cio_spi_host1_csb_d2p;
+  logic        cio_spi_host1_csb_en_d2p;
+  logic [3:0]  cio_spi_host1_sd_d2p;
+  logic [3:0]  cio_spi_host1_sd_en_d2p;
+  // pwm_aon
+  logic [5:0]  cio_pwm_aon_pwm_d2p;
+  logic [5:0]  cio_pwm_aon_pwm_en_d2p;
   // rstmgr_aon
   // clkmgr_aon
   // pinmux_aon
@@ -235,13 +260,13 @@ module top_wren #(
   logic        cio_flash_macro_wrapper_tdo_d2p;
   logic        cio_flash_macro_wrapper_tdo_en_d2p;
   // rv_plic
-  // aes
   // sram_ctrl_main
   // rom_ctrl
+  // rv_dm
   // rv_core_ibex
 
 
-  logic [87:0]  intr_vector;
+  logic [104:0]  intr_vector;
   // Interrupt source list
   logic intr_uart0_tx_watermark;
   logic intr_uart0_rx_watermark;
@@ -270,6 +295,21 @@ module top_wren #(
   logic intr_spi_device_tpm_header_not_empty;
   logic intr_spi_device_tpm_rdfifo_cmd_end;
   logic intr_spi_device_tpm_rdfifo_drop;
+  logic intr_i2c0_fmt_threshold;
+  logic intr_i2c0_rx_threshold;
+  logic intr_i2c0_acq_threshold;
+  logic intr_i2c0_rx_overflow;
+  logic intr_i2c0_controller_halt;
+  logic intr_i2c0_scl_interference;
+  logic intr_i2c0_sda_interference;
+  logic intr_i2c0_stretch_timeout;
+  logic intr_i2c0_sda_unstable;
+  logic intr_i2c0_cmd_complete;
+  logic intr_i2c0_tx_stretch;
+  logic intr_i2c0_tx_threshold;
+  logic intr_i2c0_acq_stretch;
+  logic intr_i2c0_unexp_stop;
+  logic intr_i2c0_host_timeout;
   logic intr_spi_host0_error;
   logic intr_spi_host0_spi_event;
   logic intr_rv_timer_timer_expired_hart0_timer0;
@@ -292,6 +332,8 @@ module top_wren #(
   logic intr_usbdev_link_out_err;
   logic intr_usbdev_av_setup_empty;
   logic intr_pwrmgr_aon_wakeup;
+  logic intr_spi_host1_error;
+  logic intr_spi_host1_spi_event;
   logic intr_aon_timer_aon_wkup_timer_expired;
   logic intr_aon_timer_aon_wdog_timer_bark;
   logic intr_flash_ctrl_prog_empty;
@@ -320,27 +362,37 @@ module top_wren #(
   logic       usbdev_usb_aon_bus_reset;
   logic       usbdev_usb_aon_sense_lost;
   logic       pinmux_aon_usbdev_wake_detect_active;
-  prim_mubi_pkg::mubi4_t       clkmgr_aon_idle;
   flash_phy_macro_pkg::flash_phy_macro_req_t       flash_ctrl_flash_macro_req;
   flash_phy_macro_pkg::flash_phy_macro_rsp_t       flash_ctrl_flash_macro_rsp;
   flash_phy_macro_pkg::flash_macro_status_t       flash_ctrl_flash_macro_status;
   logic       rv_plic_msip;
   logic       rv_plic_irq;
+  jtag_pkg::jtag_req_t       pinmux_aon_rv_jtag_req;
+  jtag_pkg::jtag_rsp_t       pinmux_aon_rv_jtag_rsp;
+  lc_ctrl_pkg::lc_tx_t       pinmux_aon_pinmux_hw_debug_en;
+  logic       rv_dm_debug_req;
   rv_core_ibex_pkg::cpu_crash_dump_t       rv_core_ibex_crash_dump;
   rv_core_ibex_pkg::cpu_pwrmgr_t       rv_core_ibex_pwrmgr;
   spi_device_pkg::passthrough_req_t       spi_device_passthrough_req;
   spi_device_pkg::passthrough_rsp_t       spi_device_passthrough_rsp;
   prim_mubi_pkg::mubi4_t       rstmgr_aon_sw_rst_req;
+  logic       rv_dm_ndmreset_req;
   logic [2:0] pwrmgr_aon_wakeups;
   logic       pwrmgr_aon_rstreqs;
   tlul_pkg::tl_h2d_t       main_tl_rv_core_ibex__corei_req;
   tlul_pkg::tl_d2h_t       main_tl_rv_core_ibex__corei_rsp;
   tlul_pkg::tl_h2d_t       main_tl_rv_core_ibex__cored_req;
   tlul_pkg::tl_d2h_t       main_tl_rv_core_ibex__cored_rsp;
+  tlul_pkg::tl_h2d_t       main_tl_rv_dm__sba_req;
+  tlul_pkg::tl_d2h_t       main_tl_rv_dm__sba_rsp;
   tlul_pkg::tl_h2d_t       rom_ctrl_rom_tl_req;
   tlul_pkg::tl_d2h_t       rom_ctrl_rom_tl_rsp;
   tlul_pkg::tl_h2d_t       rom_ctrl_regs_tl_req;
   tlul_pkg::tl_d2h_t       rom_ctrl_regs_tl_rsp;
+  tlul_pkg::tl_h2d_t       rv_dm_regs_tl_d_req;
+  tlul_pkg::tl_d2h_t       rv_dm_regs_tl_d_rsp;
+  tlul_pkg::tl_h2d_t       rv_dm_mem_tl_d_req;
+  tlul_pkg::tl_d2h_t       rv_dm_mem_tl_d_rsp;
   tlul_pkg::tl_h2d_t       main_tl_peri_req;
   tlul_pkg::tl_d2h_t       main_tl_peri_rsp;
   tlul_pkg::tl_h2d_t       flash_ctrl_core_tl_req;
@@ -349,8 +401,6 @@ module top_wren #(
   tlul_pkg::tl_d2h_t       flash_macro_wrapper_tl_rsp;
   tlul_pkg::tl_h2d_t       flash_ctrl_mem_tl_req;
   tlul_pkg::tl_d2h_t       flash_ctrl_mem_tl_rsp;
-  tlul_pkg::tl_h2d_t       aes_tl_req;
-  tlul_pkg::tl_d2h_t       aes_tl_rsp;
   tlul_pkg::tl_h2d_t       rv_plic_tl_req;
   tlul_pkg::tl_d2h_t       rv_plic_tl_rsp;
   tlul_pkg::tl_h2d_t       rv_core_ibex_cfg_tl_d_req;
@@ -367,6 +417,12 @@ module top_wren #(
   tlul_pkg::tl_d2h_t       gpio_tl_rsp;
   tlul_pkg::tl_h2d_t       spi_device_tl_req;
   tlul_pkg::tl_d2h_t       spi_device_tl_rsp;
+  tlul_pkg::tl_h2d_t       i2c0_tl_req;
+  tlul_pkg::tl_d2h_t       i2c0_tl_rsp;
+  tlul_pkg::tl_h2d_t       spi_host1_tl_req;
+  tlul_pkg::tl_d2h_t       spi_host1_tl_rsp;
+  tlul_pkg::tl_h2d_t       pwm_aon_tl_req;
+  tlul_pkg::tl_d2h_t       pwm_aon_tl_rsp;
   tlul_pkg::tl_h2d_t       spi_host0_tl_req;
   tlul_pkg::tl_d2h_t       spi_host0_tl_rsp;
   tlul_pkg::tl_h2d_t       rv_timer_tl_req;
@@ -381,6 +437,8 @@ module top_wren #(
   tlul_pkg::tl_d2h_t       clkmgr_aon_tl_rsp;
   tlul_pkg::tl_h2d_t       pinmux_aon_tl_req;
   tlul_pkg::tl_d2h_t       pinmux_aon_tl_rsp;
+  tlul_pkg::tl_h2d_t       aon_timer_aon_tl_req;
+  tlul_pkg::tl_d2h_t       aon_timer_aon_tl_rsp;
   clkmgr_pkg::clkmgr_out_t       clkmgr_aon_clocks;
   clkmgr_pkg::clkmgr_cg_en_t       clkmgr_aon_cg_en;
   rstmgr_pkg::rstmgr_out_t       rstmgr_aon_resets;
@@ -391,6 +449,9 @@ module top_wren #(
   jtag_pkg::jtag_req_t       pinmux_aon_dft_jtag_req;
   jtag_pkg::jtag_rsp_t       pinmux_aon_dft_jtag_rsp;
   prim_mubi_pkg::mubi8_t       sram_ctrl_main_otp_en_sram_ifetch;
+  lc_ctrl_pkg::lc_tx_t       pinmux_aon_lc_hw_debug_en;
+  lc_ctrl_pkg::lc_tx_t       rv_dm_lc_hw_debug_en;
+  prim_mubi_pkg::mubi8_t       rv_dm_otp_dis_rv_dm_late_debug;
 
   // define mixed connection to port
 
@@ -400,6 +461,12 @@ module top_wren #(
 
 
 
+
+  // There is no life cycle controller or OTP to enable debug, so it is always
+  // enabled, without waiting for software to set the late debug enable.
+  assign pinmux_aon_lc_hw_debug_en = lc_ctrl_pkg::On;
+  assign rv_dm_lc_hw_debug_en = lc_ctrl_pkg::On;
+  assign rv_dm_otp_dis_rv_dm_late_debug = prim_mubi_pkg::MuBi8True;
 
   // See #7978 This below is a hack.
   // This is because ast is a comportable-like module that sits outside
@@ -449,36 +516,42 @@ module top_wren #(
   // peri_spi_device_0
   assign outgoing_lpg_cg_en_wren_o[2] = clkmgr_aon_cg_en.io_div4_peri;
   assign outgoing_lpg_rst_en_wren_o[2] = rstmgr_aon_rst_en.spi_device[rstmgr_pkg::Domain0Sel];
+  // peri_i2c0_0
+  assign outgoing_lpg_cg_en_wren_o[3] = clkmgr_aon_cg_en.io_div4_peri;
+  assign outgoing_lpg_rst_en_wren_o[3] = rstmgr_aon_rst_en.i2c0[rstmgr_pkg::Domain0Sel];
   // peri_spi_host0_0
-  assign outgoing_lpg_cg_en_wren_o[3] = clkmgr_aon_cg_en.io_peri;
-  assign outgoing_lpg_rst_en_wren_o[3] = rstmgr_aon_rst_en.spi_host0[rstmgr_pkg::Domain0Sel];
+  assign outgoing_lpg_cg_en_wren_o[4] = clkmgr_aon_cg_en.io_peri;
+  assign outgoing_lpg_rst_en_wren_o[4] = rstmgr_aon_rst_en.spi_host0[rstmgr_pkg::Domain0Sel];
   // timers_sys_io_div4_0
-  assign outgoing_lpg_cg_en_wren_o[4] = clkmgr_aon_cg_en.io_div4_timers;
-  assign outgoing_lpg_rst_en_wren_o[4] = rstmgr_aon_rst_en.sys_io_div4[rstmgr_pkg::Domain0Sel];
+  assign outgoing_lpg_cg_en_wren_o[5] = clkmgr_aon_cg_en.io_div4_timers;
+  assign outgoing_lpg_rst_en_wren_o[5] = rstmgr_aon_rst_en.sys_io_div4[rstmgr_pkg::Domain0Sel];
   // peri_usb_0
-  assign outgoing_lpg_cg_en_wren_o[5] = clkmgr_aon_cg_en.usb_peri;
-  assign outgoing_lpg_rst_en_wren_o[5] = rstmgr_aon_rst_en.usb[rstmgr_pkg::Domain0Sel];
+  assign outgoing_lpg_cg_en_wren_o[6] = clkmgr_aon_cg_en.usb_peri;
+  assign outgoing_lpg_rst_en_wren_o[6] = rstmgr_aon_rst_en.usb[rstmgr_pkg::Domain0Sel];
   // powerup_por_io_div4_Aon
-  assign outgoing_lpg_cg_en_wren_o[6] = clkmgr_aon_cg_en.io_div4_powerup;
-  assign outgoing_lpg_rst_en_wren_o[6] = rstmgr_aon_rst_en.por_io_div4[rstmgr_pkg::DomainAonSel];
-  // powerup_lc_io_div4_Aon
   assign outgoing_lpg_cg_en_wren_o[7] = clkmgr_aon_cg_en.io_div4_powerup;
-  assign outgoing_lpg_rst_en_wren_o[7] = rstmgr_aon_rst_en.lc_io_div4[rstmgr_pkg::DomainAonSel];
+  assign outgoing_lpg_rst_en_wren_o[7] = rstmgr_aon_rst_en.por_io_div4[rstmgr_pkg::DomainAonSel];
+  // peri_spi_host1_0
+  assign outgoing_lpg_cg_en_wren_o[8] = clkmgr_aon_cg_en.io_div2_peri;
+  assign outgoing_lpg_rst_en_wren_o[8] = rstmgr_aon_rst_en.spi_host1[rstmgr_pkg::Domain0Sel];
+  // peri_lc_io_div4_Aon
+  assign outgoing_lpg_cg_en_wren_o[9] = clkmgr_aon_cg_en.io_div4_peri;
+  assign outgoing_lpg_rst_en_wren_o[9] = rstmgr_aon_rst_en.lc_io_div4[rstmgr_pkg::DomainAonSel];
+  // powerup_lc_io_div4_Aon
+  assign outgoing_lpg_cg_en_wren_o[10] = clkmgr_aon_cg_en.io_div4_powerup;
+  assign outgoing_lpg_rst_en_wren_o[10] = rstmgr_aon_rst_en.lc_io_div4[rstmgr_pkg::DomainAonSel];
   // timers_sys_io_div4_Aon
-  assign outgoing_lpg_cg_en_wren_o[8] = clkmgr_aon_cg_en.io_div4_timers;
-  assign outgoing_lpg_rst_en_wren_o[8] = rstmgr_aon_rst_en.sys_io_div4[rstmgr_pkg::DomainAonSel];
+  assign outgoing_lpg_cg_en_wren_o[11] = clkmgr_aon_cg_en.io_div4_timers;
+  assign outgoing_lpg_rst_en_wren_o[11] = rstmgr_aon_rst_en.sys_io_div4[rstmgr_pkg::DomainAonSel];
   // infra_lc_0
-  assign outgoing_lpg_cg_en_wren_o[9] = clkmgr_aon_cg_en.main_infra;
-  assign outgoing_lpg_rst_en_wren_o[9] = rstmgr_aon_rst_en.lc[rstmgr_pkg::Domain0Sel];
-  // secure_sys_0
-  assign outgoing_lpg_cg_en_wren_o[10] = clkmgr_aon_cg_en.main_secure;
-  assign outgoing_lpg_rst_en_wren_o[10] = rstmgr_aon_rst_en.sys[rstmgr_pkg::Domain0Sel];
-  // aes_trans_sys_0
-  assign outgoing_lpg_cg_en_wren_o[11] = clkmgr_aon_cg_en.main_aes;
-  assign outgoing_lpg_rst_en_wren_o[11] = rstmgr_aon_rst_en.sys[rstmgr_pkg::Domain0Sel];
-  // infra_sys_0
   assign outgoing_lpg_cg_en_wren_o[12] = clkmgr_aon_cg_en.main_infra;
-  assign outgoing_lpg_rst_en_wren_o[12] = rstmgr_aon_rst_en.sys[rstmgr_pkg::Domain0Sel];
+  assign outgoing_lpg_rst_en_wren_o[12] = rstmgr_aon_rst_en.lc[rstmgr_pkg::Domain0Sel];
+  // secure_sys_0
+  assign outgoing_lpg_cg_en_wren_o[13] = clkmgr_aon_cg_en.main_secure;
+  assign outgoing_lpg_rst_en_wren_o[13] = rstmgr_aon_rst_en.sys[rstmgr_pkg::Domain0Sel];
+  // infra_sys_0
+  assign outgoing_lpg_cg_en_wren_o[14] = clkmgr_aon_cg_en.main_infra;
+  assign outgoing_lpg_rst_en_wren_o[14] = rstmgr_aon_rst_en.sys[rstmgr_pkg::Domain0Sel];
 
 // tie-off unused connections
 //VCS coverage off
@@ -504,9 +577,9 @@ module top_wren #(
     prim_mubi_pkg::mubi4_t unused_cg_en_9;
     assign unused_cg_en_9 = clkmgr_aon_cg_en.io_infra;
     prim_mubi_pkg::mubi4_t unused_cg_en_10;
-    assign unused_cg_en_10 = clkmgr_aon_cg_en.usb_infra;
+    assign unused_cg_en_10 = clkmgr_aon_cg_en.io_div2_infra;
     prim_mubi_pkg::mubi4_t unused_cg_en_11;
-    assign unused_cg_en_11 = clkmgr_aon_cg_en.io_div2_peri;
+    assign unused_cg_en_11 = clkmgr_aon_cg_en.usb_infra;
     prim_mubi_pkg::mubi4_t unused_rst_en_0;
     assign unused_rst_en_0 = rstmgr_aon_rst_en.por_aon[rstmgr_pkg::DomainAonSel];
     prim_mubi_pkg::mubi4_t unused_rst_en_1;
@@ -540,21 +613,29 @@ module top_wren #(
     prim_mubi_pkg::mubi4_t unused_rst_en_15;
     assign unused_rst_en_15 = rstmgr_aon_rst_en.lc_shadowed[rstmgr_pkg::Domain0Sel];
     prim_mubi_pkg::mubi4_t unused_rst_en_16;
-    assign unused_rst_en_16 = rstmgr_aon_rst_en.sys_shadowed[rstmgr_pkg::DomainAonSel];
+    assign unused_rst_en_16 = rstmgr_aon_rst_en.lc_aon[rstmgr_pkg::DomainAonSel];
     prim_mubi_pkg::mubi4_t unused_rst_en_17;
-    assign unused_rst_en_17 = rstmgr_aon_rst_en.sys[rstmgr_pkg::DomainAonSel];
+    assign unused_rst_en_17 = rstmgr_aon_rst_en.lc_aon[rstmgr_pkg::Domain0Sel];
     prim_mubi_pkg::mubi4_t unused_rst_en_18;
-    assign unused_rst_en_18 = rstmgr_aon_rst_en.sys_shadowed[rstmgr_pkg::Domain0Sel];
+    assign unused_rst_en_18 = rstmgr_aon_rst_en.lc_io_div2[rstmgr_pkg::DomainAonSel];
     prim_mubi_pkg::mubi4_t unused_rst_en_19;
-    assign unused_rst_en_19 = rstmgr_aon_rst_en.sys_aon[rstmgr_pkg::DomainAonSel];
+    assign unused_rst_en_19 = rstmgr_aon_rst_en.lc_io_div2[rstmgr_pkg::Domain0Sel];
     prim_mubi_pkg::mubi4_t unused_rst_en_20;
-    assign unused_rst_en_20 = rstmgr_aon_rst_en.sys_aon[rstmgr_pkg::Domain0Sel];
+    assign unused_rst_en_20 = rstmgr_aon_rst_en.sys[rstmgr_pkg::DomainAonSel];
     prim_mubi_pkg::mubi4_t unused_rst_en_21;
-    assign unused_rst_en_21 = rstmgr_aon_rst_en.spi_device[rstmgr_pkg::DomainAonSel];
+    assign unused_rst_en_21 = rstmgr_aon_rst_en.sys_aon[rstmgr_pkg::DomainAonSel];
     prim_mubi_pkg::mubi4_t unused_rst_en_22;
-    assign unused_rst_en_22 = rstmgr_aon_rst_en.spi_host0[rstmgr_pkg::DomainAonSel];
+    assign unused_rst_en_22 = rstmgr_aon_rst_en.sys_aon[rstmgr_pkg::Domain0Sel];
     prim_mubi_pkg::mubi4_t unused_rst_en_23;
-    assign unused_rst_en_23 = rstmgr_aon_rst_en.usb[rstmgr_pkg::DomainAonSel];
+    assign unused_rst_en_23 = rstmgr_aon_rst_en.spi_device[rstmgr_pkg::DomainAonSel];
+    prim_mubi_pkg::mubi4_t unused_rst_en_24;
+    assign unused_rst_en_24 = rstmgr_aon_rst_en.spi_host0[rstmgr_pkg::DomainAonSel];
+    prim_mubi_pkg::mubi4_t unused_rst_en_25;
+    assign unused_rst_en_25 = rstmgr_aon_rst_en.usb[rstmgr_pkg::DomainAonSel];
+    prim_mubi_pkg::mubi4_t unused_rst_en_26;
+    assign unused_rst_en_26 = rstmgr_aon_rst_en.spi_host1[rstmgr_pkg::DomainAonSel];
+    prim_mubi_pkg::mubi4_t unused_rst_en_27;
+    assign unused_rst_en_27 = rstmgr_aon_rst_en.i2c0[rstmgr_pkg::DomainAonSel];
 //VCS coverage on
 // pragma coverage on
 
@@ -717,8 +798,57 @@ module top_wren #(
       .scan_clk_i (clkmgr_aon_clocks.clk_io_div2_peri),
       .rst_ni (rstmgr_aon_resets.rst_spi_device_n[rstmgr_pkg::Domain0Sel])
   );
-  spi_host #(
+  i2c #(
     .AlertAsyncOn(AsyncOnOutgoingAlertWren[4:4]),
+    .AlertSkewCycles(top_pkg::AlertSkewCycles),
+    .InputDelayCycles(I2c0InputDelayCycles)
+  ) u_i2c0 (
+
+      // Input
+      .cio_sda_i    (cio_i2c0_sda_p2d),
+      .cio_scl_i    (cio_i2c0_scl_p2d),
+
+      // Output
+      .cio_sda_o    (cio_i2c0_sda_d2p),
+      .cio_sda_en_o (cio_i2c0_sda_en_d2p),
+      .cio_scl_o    (cio_i2c0_scl_d2p),
+      .cio_scl_en_o (cio_i2c0_scl_en_d2p),
+
+      // Interrupt
+      .intr_fmt_threshold_o    (intr_i2c0_fmt_threshold),
+      .intr_rx_threshold_o     (intr_i2c0_rx_threshold),
+      .intr_acq_threshold_o    (intr_i2c0_acq_threshold),
+      .intr_rx_overflow_o      (intr_i2c0_rx_overflow),
+      .intr_controller_halt_o  (intr_i2c0_controller_halt),
+      .intr_scl_interference_o (intr_i2c0_scl_interference),
+      .intr_sda_interference_o (intr_i2c0_sda_interference),
+      .intr_stretch_timeout_o  (intr_i2c0_stretch_timeout),
+      .intr_sda_unstable_o     (intr_i2c0_sda_unstable),
+      .intr_cmd_complete_o     (intr_i2c0_cmd_complete),
+      .intr_tx_stretch_o       (intr_i2c0_tx_stretch),
+      .intr_tx_threshold_o     (intr_i2c0_tx_threshold),
+      .intr_acq_stretch_o      (intr_i2c0_acq_stretch),
+      .intr_unexp_stop_o       (intr_i2c0_unexp_stop),
+      .intr_host_timeout_o     (intr_i2c0_host_timeout),
+      // External alert group "wren" [4]: fatal_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[4:4] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[4:4] ),
+
+      // Inter-module signals
+      .ram_cfg_i(prim_ram_1p_pkg::RAM_1P_CFG_DEFAULT),
+      .ram_cfg_rsp_o(),
+      .lsio_trigger_o(),
+      .racl_policies_i(top_racl_pkg::RACL_POLICY_VEC_DEFAULT),
+      .racl_error_o(),
+      .tl_i(i2c0_tl_req),
+      .tl_o(i2c0_tl_rsp),
+
+      // Clock and reset connections
+      .clk_i (clkmgr_aon_clocks.clk_io_div4_peri),
+      .rst_ni (rstmgr_aon_resets.rst_i2c0_n[rstmgr_pkg::Domain0Sel])
+  );
+  spi_host #(
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[5:5]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles),
     .NumCS(SpiHost0NumCS)
   ) u_spi_host0 (
@@ -737,9 +867,9 @@ module top_wren #(
       // Interrupt
       .intr_error_o     (intr_spi_host0_error),
       .intr_spi_event_o (intr_spi_host0_spi_event),
-      // External alert group "wren" [4]: fatal_fault
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[4:4] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[4:4] ),
+      // External alert group "wren" [5]: fatal_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[5:5] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[5:5] ),
 
       // Inter-module signals
       .passthrough_i(spi_device_passthrough_req),
@@ -755,15 +885,15 @@ module top_wren #(
       .rst_ni (rstmgr_aon_resets.rst_spi_host0_n[rstmgr_pkg::Domain0Sel])
   );
   rv_timer #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[5:5]),
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[6:6]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
   ) u_rv_timer (
 
       // Interrupt
       .intr_timer_expired_hart0_timer0_o (intr_rv_timer_timer_expired_hart0_timer0),
-      // External alert group "wren" [5]: fatal_fault
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[5:5] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[5:5] ),
+      // External alert group "wren" [6]: fatal_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[6:6] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[6:6] ),
 
       // Inter-module signals
       .racl_policies_i(top_racl_pkg::RACL_POLICY_VEC_DEFAULT),
@@ -776,7 +906,7 @@ module top_wren #(
       .rst_ni (rstmgr_aon_resets.rst_sys_io_div4_n[rstmgr_pkg::Domain0Sel])
   );
   usbdev #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[6:6]),
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[7:7]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles),
     .Stub(UsbdevStub),
     .RcvrWakeTimeUs(UsbdevRcvrWakeTimeUs)
@@ -812,9 +942,9 @@ module top_wren #(
       .intr_powered_o         (intr_usbdev_powered),
       .intr_link_out_err_o    (intr_usbdev_link_out_err),
       .intr_av_setup_empty_o  (intr_usbdev_av_setup_empty),
-      // External alert group "wren" [6]: fatal_fault
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[6:6] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[6:6] ),
+      // External alert group "wren" [7]: fatal_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[7:7] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[7:7] ),
 
       // Inter-module signals
       .usb_rx_d_i(usbdev_usb_rx_d_i),
@@ -844,7 +974,7 @@ module top_wren #(
       .rst_aon_ni (rstmgr_aon_resets.rst_sys_aon_n[rstmgr_pkg::Domain0Sel])
   );
   pwrmgr #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[7:7]),
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[8:8]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles),
     .EscNumSeverities(4),
     .EscPingCountWidth(16)
@@ -852,9 +982,9 @@ module top_wren #(
 
       // Interrupt
       .intr_wakeup_o (intr_pwrmgr_aon_wakeup),
-      // External alert group "wren" [7]: fatal_fault
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[7:7] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[7:7] ),
+      // External alert group "wren" [8]: fatal_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[8:8] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[8:8] ),
 
       // Inter-module signals
       .pwr_ast_o(pwrmgr_ast_req_o),
@@ -873,7 +1003,7 @@ module top_wren #(
       .pwr_cpu_i(rv_core_ibex_pwrmgr),
       .wakeups_i(pwrmgr_aon_wakeups),
       .rstreqs_i(pwrmgr_aon_rstreqs),
-      .ndmreset_req_i('0),
+      .ndmreset_req_i(rv_dm_ndmreset_req),
       .strap_o(pwrmgr_aon_strap),
       .low_power_o(pwrmgr_aon_low_power),
       .rom_ctrl_i(rom_ctrl_pkg::PWRMGR_DATA_DEFAULT),
@@ -895,16 +1025,77 @@ module top_wren #(
       .rst_main_ni (rstmgr_aon_resets.rst_por_aon_n[rstmgr_pkg::DomainAonSel]),
       .rst_slow_ni (rstmgr_aon_resets.rst_por_aon_n[rstmgr_pkg::DomainAonSel])
   );
+  spi_host #(
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[9:9]),
+    .AlertSkewCycles(top_pkg::AlertSkewCycles),
+    .NumCS(SpiHost1NumCS)
+  ) u_spi_host1 (
+
+      // Input
+      .cio_sd_i     (cio_spi_host1_sd_p2d),
+
+      // Output
+      .cio_sck_o    (cio_spi_host1_sck_d2p),
+      .cio_sck_en_o (cio_spi_host1_sck_en_d2p),
+      .cio_csb_o    (cio_spi_host1_csb_d2p),
+      .cio_csb_en_o (cio_spi_host1_csb_en_d2p),
+      .cio_sd_o     (cio_spi_host1_sd_d2p),
+      .cio_sd_en_o  (cio_spi_host1_sd_en_d2p),
+
+      // Interrupt
+      .intr_error_o     (intr_spi_host1_error),
+      .intr_spi_event_o (intr_spi_host1_spi_event),
+      // External alert group "wren" [9]: fatal_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[9:9] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[9:9] ),
+
+      // Inter-module signals
+      .passthrough_i(spi_device_pkg::PASSTHROUGH_REQ_DEFAULT),
+      .passthrough_o(),
+      .lsio_trigger_o(),
+      .racl_policies_i(top_racl_pkg::RACL_POLICY_VEC_DEFAULT),
+      .racl_error_o(),
+      .tl_i(spi_host1_tl_req),
+      .tl_o(spi_host1_tl_rsp),
+
+      // Clock and reset connections
+      .clk_i (clkmgr_aon_clocks.clk_io_div2_peri),
+      .rst_ni (rstmgr_aon_resets.rst_spi_host1_n[rstmgr_pkg::Domain0Sel])
+  );
+  pwm #(
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[10:10]),
+    .AlertSkewCycles(top_pkg::AlertSkewCycles)
+  ) u_pwm_aon (
+
+      // Output
+      .cio_pwm_o    (cio_pwm_aon_pwm_d2p),
+      .cio_pwm_en_o (cio_pwm_aon_pwm_en_d2p),
+      // External alert group "wren" [10]: fatal_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[10:10] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[10:10] ),
+
+      // Inter-module signals
+      .racl_policies_i(top_racl_pkg::RACL_POLICY_VEC_DEFAULT),
+      .racl_error_o(),
+      .tl_i(pwm_aon_tl_req),
+      .tl_o(pwm_aon_tl_rsp),
+
+      // Clock and reset connections
+      .clk_i (clkmgr_aon_clocks.clk_io_div4_peri),
+      .clk_core_i (clkmgr_aon_clocks.clk_aon_peri),
+      .rst_ni (rstmgr_aon_resets.rst_lc_io_div4_n[rstmgr_pkg::DomainAonSel]),
+      .rst_core_ni (rstmgr_aon_resets.rst_lc_aon_n[rstmgr_pkg::DomainAonSel])
+  );
   rstmgr #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[9:8]),
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[12:11]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles),
     .SecCheck(SecRstmgrAonCheck),
     .SecMaxSyncDelay(SecRstmgrAonMaxSyncDelay)
   ) u_rstmgr_aon (
-      // External alert group "wren" [8]: fatal_fault
-      // External alert group "wren" [9]: fatal_cnsty_fault
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[9:8] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[9:8] ),
+      // External alert group "wren" [11]: fatal_fault
+      // External alert group "wren" [12]: fatal_cnsty_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[12:11] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[12:11] ),
 
       // Inter-module signals
       .por_n_i(por_n_i),
@@ -932,13 +1123,13 @@ module top_wren #(
       .rst_por_ni (rstmgr_aon_resets.rst_por_io_div4_n[rstmgr_pkg::DomainAonSel])
   );
   clkmgr #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[11:10]),
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[14:13]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
   ) u_clkmgr_aon (
-      // External alert group "wren" [10]: recov_fault
-      // External alert group "wren" [11]: fatal_fault
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[11:10] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[11:10] ),
+      // External alert group "wren" [13]: recov_fault
+      // External alert group "wren" [14]: fatal_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[14:13] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[14:13] ),
 
       // Inter-module signals
       .clocks_o(clkmgr_aon_clocks),
@@ -955,7 +1146,6 @@ module top_wren #(
       .jitter_en_o(clk_main_jitter_en_o),
       .pwr_i(pwrmgr_aon_pwr_clk_req),
       .pwr_o(pwrmgr_aon_pwr_clk_rsp),
-      .idle_i(clkmgr_aon_idle),
       .calib_rdy_i(prim_mubi_pkg::MuBi4True),
       .tl_i(clkmgr_aon_tl_req),
       .tl_o(clkmgr_aon_tl_rsp),
@@ -983,26 +1173,26 @@ module top_wren #(
       .rst_root_usb_ni (rstmgr_aon_resets.rst_por_usb_n[rstmgr_pkg::DomainAonSel])
   );
   pinmux #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[12:12]),
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[15:15]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles),
     .SecVolatileRawUnlockEn(SecPinmuxAonVolatileRawUnlockEn),
     .TargetCfg(PinmuxAonTargetCfg)
   ) u_pinmux_aon (
-      // External alert group "wren" [12]: fatal_fault
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[12:12] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[12:12] ),
+      // External alert group "wren" [15]: fatal_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[15:15] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[15:15] ),
 
       // Inter-module signals
       .lc_hw_debug_clr_i(lc_ctrl_pkg::Off),
-      .lc_hw_debug_en_i(lc_ctrl_pkg::Off),
+      .lc_hw_debug_en_i(pinmux_aon_lc_hw_debug_en),
       .lc_dft_en_i(lc_ctrl_pkg::Off),
       .lc_escalate_en_i(lc_ctrl_pkg::Off),
       .lc_check_byp_en_i(lc_ctrl_pkg::Off),
-      .pinmux_hw_debug_en_o(),
+      .pinmux_hw_debug_en_o(pinmux_aon_pinmux_hw_debug_en),
       .lc_jtag_o(),
       .lc_jtag_i(jtag_pkg::JTAG_RSP_DEFAULT),
-      .rv_jtag_o(),
-      .rv_jtag_i(jtag_pkg::JTAG_RSP_DEFAULT),
+      .rv_jtag_o(pinmux_aon_rv_jtag_req),
+      .rv_jtag_i(pinmux_aon_rv_jtag_rsp),
       .dft_jtag_o(pinmux_aon_dft_jtag_req),
       .dft_jtag_i(pinmux_aon_dft_jtag_rsp),
       .dft_strap_test_o(dft_strap_test_o),
@@ -1053,16 +1243,16 @@ module top_wren #(
       .rst_sys_ni (rstmgr_aon_resets.rst_sys_io_div4_n[rstmgr_pkg::DomainAonSel])
   );
   aon_timer #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[13:13]),
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[16:16]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
   ) u_aon_timer_aon (
 
       // Interrupt
       .intr_wkup_timer_expired_o (intr_aon_timer_aon_wkup_timer_expired),
       .intr_wdog_timer_bark_o    (intr_aon_timer_aon_wdog_timer_bark),
-      // External alert group "wren" [13]: fatal_fault
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[13:13] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[13:13] ),
+      // External alert group "wren" [16]: fatal_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[16:16] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[16:16] ),
 
       // Inter-module signals
       .nmi_wdog_timer_bark_o(),
@@ -1072,8 +1262,8 @@ module top_wren #(
       .sleep_mode_i(pwrmgr_aon_low_power),
       .racl_policies_i(top_racl_pkg::RACL_POLICY_VEC_DEFAULT),
       .racl_error_o(),
-      .tl_i(tlul_pkg::TL_H2D_DEFAULT),
-      .tl_o(),
+      .tl_i(aon_timer_aon_tl_req),
+      .tl_o(aon_timer_aon_tl_rsp),
 
       // Clock and reset connections
       .clk_i (clkmgr_aon_clocks.clk_io_div4_timers),
@@ -1082,7 +1272,7 @@ module top_wren #(
       .rst_aon_ni (rstmgr_aon_resets.rst_sys_aon_n[rstmgr_pkg::DomainAonSel])
   );
   flash_ctrl #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[18:14]),
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[21:17]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles),
     .SecScrambleEn(SecFlashCtrlScrambleEn),
     .ProgFifoDepth(FlashCtrlProgFifoDepth),
@@ -1101,13 +1291,13 @@ module top_wren #(
       .intr_rd_lvl_o     (intr_flash_ctrl_rd_lvl),
       .intr_op_done_o    (intr_flash_ctrl_op_done),
       .intr_corr_err_o   (intr_flash_ctrl_corr_err),
-      // External alert group "wren" [14]: recov_err
-      // External alert group "wren" [15]: fatal_std_err
-      // External alert group "wren" [16]: fatal_err
-      // External alert group "wren" [17]: fatal_prim_flash_alert
-      // External alert group "wren" [18]: recov_prim_flash_alert
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[18:14] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[18:14] ),
+      // External alert group "wren" [17]: recov_err
+      // External alert group "wren" [18]: fatal_std_err
+      // External alert group "wren" [19]: fatal_err
+      // External alert group "wren" [20]: fatal_prim_flash_alert
+      // External alert group "wren" [21]: recov_prim_flash_alert
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[21:17] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[21:17] ),
 
       // Inter-module signals
       .otp_o(),
@@ -1181,12 +1371,12 @@ module top_wren #(
       .rst_ni (rstmgr_aon_resets.rst_lc_n[rstmgr_pkg::Domain0Sel])
   );
   rv_plic #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[19:19]),
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[22:22]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
   ) u_rv_plic (
-      // External alert group "wren" [19]: fatal_fault
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[19:19] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[19:19] ),
+      // External alert group "wren" [22]: fatal_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[22:22] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[22:22] ),
 
       // Inter-module signals
       .irq_o(rv_plic_irq),
@@ -1200,44 +1390,8 @@ module top_wren #(
       .clk_i (clkmgr_aon_clocks.clk_main_secure),
       .rst_ni (rstmgr_aon_resets.rst_sys_n[rstmgr_pkg::Domain0Sel])
   );
-  aes #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[21:20]),
-    .AlertSkewCycles(top_pkg::AlertSkewCycles),
-    .AES192Enable(1'b1),
-    .SecMasking(SecAesMasking),
-    .SecSBoxImpl(SecAesSBoxImpl),
-    .SecStartTriggerDelay(SecAesStartTriggerDelay),
-    .SecAllowForcingMasks(SecAesAllowForcingMasks),
-    .SecSkipPRNGReseeding(SecAesSkipPRNGReseeding),
-    .RndCnstClearingLfsrSeed(RndCnstAesClearingLfsrSeed),
-    .RndCnstClearingLfsrPerm(RndCnstAesClearingLfsrPerm),
-    .RndCnstClearingSharePerm(RndCnstAesClearingSharePerm),
-    .RndCnstMaskingLfsrSeed(RndCnstAesMaskingLfsrSeed),
-    .RndCnstMaskingLfsrPerm(RndCnstAesMaskingLfsrPerm)
-  ) u_aes (
-      // External alert group "wren" [20]: recov_ctrl_update_err
-      // External alert group "wren" [21]: fatal_fault
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[21:20] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[21:20] ),
-
-      // Inter-module signals
-      .idle_o(clkmgr_aon_idle),
-      .lc_escalate_en_i(lc_ctrl_pkg::Off),
-      .edn_o(),
-      .edn_i(edn_pkg::EDN_RSP_DEFAULT),
-      .keymgr_key_i(keymgr_pkg::HW_KEY_REQ_DEFAULT),
-      .tl_i(aes_tl_req),
-      .tl_o(aes_tl_rsp),
-
-      // Clock and reset connections
-      .clk_i (clkmgr_aon_clocks.clk_main_aes),
-      .clk_edn_i (clkmgr_aon_clocks.clk_main_aes),
-      .rst_shadowed_ni (rstmgr_aon_resets.rst_sys_shadowed_n[rstmgr_pkg::Domain0Sel]),
-      .rst_ni (rstmgr_aon_resets.rst_sys_n[rstmgr_pkg::Domain0Sel]),
-      .rst_edn_ni (rstmgr_aon_resets.rst_sys_n[rstmgr_pkg::Domain0Sel])
-  );
   sram_ctrl #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[22:22]),
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[23:23]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles),
     .MemSizeRam(131072),
     .InstSize(SramCtrlMainInstSize),
@@ -1251,9 +1405,9 @@ module top_wren #(
     .RndCnstLfsrSeed(RndCnstSramCtrlMainLfsrSeed),
     .RndCnstLfsrPerm(RndCnstSramCtrlMainLfsrPerm)
   ) u_sram_ctrl_main (
-      // External alert group "wren" [22]: fatal_error
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[22:22] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[22:22] ),
+      // External alert group "wren" [23]: fatal_error
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[23:23] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[23:23] ),
       .racl_policy_sel_ranges_ram_i('{top_racl_pkg::RACL_RANGE_T_DEFAULT}),
 
       // Inter-module signals
@@ -1279,7 +1433,7 @@ module top_wren #(
       .rst_otp_ni (rstmgr_aon_resets.rst_lc_io_div4_n[rstmgr_pkg::Domain0Sel])
   );
   rom_ctrl #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[23:23]),
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[24:24]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles),
     .BootRomInitFile(RomCtrlBootRomInitFile),
     .FlopToKmac(RomCtrlFlopToKmac),
@@ -1288,9 +1442,9 @@ module top_wren #(
     .RndCnstScrNonce(RndCnstRomCtrlScrNonce),
     .RndCnstScrKey(RndCnstRomCtrlScrKey)
   ) u_rom_ctrl (
-      // External alert group "wren" [23]: fatal
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[23:23] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[23:23] ),
+      // External alert group "wren" [24]: fatal
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[24:24] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[24:24] ),
 
       // Inter-module signals
       .rom_cfg_i(prim_rom_pkg::ROM_CFG_DEFAULT),
@@ -1307,8 +1461,57 @@ module top_wren #(
       .clk_i (clkmgr_aon_clocks.clk_main_infra),
       .rst_ni (rstmgr_aon_resets.rst_sys_n[rstmgr_pkg::Domain0Sel])
   );
+  rv_dm #(
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[25:25]),
+    .AlertSkewCycles(top_pkg::AlertSkewCycles),
+    .IdcodeValue(RvDmIdcodeValue),
+    .UseDmiInterface(RvDmUseDmiInterface),
+    .SecVolatileRawUnlockEn(SecRvDmVolatileRawUnlockEn),
+    .TlulHostUserRsvdBits(RvDmTlulHostUserRsvdBits)
+  ) u_rv_dm (
+      // External alert group "wren" [25]: fatal_fault
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[25:25] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[25:25] ),
+
+      // Inter-module signals
+      .next_dm_addr_i('0),
+      .jtag_i(pinmux_aon_rv_jtag_req),
+      .jtag_o(pinmux_aon_rv_jtag_rsp),
+      .lc_init_done_i(lc_ctrl_pkg::Off),
+      .lc_hw_debug_clr_i(lc_ctrl_pkg::Off),
+      .lc_hw_debug_en_i(rv_dm_lc_hw_debug_en),
+      .lc_dft_en_i(lc_ctrl_pkg::Off),
+      .pinmux_hw_debug_en_i(pinmux_aon_pinmux_hw_debug_en),
+      .otp_dis_rv_dm_late_debug_i(rv_dm_otp_dis_rv_dm_late_debug),
+      .unavailable_i(1'b0),
+      .ndmreset_req_o(rv_dm_ndmreset_req),
+      .dmactive_o(),
+      .debug_req_o(rv_dm_debug_req),
+      .lc_escalate_en_i(lc_ctrl_pkg::Off),
+      .lc_check_byp_en_i(lc_ctrl_pkg::Off),
+      .strap_en_i(1'b0),
+      .strap_en_override_i(1'b0),
+      .racl_policies_i(top_racl_pkg::RACL_POLICY_VEC_DEFAULT),
+      .racl_error_o(),
+      .sba_tl_h_o(main_tl_rv_dm__sba_req),
+      .sba_tl_h_i(main_tl_rv_dm__sba_rsp),
+      .regs_tl_d_i(rv_dm_regs_tl_d_req),
+      .regs_tl_d_o(rv_dm_regs_tl_d_rsp),
+      .mem_tl_d_i(rv_dm_mem_tl_d_req),
+      .mem_tl_d_o(rv_dm_mem_tl_d_rsp),
+      .dbg_tl_d_i(tlul_pkg::TL_H2D_DEFAULT),
+      .dbg_tl_d_o(),
+      .scanmode_i,
+      .scan_rst_ni,
+
+      // Clock and reset connections
+      .clk_i (clkmgr_aon_clocks.clk_main_infra),
+      .clk_lc_i (clkmgr_aon_clocks.clk_main_infra),
+      .rst_ni (rstmgr_aon_resets.rst_sys_n[rstmgr_pkg::Domain0Sel]),
+      .rst_lc_ni (rstmgr_aon_resets.rst_lc_n[rstmgr_pkg::Domain0Sel])
+  );
   rv_core_ibex #(
-    .AlertAsyncOn(AsyncOnOutgoingAlertWren[27:24]),
+    .AlertAsyncOn(AsyncOnOutgoingAlertWren[29:26]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles),
     .NEscalationSeverities(4),
     .WidthPingCounter(16),
@@ -1349,12 +1552,12 @@ module top_wren #(
     .RndCnstIbexKeyDefault(RndCnstRvCoreIbexIbexKeyDefault),
     .RndCnstIbexNonceDefault(RndCnstRvCoreIbexIbexNonceDefault)
   ) u_rv_core_ibex (
-      // External alert group "wren" [24]: fatal_sw_err
-      // External alert group "wren" [25]: recov_sw_err
-      // External alert group "wren" [26]: fatal_hw_err
-      // External alert group "wren" [27]: recov_hw_err
-      .alert_tx_o  ( outgoing_alert_wren_tx_o[27:24] ),
-      .alert_rx_i  ( outgoing_alert_wren_rx_i[27:24] ),
+      // External alert group "wren" [26]: fatal_sw_err
+      // External alert group "wren" [27]: recov_sw_err
+      // External alert group "wren" [28]: fatal_hw_err
+      // External alert group "wren" [29]: recov_hw_err
+      .alert_tx_o  ( outgoing_alert_wren_tx_o[29:26] ),
+      .alert_rx_i  ( outgoing_alert_wren_rx_i[29:26] ),
 
       // Inter-module signals
       .rst_cpu_n_o(),
@@ -1369,7 +1572,7 @@ module top_wren #(
       .irq_external_i(rv_plic_irq),
       .esc_tx_i(prim_esc_pkg::ESC_TX_DEFAULT),
       .esc_rx_o(),
-      .debug_req_i('0),
+      .debug_req_i(rv_dm_debug_req),
       .crash_dump_o(rv_core_ibex_crash_dump),
       .lc_cpu_en_i(lc_ctrl_pkg::On),
       .pwrmgr_cpu_en_i(pwrmgr_aon_fetch_en),
@@ -1403,35 +1606,52 @@ module top_wren #(
 
   // interrupt assignments
   assign intr_vector = {
-      intr_flash_ctrl_corr_err, // IDs [87 +: 1]
-      intr_flash_ctrl_op_done, // IDs [86 +: 1]
-      intr_flash_ctrl_rd_lvl, // IDs [85 +: 1]
-      intr_flash_ctrl_rd_full, // IDs [84 +: 1]
-      intr_flash_ctrl_prog_lvl, // IDs [83 +: 1]
-      intr_flash_ctrl_prog_empty, // IDs [82 +: 1]
-      intr_aon_timer_aon_wdog_timer_bark, // IDs [81 +: 1]
-      intr_aon_timer_aon_wkup_timer_expired, // IDs [80 +: 1]
-      intr_pwrmgr_aon_wakeup, // IDs [79 +: 1]
-      intr_usbdev_av_setup_empty, // IDs [78 +: 1]
-      intr_usbdev_link_out_err, // IDs [77 +: 1]
-      intr_usbdev_powered, // IDs [76 +: 1]
-      intr_usbdev_frame, // IDs [75 +: 1]
-      intr_usbdev_rx_bitstuff_err, // IDs [74 +: 1]
-      intr_usbdev_rx_pid_err, // IDs [73 +: 1]
-      intr_usbdev_rx_crc_err, // IDs [72 +: 1]
-      intr_usbdev_link_in_err, // IDs [71 +: 1]
-      intr_usbdev_av_overflow, // IDs [70 +: 1]
-      intr_usbdev_rx_full, // IDs [69 +: 1]
-      intr_usbdev_av_out_empty, // IDs [68 +: 1]
-      intr_usbdev_link_resume, // IDs [67 +: 1]
-      intr_usbdev_link_suspend, // IDs [66 +: 1]
-      intr_usbdev_link_reset, // IDs [65 +: 1]
-      intr_usbdev_host_lost, // IDs [64 +: 1]
-      intr_usbdev_disconnected, // IDs [63 +: 1]
-      intr_usbdev_pkt_sent, // IDs [62 +: 1]
-      intr_usbdev_pkt_received, // IDs [61 +: 1]
-      intr_spi_host0_spi_event, // IDs [60 +: 1]
-      intr_spi_host0_error, // IDs [59 +: 1]
+      intr_flash_ctrl_corr_err, // IDs [104 +: 1]
+      intr_flash_ctrl_op_done, // IDs [103 +: 1]
+      intr_flash_ctrl_rd_lvl, // IDs [102 +: 1]
+      intr_flash_ctrl_rd_full, // IDs [101 +: 1]
+      intr_flash_ctrl_prog_lvl, // IDs [100 +: 1]
+      intr_flash_ctrl_prog_empty, // IDs [99 +: 1]
+      intr_aon_timer_aon_wdog_timer_bark, // IDs [98 +: 1]
+      intr_aon_timer_aon_wkup_timer_expired, // IDs [97 +: 1]
+      intr_pwrmgr_aon_wakeup, // IDs [96 +: 1]
+      intr_usbdev_av_setup_empty, // IDs [95 +: 1]
+      intr_usbdev_link_out_err, // IDs [94 +: 1]
+      intr_usbdev_powered, // IDs [93 +: 1]
+      intr_usbdev_frame, // IDs [92 +: 1]
+      intr_usbdev_rx_bitstuff_err, // IDs [91 +: 1]
+      intr_usbdev_rx_pid_err, // IDs [90 +: 1]
+      intr_usbdev_rx_crc_err, // IDs [89 +: 1]
+      intr_usbdev_link_in_err, // IDs [88 +: 1]
+      intr_usbdev_av_overflow, // IDs [87 +: 1]
+      intr_usbdev_rx_full, // IDs [86 +: 1]
+      intr_usbdev_av_out_empty, // IDs [85 +: 1]
+      intr_usbdev_link_resume, // IDs [84 +: 1]
+      intr_usbdev_link_suspend, // IDs [83 +: 1]
+      intr_usbdev_link_reset, // IDs [82 +: 1]
+      intr_usbdev_host_lost, // IDs [81 +: 1]
+      intr_usbdev_disconnected, // IDs [80 +: 1]
+      intr_usbdev_pkt_sent, // IDs [79 +: 1]
+      intr_usbdev_pkt_received, // IDs [78 +: 1]
+      intr_spi_host1_spi_event, // IDs [77 +: 1]
+      intr_spi_host1_error, // IDs [76 +: 1]
+      intr_spi_host0_spi_event, // IDs [75 +: 1]
+      intr_spi_host0_error, // IDs [74 +: 1]
+      intr_i2c0_host_timeout, // IDs [73 +: 1]
+      intr_i2c0_unexp_stop, // IDs [72 +: 1]
+      intr_i2c0_acq_stretch, // IDs [71 +: 1]
+      intr_i2c0_tx_threshold, // IDs [70 +: 1]
+      intr_i2c0_tx_stretch, // IDs [69 +: 1]
+      intr_i2c0_cmd_complete, // IDs [68 +: 1]
+      intr_i2c0_sda_unstable, // IDs [67 +: 1]
+      intr_i2c0_stretch_timeout, // IDs [66 +: 1]
+      intr_i2c0_sda_interference, // IDs [65 +: 1]
+      intr_i2c0_scl_interference, // IDs [64 +: 1]
+      intr_i2c0_controller_halt, // IDs [63 +: 1]
+      intr_i2c0_rx_overflow, // IDs [62 +: 1]
+      intr_i2c0_acq_threshold, // IDs [61 +: 1]
+      intr_i2c0_rx_threshold, // IDs [60 +: 1]
+      intr_i2c0_fmt_threshold, // IDs [59 +: 1]
       intr_spi_device_tpm_rdfifo_drop, // IDs [58 +: 1]
       intr_spi_device_tpm_rdfifo_cmd_end, // IDs [57 +: 1]
       intr_spi_device_tpm_header_not_empty, // IDs [56 +: 1]
@@ -1477,6 +1697,10 @@ module top_wren #(
     .tl_rv_core_ibex__cored_i(main_tl_rv_core_ibex__cored_req),
     .tl_rv_core_ibex__cored_o(main_tl_rv_core_ibex__cored_rsp),
 
+    // port: tl_rv_dm__sba
+    .tl_rv_dm__sba_i(main_tl_rv_dm__sba_req),
+    .tl_rv_dm__sba_o(main_tl_rv_dm__sba_rsp),
+
     // port: tl_rom_ctrl__rom
     .tl_rom_ctrl__rom_o(rom_ctrl_rom_tl_req),
     .tl_rom_ctrl__rom_i(rom_ctrl_rom_tl_rsp),
@@ -1484,6 +1708,14 @@ module top_wren #(
     // port: tl_rom_ctrl__regs
     .tl_rom_ctrl__regs_o(rom_ctrl_regs_tl_req),
     .tl_rom_ctrl__regs_i(rom_ctrl_regs_tl_rsp),
+
+    // port: tl_rv_dm__regs
+    .tl_rv_dm__regs_o(rv_dm_regs_tl_d_req),
+    .tl_rv_dm__regs_i(rv_dm_regs_tl_d_rsp),
+
+    // port: tl_rv_dm__mem
+    .tl_rv_dm__mem_o(rv_dm_mem_tl_d_req),
+    .tl_rv_dm__mem_i(rv_dm_mem_tl_d_rsp),
 
     // port: tl_peri
     .tl_peri_o(main_tl_peri_req),
@@ -1500,10 +1732,6 @@ module top_wren #(
     // port: tl_flash_ctrl__mem
     .tl_flash_ctrl__mem_o(flash_ctrl_mem_tl_req),
     .tl_flash_ctrl__mem_i(flash_ctrl_mem_tl_rsp),
-
-    // port: tl_aes
-    .tl_aes_o(aes_tl_req),
-    .tl_aes_i(aes_tl_rsp),
 
     // port: tl_rv_plic
     .tl_rv_plic_o(rv_plic_tl_req),
@@ -1527,9 +1755,11 @@ module top_wren #(
   xbar_peri u_xbar_peri (
     .clk_peri_i (clkmgr_aon_clocks.clk_io_div4_infra),
     .clk_spi_host0_i (clkmgr_aon_clocks.clk_io_infra),
+    .clk_spi_host1_i (clkmgr_aon_clocks.clk_io_div2_infra),
     .clk_usb_i (clkmgr_aon_clocks.clk_usb_infra),
     .rst_peri_ni (rstmgr_aon_resets.rst_sys_io_div4_n[rstmgr_pkg::Domain0Sel]),
     .rst_spi_host0_ni (rstmgr_aon_resets.rst_spi_host0_n[rstmgr_pkg::Domain0Sel]),
+    .rst_spi_host1_ni (rstmgr_aon_resets.rst_lc_io_div2_n[rstmgr_pkg::Domain0Sel]),
     .rst_usb_ni (rstmgr_aon_resets.rst_usb_n[rstmgr_pkg::Domain0Sel]),
 
     // port: tl_main
@@ -1551,6 +1781,18 @@ module top_wren #(
     // port: tl_spi_device
     .tl_spi_device_o(spi_device_tl_req),
     .tl_spi_device_i(spi_device_tl_rsp),
+
+    // port: tl_i2c0
+    .tl_i2c0_o(i2c0_tl_req),
+    .tl_i2c0_i(i2c0_tl_rsp),
+
+    // port: tl_spi_host1
+    .tl_spi_host1_o(spi_host1_tl_req),
+    .tl_spi_host1_i(spi_host1_tl_rsp),
+
+    // port: tl_pwm_aon
+    .tl_pwm_aon_o(pwm_aon_tl_req),
+    .tl_pwm_aon_i(pwm_aon_tl_rsp),
 
     // port: tl_spi_host0
     .tl_spi_host0_o(spi_host0_tl_req),
@@ -1579,6 +1821,10 @@ module top_wren #(
     // port: tl_pinmux_aon
     .tl_pinmux_aon_o(pinmux_aon_tl_req),
     .tl_pinmux_aon_i(pinmux_aon_tl_rsp),
+
+    // port: tl_aon_timer_aon
+    .tl_aon_timer_aon_o(aon_timer_aon_tl_req),
+    .tl_aon_timer_aon_i(aon_timer_aon_tl_rsp),
 
     // port: tl_ast
     .tl_ast_o(ast_tl_req_o),
@@ -1622,6 +1868,12 @@ module top_wren #(
   assign cio_gpio_gpio_p2d[29] = mio_p2d[MioInGpioGpio29];
   assign cio_gpio_gpio_p2d[30] = mio_p2d[MioInGpioGpio30];
   assign cio_gpio_gpio_p2d[31] = mio_p2d[MioInGpioGpio31];
+  assign cio_i2c0_sda_p2d = mio_p2d[MioInI2c0Sda];
+  assign cio_i2c0_scl_p2d = mio_p2d[MioInI2c0Scl];
+  assign cio_spi_host1_sd_p2d[0] = mio_p2d[MioInSpiHost1Sd0];
+  assign cio_spi_host1_sd_p2d[1] = mio_p2d[MioInSpiHost1Sd1];
+  assign cio_spi_host1_sd_p2d[2] = mio_p2d[MioInSpiHost1Sd2];
+  assign cio_spi_host1_sd_p2d[3] = mio_p2d[MioInSpiHost1Sd3];
   assign cio_uart0_rx_p2d = mio_p2d[MioInUart0Rx];
   assign cio_uart1_rx_p2d = mio_p2d[MioInUart1Rx];
   assign cio_usbdev_sense_p2d = mio_p2d[MioInUsbdevSense];
@@ -1659,8 +1911,22 @@ module top_wren #(
   assign mio_d2p[MioOutGpioGpio29] = cio_gpio_gpio_d2p[29];
   assign mio_d2p[MioOutGpioGpio30] = cio_gpio_gpio_d2p[30];
   assign mio_d2p[MioOutGpioGpio31] = cio_gpio_gpio_d2p[31];
+  assign mio_d2p[MioOutI2c0Sda] = cio_i2c0_sda_d2p;
+  assign mio_d2p[MioOutI2c0Scl] = cio_i2c0_scl_d2p;
+  assign mio_d2p[MioOutSpiHost1Sd0] = cio_spi_host1_sd_d2p[0];
+  assign mio_d2p[MioOutSpiHost1Sd1] = cio_spi_host1_sd_d2p[1];
+  assign mio_d2p[MioOutSpiHost1Sd2] = cio_spi_host1_sd_d2p[2];
+  assign mio_d2p[MioOutSpiHost1Sd3] = cio_spi_host1_sd_d2p[3];
   assign mio_d2p[MioOutUart0Tx] = cio_uart0_tx_d2p;
   assign mio_d2p[MioOutUart1Tx] = cio_uart1_tx_d2p;
+  assign mio_d2p[MioOutSpiHost1Sck] = cio_spi_host1_sck_d2p;
+  assign mio_d2p[MioOutSpiHost1Csb] = cio_spi_host1_csb_d2p;
+  assign mio_d2p[MioOutPwmAonPwm0] = cio_pwm_aon_pwm_d2p[0];
+  assign mio_d2p[MioOutPwmAonPwm1] = cio_pwm_aon_pwm_d2p[1];
+  assign mio_d2p[MioOutPwmAonPwm2] = cio_pwm_aon_pwm_d2p[2];
+  assign mio_d2p[MioOutPwmAonPwm3] = cio_pwm_aon_pwm_d2p[3];
+  assign mio_d2p[MioOutPwmAonPwm4] = cio_pwm_aon_pwm_d2p[4];
+  assign mio_d2p[MioOutPwmAonPwm5] = cio_pwm_aon_pwm_d2p[5];
 
   // All muxed output enables
   assign mio_en_d2p[MioOutGpioGpio0] = cio_gpio_gpio_en_d2p[0];
@@ -1695,8 +1961,22 @@ module top_wren #(
   assign mio_en_d2p[MioOutGpioGpio29] = cio_gpio_gpio_en_d2p[29];
   assign mio_en_d2p[MioOutGpioGpio30] = cio_gpio_gpio_en_d2p[30];
   assign mio_en_d2p[MioOutGpioGpio31] = cio_gpio_gpio_en_d2p[31];
+  assign mio_en_d2p[MioOutI2c0Sda] = cio_i2c0_sda_en_d2p;
+  assign mio_en_d2p[MioOutI2c0Scl] = cio_i2c0_scl_en_d2p;
+  assign mio_en_d2p[MioOutSpiHost1Sd0] = cio_spi_host1_sd_en_d2p[0];
+  assign mio_en_d2p[MioOutSpiHost1Sd1] = cio_spi_host1_sd_en_d2p[1];
+  assign mio_en_d2p[MioOutSpiHost1Sd2] = cio_spi_host1_sd_en_d2p[2];
+  assign mio_en_d2p[MioOutSpiHost1Sd3] = cio_spi_host1_sd_en_d2p[3];
   assign mio_en_d2p[MioOutUart0Tx] = cio_uart0_tx_en_d2p;
   assign mio_en_d2p[MioOutUart1Tx] = cio_uart1_tx_en_d2p;
+  assign mio_en_d2p[MioOutSpiHost1Sck] = cio_spi_host1_sck_en_d2p;
+  assign mio_en_d2p[MioOutSpiHost1Csb] = cio_spi_host1_csb_en_d2p;
+  assign mio_en_d2p[MioOutPwmAonPwm0] = cio_pwm_aon_pwm_en_d2p[0];
+  assign mio_en_d2p[MioOutPwmAonPwm1] = cio_pwm_aon_pwm_en_d2p[1];
+  assign mio_en_d2p[MioOutPwmAonPwm2] = cio_pwm_aon_pwm_en_d2p[2];
+  assign mio_en_d2p[MioOutPwmAonPwm3] = cio_pwm_aon_pwm_en_d2p[3];
+  assign mio_en_d2p[MioOutPwmAonPwm4] = cio_pwm_aon_pwm_en_d2p[4];
+  assign mio_en_d2p[MioOutPwmAonPwm5] = cio_pwm_aon_pwm_en_d2p[5];
 
   // All dedicated inputs
   logic [13:0] unused_dio_p2d;

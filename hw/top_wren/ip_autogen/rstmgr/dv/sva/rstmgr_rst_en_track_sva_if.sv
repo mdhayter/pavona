@@ -110,6 +110,32 @@ interface rstmgr_rst_en_track_sva_if (
           clk_main_i,
           !rst_por_ni)
 
+  `ASSERT(DAonRstLcAonEnTracksRstLcAonActive_A,
+          $fell(resets_i.rst_lc_aon_n[DomainAonSel]) |-> ##[0:DELAY]
+          reset_en_i.lc_aon[DomainAonSel] == prim_mubi_pkg::MuBi4True,
+          clk_aon_i,
+          !rst_por_ni)
+
+  `ASSERT(DAonRstLcAonEnTracksRstLcAonInactive_A,
+          $rose(resets_i.rst_lc_aon_n[DomainAonSel]) |-> ##DELAY
+          !resets_i.rst_lc_aon_n[DomainAonSel] ||
+          reset_en_i.lc_aon[DomainAonSel] == prim_mubi_pkg::MuBi4False,
+          clk_aon_i,
+          !rst_por_ni)
+
+  `ASSERT(D0RstLcIoDiv2EnTracksRstLcIoDiv2Active_A,
+          $fell(resets_i.rst_lc_io_div2_n[Domain0Sel]) |-> ##[0:DELAY]
+          reset_en_i.lc_io_div2[Domain0Sel] == prim_mubi_pkg::MuBi4True,
+          clk_io_div2_i,
+          !rst_por_ni)
+
+  `ASSERT(D0RstLcIoDiv2EnTracksRstLcIoDiv2Inactive_A,
+          $rose(resets_i.rst_lc_io_div2_n[Domain0Sel]) |-> ##DELAY
+          !resets_i.rst_lc_io_div2_n[Domain0Sel] ||
+          reset_en_i.lc_io_div2[Domain0Sel] == prim_mubi_pkg::MuBi4False,
+          clk_io_div2_i,
+          !rst_por_ni)
+
   `ASSERT(D0RstLcIoDiv4EnTracksRstLcIoDiv4Active_A,
           $fell(resets_i.rst_lc_io_div4_n[Domain0Sel]) |-> ##[0:DELAY]
           reset_en_i.lc_io_div4[Domain0Sel] == prim_mubi_pkg::MuBi4True,
@@ -136,16 +162,16 @@ interface rstmgr_rst_en_track_sva_if (
           clk_io_div4_i,
           !rst_por_ni)
 
-  `ASSERT(D0RstSysShadowedEnTracksRstSysShadowedActive_A,
-          $fell(resets_i.rst_sys_shadowed_n[Domain0Sel]) |-> ##[0:DELAY]
-          reset_en_i.sys_shadowed[Domain0Sel] == prim_mubi_pkg::MuBi4True,
+  `ASSERT(D0RstSysEnTracksRstSysActive_A,
+          $fell(resets_i.rst_sys_n[Domain0Sel]) |-> ##[0:DELAY]
+          reset_en_i.sys[Domain0Sel] == prim_mubi_pkg::MuBi4True,
           clk_main_i,
           !rst_por_ni)
 
-  `ASSERT(D0RstSysShadowedEnTracksRstSysShadowedInactive_A,
-          $rose(resets_i.rst_sys_shadowed_n[Domain0Sel]) |-> ##DELAY
-          !resets_i.rst_sys_shadowed_n[Domain0Sel] ||
-          reset_en_i.sys_shadowed[Domain0Sel] == prim_mubi_pkg::MuBi4False,
+  `ASSERT(D0RstSysEnTracksRstSysInactive_A,
+          $rose(resets_i.rst_sys_n[Domain0Sel]) |-> ##DELAY
+          !resets_i.rst_sys_n[Domain0Sel] ||
+          reset_en_i.sys[Domain0Sel] == prim_mubi_pkg::MuBi4False,
           clk_main_i,
           !rst_por_ni)
 
@@ -238,6 +264,32 @@ interface rstmgr_rst_en_track_sva_if (
           !resets_i.rst_usb_n[Domain0Sel] ||
           reset_en_i.usb[Domain0Sel] == prim_mubi_pkg::MuBi4False,
           clk_usb_i,
+          !rst_por_ni)
+
+  `ASSERT(D0RstSpiHost1EnTracksRstSpiHost1Active_A,
+          $fell(resets_i.rst_spi_host1_n[Domain0Sel]) |-> ##[0:DELAY]
+          reset_en_i.spi_host1[Domain0Sel] == prim_mubi_pkg::MuBi4True,
+          clk_io_div2_i,
+          !rst_por_ni)
+
+  `ASSERT(D0RstSpiHost1EnTracksRstSpiHost1Inactive_A,
+          $rose(resets_i.rst_spi_host1_n[Domain0Sel]) |-> ##DELAY
+          !resets_i.rst_spi_host1_n[Domain0Sel] ||
+          reset_en_i.spi_host1[Domain0Sel] == prim_mubi_pkg::MuBi4False,
+          clk_io_div2_i,
+          !rst_por_ni)
+
+  `ASSERT(D0RstI2c0EnTracksRstI2c0Active_A,
+          $fell(resets_i.rst_i2c0_n[Domain0Sel]) |-> ##[0:DELAY]
+          reset_en_i.i2c0[Domain0Sel] == prim_mubi_pkg::MuBi4True,
+          clk_io_div4_i,
+          !rst_por_ni)
+
+  `ASSERT(D0RstI2c0EnTracksRstI2c0Inactive_A,
+          $rose(resets_i.rst_i2c0_n[Domain0Sel]) |-> ##DELAY
+          !resets_i.rst_i2c0_n[Domain0Sel] ||
+          reset_en_i.i2c0[Domain0Sel] == prim_mubi_pkg::MuBi4False,
+          clk_io_div4_i,
           !rst_por_ni)
 
 endinterface

@@ -13,6 +13,12 @@ tl_device_t xbar_devices[$] = '{
     '{"rom_ctrl__regs", '{
         '{32'h411e0000, 32'h411e007f}
     }},
+    '{"rv_dm__regs", '{
+        '{32'h41200000, 32'h4120000f}
+    }},
+    '{"rv_dm__mem", '{
+        '{32'h00010000, 32'h00010fff}
+    }},
     '{"flash_ctrl__core", '{
         '{32'h41000000, 32'h410001ff}
     }},
@@ -21,9 +27,6 @@ tl_device_t xbar_devices[$] = '{
     }},
     '{"flash_ctrl__mem", '{
         '{32'h20000000, 32'h2000ffff}
-    }},
-    '{"aes", '{
-        '{32'h41100000, 32'h411000ff}
     }},
     '{"rv_plic", '{
         '{32'h48000000, 32'h4fffffff}
@@ -49,6 +52,15 @@ tl_device_t xbar_devices[$] = '{
     '{"spi_device", '{
         '{32'h40050000, 32'h40051fff}
     }},
+    '{"i2c0", '{
+        '{32'h40080000, 32'h4008007f}
+    }},
+    '{"spi_host1", '{
+        '{32'h40310000, 32'h4031003f}
+    }},
+    '{"pwm_aon", '{
+        '{32'h40450000, 32'h4045007f}
+    }},
     '{"spi_host0", '{
         '{32'h40060000, 32'h4006003f}
     }},
@@ -62,13 +74,16 @@ tl_device_t xbar_devices[$] = '{
         '{32'h40400000, 32'h4040007f}
     }},
     '{"rstmgr_aon", '{
-        '{32'h40410000, 32'h4041003f}
+        '{32'h40410000, 32'h4041007f}
     }},
     '{"clkmgr_aon", '{
         '{32'h40420000, 32'h4042007f}
     }},
     '{"pinmux_aon", '{
         '{32'h40460000, 32'h40460fff}
+    }},
+    '{"aon_timer_aon", '{
+        '{32'h40470000, 32'h4047003f}
     }},
     '{"ast", '{
         '{32'h40480000, 32'h404803ff}
@@ -78,31 +93,65 @@ tl_device_t xbar_devices[$] = '{
 tl_host_t xbar_hosts[$] = '{
     '{"rv_core_ibex__corei", 0, '{
         "rom_ctrl__rom",
+        "rv_dm__mem",
         "sram_ctrl_main__ram",
         "flash_ctrl__mem"}}
     ,
     '{"rv_core_ibex__cored", 1, '{
         "rom_ctrl__rom",
         "rom_ctrl__regs",
+        "rv_dm__mem",
+        "rv_dm__regs",
         "sram_ctrl_main__ram",
         "flash_ctrl__mem",
         "uart0",
         "uart1",
+        "i2c0",
         "gpio",
         "spi_device",
         "spi_host0",
+        "spi_host1",
         "rv_timer",
         "usbdev",
         "pwrmgr_aon",
         "rstmgr_aon",
         "clkmgr_aon",
+        "pwm_aon",
         "pinmux_aon",
+        "aon_timer_aon",
         "ast",
         "flash_ctrl__core",
         "flash_macro_wrapper",
-        "aes",
         "rv_plic",
+        "sram_ctrl_main__regs",
+        "rv_core_ibex__cfg"}}
+    ,
+    '{"rv_dm__sba", 2, '{
+        "rom_ctrl__rom",
+        "rom_ctrl__regs",
+        "rv_dm__mem",
+        "rv_dm__regs",
         "sram_ctrl_main__ram",
+        "flash_ctrl__mem",
+        "uart0",
+        "uart1",
+        "i2c0",
+        "gpio",
+        "spi_device",
+        "spi_host0",
+        "spi_host1",
+        "rv_timer",
+        "usbdev",
+        "pwrmgr_aon",
+        "rstmgr_aon",
+        "clkmgr_aon",
+        "pwm_aon",
+        "pinmux_aon",
+        "aon_timer_aon",
+        "ast",
+        "flash_ctrl__core",
+        "flash_macro_wrapper",
+        "rv_plic",
         "sram_ctrl_main__regs",
         "rv_core_ibex__cfg"}}
 };

@@ -7,7 +7,7 @@
   {
     num_regions: 2
     module_instance_name: rv_core_ibex
-    pmp_enable: false
+    pmp_enable: true
     topname: wren
     uniquified_modules: {}
     racl_support: false

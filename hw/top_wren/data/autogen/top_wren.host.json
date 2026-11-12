@@ -2,6 +2,7 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "generator": "util/gen_top_host.py",
   "name": "wren",
+  "dm_idcode": 268442847,
   "addr_spaces": {
     "hart": {
       "devices": {
@@ -25,6 +26,11 @@
           "size_bytes": 8192,
           "ip": "spi_device"
         },
+        "i2c0": {
+          "base_addr": 1074266112,
+          "size_bytes": 128,
+          "ip": "i2c"
+        },
         "spi_host0": {
           "base_addr": 1074135040,
           "size_bytes": 64,
@@ -45,9 +51,19 @@
           "size_bytes": 128,
           "ip": "pwrmgr"
         },
+        "spi_host1": {
+          "base_addr": 1076953088,
+          "size_bytes": 64,
+          "ip": "spi_host"
+        },
+        "pwm_aon": {
+          "base_addr": 1078263808,
+          "size_bytes": 128,
+          "ip": "pwm"
+        },
         "rstmgr_aon": {
           "base_addr": 1078001664,
-          "size_bytes": 64,
+          "size_bytes": 128,
           "ip": "rstmgr"
         },
         "clkmgr_aon": {
@@ -85,11 +101,6 @@
           "size_bytes": 134217728,
           "ip": "rv_plic"
         },
-        "aes": {
-          "base_addr": 1091567616,
-          "size_bytes": 256,
-          "ip": "aes"
-        },
         "sram_ctrl_main_regs": {
           "base_addr": 1092354048,
           "size_bytes": 64,
@@ -99,6 +110,21 @@
           "base_addr": 1092485120,
           "size_bytes": 128,
           "ip": "rom_ctrl"
+        },
+        "rv_dm_regs": {
+          "base_addr": 1092616192,
+          "size_bytes": 16,
+          "ip": "rv_dm"
+        },
+        "rv_dm_mem": {
+          "base_addr": 65536,
+          "size_bytes": 4096,
+          "ip": "rv_dm"
+        },
+        "rv_dm_dbg": {
+          "base_addr": 4096,
+          "size_bytes": 512,
+          "ip": "rv_dm"
         },
         "rv_core_ibex_cfg": {
           "base_addr": 1092550656,
@@ -137,11 +163,11 @@
       "JITTER_REGWEN": 16,
       "JITTER_ENABLE": 20,
       "CLK_ENABLES": 24,
-      "CLK_HINTS": 28,
-      "CLK_HINTS_STATUS": 32,
-      "MEASURE_CTRL_REGWEN": 36,
-      "IO_MEAS_CTRL_EN": 40,
-      "IO_MEAS_CTRL_SHADOWED": 44,
+      "MEASURE_CTRL_REGWEN": 28,
+      "IO_MEAS_CTRL_EN": 32,
+      "IO_MEAS_CTRL_SHADOWED": 36,
+      "IO_DIV2_MEAS_CTRL_EN": 40,
+      "IO_DIV2_MEAS_CTRL_SHADOWED": 44,
       "IO_DIV4_MEAS_CTRL_EN": 48,
       "IO_DIV4_MEAS_CTRL_SHADOWED": 52,
       "MAIN_MEAS_CTRL_EN": 56,
@@ -273,106 +299,128 @@
       "ALERT_TEST": 0,
       "MIO_PERIPH_INSEL_REGWEN": {
         "offset": 4,
-        "count": 35,
+        "count": 41,
         "stride": 4
       },
       "MIO_PERIPH_INSEL": {
-        "offset": 144,
-        "count": 35,
+        "offset": 168,
+        "count": 41,
         "stride": 4
       },
       "MIO_OUTSEL_REGWEN": {
-        "offset": 284,
+        "offset": 332,
         "count": 47,
         "stride": 4
       },
       "MIO_OUTSEL": {
-        "offset": 472,
+        "offset": 520,
         "count": 47,
         "stride": 4
       },
       "MIO_PAD_ATTR_REGWEN": {
-        "offset": 660,
+        "offset": 708,
         "count": 47,
         "stride": 4
       },
       "MIO_PAD_ATTR": {
-        "offset": 848,
+        "offset": 896,
         "count": 47,
         "stride": 4
       },
       "DIO_PAD_ATTR_REGWEN": {
-        "offset": 1036,
+        "offset": 1084,
         "count": 14,
         "stride": 4
       },
       "DIO_PAD_ATTR": {
-        "offset": 1092,
+        "offset": 1140,
         "count": 14,
         "stride": 4
       },
       "MIO_PAD_SLEEP_STATUS": {
-        "offset": 1148,
+        "offset": 1196,
         "count": 2,
         "stride": 4
       },
       "MIO_PAD_SLEEP_REGWEN": {
-        "offset": 1156,
+        "offset": 1204,
         "count": 47,
         "stride": 4
       },
       "MIO_PAD_SLEEP_EN": {
-        "offset": 1344,
+        "offset": 1392,
         "count": 47,
         "stride": 4
       },
       "MIO_PAD_SLEEP_MODE": {
-        "offset": 1532,
+        "offset": 1580,
         "count": 47,
         "stride": 4
       },
-      "DIO_PAD_SLEEP_STATUS": 1720,
+      "DIO_PAD_SLEEP_STATUS": 1768,
       "DIO_PAD_SLEEP_REGWEN": {
-        "offset": 1724,
+        "offset": 1772,
         "count": 14,
         "stride": 4
       },
       "DIO_PAD_SLEEP_EN": {
-        "offset": 1780,
+        "offset": 1828,
         "count": 14,
         "stride": 4
       },
       "DIO_PAD_SLEEP_MODE": {
-        "offset": 1836,
+        "offset": 1884,
         "count": 14,
         "stride": 4
       },
       "WKUP_DETECTOR_REGWEN": {
-        "offset": 1892,
+        "offset": 1940,
         "count": 8,
         "stride": 4
       },
       "WKUP_DETECTOR_EN": {
-        "offset": 1924,
+        "offset": 1972,
         "count": 8,
         "stride": 4
       },
       "WKUP_DETECTOR": {
-        "offset": 1956,
+        "offset": 2004,
         "count": 8,
         "stride": 4
       },
       "WKUP_DETECTOR_CNT_TH": {
-        "offset": 1988,
+        "offset": 2036,
         "count": 8,
         "stride": 4
       },
       "WKUP_DETECTOR_PADSEL": {
-        "offset": 2020,
+        "offset": 2068,
         "count": 8,
         "stride": 4
       },
-      "WKUP_CAUSE": 2052
+      "WKUP_CAUSE": 2100
+    },
+    "pwm": {
+      "ALERT_TEST": 0,
+      "REGWEN": 4,
+      "CFG": 8,
+      "PWM_EN": 12,
+      "INVERT": 16,
+      "PWM_PARAM": {
+        "offset": 20,
+        "count": 6,
+        "stride": 4
+      },
+      "DUTY_CYCLE": {
+        "offset": 44,
+        "count": 6,
+        "stride": 4
+      },
+      "BLINK_PARAM": {
+        "offset": 68,
+        "count": 6,
+        "stride": 4
+      }
     },
     "pwrmgr": {
       "INTR_STATE": 0,
@@ -403,15 +451,15 @@
       "CPU_INFO": 24,
       "SW_RST_REGWEN": {
         "offset": 28,
-        "count": 3,
+        "count": 5,
         "stride": 4
       },
       "SW_RST_CTRL_N": {
-        "offset": 40,
-        "count": 3,
+        "offset": 48,
+        "count": 5,
         "stride": 4
       },
-      "ERR_CODE": 52
+      "ERR_CODE": 68
     }
   },
   "per_top_used_fields": {
@@ -494,9 +542,15 @@
       "GpioGpio29": 29,
       "GpioGpio30": 30,
       "GpioGpio31": 31,
-      "Uart0Rx": 32,
-      "Uart1Rx": 33,
-      "UsbdevSense": 34
+      "I2c0Sda": 32,
+      "I2c0Scl": 33,
+      "SpiHost1Sd0": 34,
+      "SpiHost1Sd1": 35,
+      "SpiHost1Sd2": 36,
+      "SpiHost1Sd3": 37,
+      "Uart0Rx": 38,
+      "Uart1Rx": 39,
+      "UsbdevSense": 40
     },
     "insel": {
       "ConstantZero": 0,
@@ -634,8 +688,22 @@
       "GpioGpio29": 32,
       "GpioGpio30": 33,
       "GpioGpio31": 34,
-      "Uart0Tx": 35,
-      "Uart1Tx": 36
+      "I2c0Sda": 35,
+      "I2c0Scl": 36,
+      "SpiHost1Sd0": 37,
+      "SpiHost1Sd1": 38,
+      "SpiHost1Sd2": 39,
+      "SpiHost1Sd3": 40,
+      "Uart0Tx": 41,
+      "Uart1Tx": 42,
+      "SpiHost1Sck": 43,
+      "SpiHost1Csb": 44,
+      "PwmAonPwm0": 45,
+      "PwmAonPwm1": 46,
+      "PwmAonPwm2": 47,
+      "PwmAonPwm3": 48,
+      "PwmAonPwm4": 49,
+      "PwmAonPwm5": 50
     },
     "direct_pads": {
       "SpiHost0Sd0": 0,
@@ -717,7 +785,9 @@
     "sw_resets": {
       "SpiDevice": 0,
       "SpiHost0": 1,
-      "Usb": 2
+      "Usb": 2,
+      "SpiHost1": 3,
+      "I2c0": 4
     },
     "reset_info": {
       "Por": 0,
@@ -736,9 +806,7 @@
       "IoPeri": 2,
       "UsbPeri": 3
     },
-    "hintable_clocks": {
-      "MainAes": 0
-    },
+    "hintable_clocks": {},
     "ext_clk_bypass": true
   }
 }

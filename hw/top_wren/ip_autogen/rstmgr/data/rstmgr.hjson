@@ -111,7 +111,7 @@
     { name: "NumSwResets",
       desc: "Number of software resets",
       type: "int",
-      default: "3",
+      default: "5",
       local: "true"
     },
 
@@ -164,6 +164,18 @@
     }
     { name: "RSTMGR.SW_RST.USB_ENABLE",
       desc: "Enable reset of USB peripheral via CSR."
+    }
+    { name: "RSTMGR.SW_RST.SPI_HOST1_REQUEST",
+      desc: "Trigger reset of SPI_HOST1 peripheral via CSR."
+    }
+    { name: "RSTMGR.SW_RST.SPI_HOST1_ENABLE",
+      desc: "Enable reset of SPI_HOST1 peripheral via CSR."
+    }
+    { name: "RSTMGR.SW_RST.I2C0_REQUEST",
+      desc: "Trigger reset of I2C0 peripheral via CSR."
+    }
+    { name: "RSTMGR.SW_RST.I2C0_ENABLE",
+      desc: "Enable reset of I2C0 peripheral via CSR."
     }
     { name: "RSTMGR.RESET_INFO.CAPTURE",
       desc: "Capture information about the causes of a reset."

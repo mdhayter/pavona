@@ -12,6 +12,7 @@
   {
     clk_peri_i: io_div4
     clk_spi_host0_i: io
+    clk_spi_host1_i: io_div2
     clk_usb_i: usb
   }
   clock_group: infra
@@ -28,6 +29,11 @@
       name: spi_host0
       domain: "0"
     }
+    rst_spi_host1_ni:
+    {
+      name: lc_io_div2
+      domain: "0"
+    }
     rst_usb_ni:
     {
       name: usb
@@ -38,6 +44,7 @@
   {
     clk_peri_i: clkmgr_aon_clocks.clk_io_div4_infra
     clk_spi_host0_i: clkmgr_aon_clocks.clk_io_infra
+    clk_spi_host1_i: clkmgr_aon_clocks.clk_io_div2_infra
     clk_usb_i: clkmgr_aon_clocks.clk_usb_infra
   }
   domain:
@@ -50,15 +57,19 @@
     [
       uart0
       uart1
+      i2c0
       gpio
       spi_device
       spi_host0
+      spi_host1
       rv_timer
       usbdev
       pwrmgr_aon
       rstmgr_aon
       clkmgr_aon
+      pwm_aon
       pinmux_aon
+      aon_timer_aon
       ast
     ]
   }
@@ -155,6 +166,69 @@
             hart: 0x40050000
           }
           size_byte: 0x2000
+        }
+      ]
+      xbar: false
+      stub: false
+      req_fifo_pass: true
+    }
+    {
+      name: i2c0
+      type: device
+      clock: clk_peri_i
+      reset: rst_peri_ni
+      pipeline: false
+      inst_type: i2c
+      addr_range:
+      [
+        {
+          base_addrs:
+          {
+            hart: 0x40080000
+          }
+          size_byte: 0x80
+        }
+      ]
+      xbar: false
+      stub: false
+      req_fifo_pass: true
+    }
+    {
+      name: spi_host1
+      type: device
+      clock: clk_spi_host1_i
+      reset: rst_spi_host1_ni
+      pipeline: false
+      inst_type: spi_host
+      addr_range:
+      [
+        {
+          base_addrs:
+          {
+            hart: 0x40310000
+          }
+          size_byte: 0x40
+        }
+      ]
+      xbar: false
+      stub: false
+      req_fifo_pass: true
+    }
+    {
+      name: pwm_aon
+      type: device
+      clock: clk_peri_i
+      reset: rst_peri_ni
+      pipeline: false
+      inst_type: pwm
+      addr_range:
+      [
+        {
+          base_addrs:
+          {
+            hart: 0x40450000
+          }
+          size_byte: 0x80
         }
       ]
       xbar: false
@@ -259,7 +333,7 @@
           {
             hart: 0x40410000
           }
-          size_byte: 0x40
+          size_byte: 0x80
         }
       ]
       xbar: false
@@ -302,6 +376,27 @@
             hart: 0x40460000
           }
           size_byte: 0x1000
+        }
+      ]
+      xbar: false
+      stub: false
+      req_fifo_pass: true
+    }
+    {
+      name: aon_timer_aon
+      type: device
+      clock: clk_peri_i
+      reset: rst_peri_ni
+      pipeline: false
+      inst_type: aon_timer
+      addr_range:
+      [
+        {
+          base_addrs:
+          {
+            hart: 0x40470000
+          }
+          size_byte: 0x40
         }
       ]
       xbar: false
@@ -399,6 +494,42 @@
       index: -1
     }
     {
+      name: tl_i2c0
+      struct: tl
+      package: tlul_pkg
+      type: req_rsp
+      act: req
+      inst_name: peri
+      width: 1
+      default: ""
+      top_signame: i2c0_tl
+      index: -1
+    }
+    {
+      name: tl_spi_host1
+      struct: tl
+      package: tlul_pkg
+      type: req_rsp
+      act: req
+      inst_name: peri
+      width: 1
+      default: ""
+      top_signame: spi_host1_tl
+      index: -1
+    }
+    {
+      name: tl_pwm_aon
+      struct: tl
+      package: tlul_pkg
+      type: req_rsp
+      act: req
+      inst_name: peri
+      width: 1
+      default: ""
+      top_signame: pwm_aon_tl
+      index: -1
+    }
+    {
       name: tl_spi_host0
       struct: tl
       package: tlul_pkg
@@ -480,6 +611,18 @@
       width: 1
       default: ""
       top_signame: pinmux_aon_tl
+      index: -1
+    }
+    {
+      name: tl_aon_timer_aon
+      struct: tl
+      package: tlul_pkg
+      type: req_rsp
+      act: req
+      inst_name: peri
+      width: 1
+      default: ""
+      top_signame: aon_timer_aon_tl
       index: -1
     }
     {

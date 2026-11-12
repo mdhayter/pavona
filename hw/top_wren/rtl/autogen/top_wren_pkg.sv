@@ -50,6 +50,16 @@ package top_wren_pkg;
   parameter int unsigned TOP_WREN_SPI_DEVICE_SIZE_BYTES = 32'h2000;
 
   /**
+   * Peripheral base address for i2c0 in top wren.
+   */
+  parameter int unsigned TOP_WREN_I2C0_BASE_ADDR = 32'h40080000;
+
+  /**
+   * Peripheral size in bytes for i2c0 in top wren.
+   */
+  parameter int unsigned TOP_WREN_I2C0_SIZE_BYTES = 32'h80;
+
+  /**
    * Peripheral base address for spi_host0 in top wren.
    */
   parameter int unsigned TOP_WREN_SPI_HOST0_BASE_ADDR = 32'h40060000;
@@ -90,6 +100,26 @@ package top_wren_pkg;
   parameter int unsigned TOP_WREN_PWRMGR_AON_SIZE_BYTES = 32'h80;
 
   /**
+   * Peripheral base address for spi_host1 in top wren.
+   */
+  parameter int unsigned TOP_WREN_SPI_HOST1_BASE_ADDR = 32'h40310000;
+
+  /**
+   * Peripheral size in bytes for spi_host1 in top wren.
+   */
+  parameter int unsigned TOP_WREN_SPI_HOST1_SIZE_BYTES = 32'h40;
+
+  /**
+   * Peripheral base address for pwm_aon in top wren.
+   */
+  parameter int unsigned TOP_WREN_PWM_AON_BASE_ADDR = 32'h40450000;
+
+  /**
+   * Peripheral size in bytes for pwm_aon in top wren.
+   */
+  parameter int unsigned TOP_WREN_PWM_AON_SIZE_BYTES = 32'h80;
+
+  /**
    * Peripheral base address for rstmgr_aon in top wren.
    */
   parameter int unsigned TOP_WREN_RSTMGR_AON_BASE_ADDR = 32'h40410000;
@@ -97,7 +127,7 @@ package top_wren_pkg;
   /**
    * Peripheral size in bytes for rstmgr_aon in top wren.
    */
-  parameter int unsigned TOP_WREN_RSTMGR_AON_SIZE_BYTES = 32'h40;
+  parameter int unsigned TOP_WREN_RSTMGR_AON_SIZE_BYTES = 32'h80;
 
   /**
    * Peripheral base address for clkmgr_aon in top wren.
@@ -170,16 +200,6 @@ package top_wren_pkg;
   parameter int unsigned TOP_WREN_RV_PLIC_SIZE_BYTES = 32'h8000000;
 
   /**
-   * Peripheral base address for aes in top wren.
-   */
-  parameter int unsigned TOP_WREN_AES_BASE_ADDR = 32'h41100000;
-
-  /**
-   * Peripheral size in bytes for aes in top wren.
-   */
-  parameter int unsigned TOP_WREN_AES_SIZE_BYTES = 32'h100;
-
-  /**
    * Peripheral base address for regs device on sram_ctrl_main in top wren.
    */
   parameter int unsigned TOP_WREN_SRAM_CTRL_MAIN_REGS_BASE_ADDR = 32'h411C0000;
@@ -198,6 +218,36 @@ package top_wren_pkg;
    * Peripheral size in bytes for regs device on rom_ctrl in top wren.
    */
   parameter int unsigned TOP_WREN_ROM_CTRL_REGS_SIZE_BYTES = 32'h80;
+
+  /**
+   * Peripheral base address for regs device on rv_dm in top wren.
+   */
+  parameter int unsigned TOP_WREN_RV_DM_REGS_BASE_ADDR = 32'h41200000;
+
+  /**
+   * Peripheral size in bytes for regs device on rv_dm in top wren.
+   */
+  parameter int unsigned TOP_WREN_RV_DM_REGS_SIZE_BYTES = 32'h10;
+
+  /**
+   * Peripheral base address for mem device on rv_dm in top wren.
+   */
+  parameter int unsigned TOP_WREN_RV_DM_MEM_BASE_ADDR = 32'h10000;
+
+  /**
+   * Peripheral size in bytes for mem device on rv_dm in top wren.
+   */
+  parameter int unsigned TOP_WREN_RV_DM_MEM_SIZE_BYTES = 32'h1000;
+
+  /**
+   * Peripheral base address for dbg device on rv_dm in top wren.
+   */
+  parameter int unsigned TOP_WREN_RV_DM_DBG_BASE_ADDR = 32'h1000;
+
+  /**
+   * Peripheral size in bytes for dbg device on rv_dm in top wren.
+   */
+  parameter int unsigned TOP_WREN_RV_DM_DBG_SIZE_BYTES = 32'h200;
 
   /**
    * Peripheral base address for cfg device on rv_core_ibex in top wren.
@@ -241,10 +291,10 @@ package top_wren_pkg;
 
 
   // Number of wren outgoing alerts
-  parameter int unsigned NOutgoingAlertsWren = 28;
+  parameter int unsigned NOutgoingAlertsWren = 30;
 
   // Number of LPGs for outgoing alert group wren
-  parameter int unsigned NOutgoingLpgsWren = 13;
+  parameter int unsigned NOutgoingLpgsWren = 15;
 
   // Enumeration of wren outgoing alert modules
   typedef enum int unsigned {
@@ -252,20 +302,23 @@ package top_wren_pkg;
     TopWrenAlertPeripheralUart1 = 1,
     TopWrenAlertPeripheralGpio = 2,
     TopWrenAlertPeripheralSpiDevice = 3,
-    TopWrenAlertPeripheralSpiHost0 = 4,
-    TopWrenAlertPeripheralRvTimer = 5,
-    TopWrenAlertPeripheralUsbdev = 6,
-    TopWrenAlertPeripheralPwrmgrAon = 7,
-    TopWrenAlertPeripheralRstmgrAon = 8,
-    TopWrenAlertPeripheralClkmgrAon = 9,
-    TopWrenAlertPeripheralPinmuxAon = 10,
-    TopWrenAlertPeripheralAonTimerAon = 11,
-    TopWrenAlertPeripheralFlashCtrl = 12,
-    TopWrenAlertPeripheralRvPlic = 13,
-    TopWrenAlertPeripheralAes = 14,
-    TopWrenAlertPeripheralSramCtrlMain = 15,
-    TopWrenAlertPeripheralRomCtrl = 16,
-    TopWrenAlertPeripheralRvCoreIbex = 17,
+    TopWrenAlertPeripheralI2c0 = 4,
+    TopWrenAlertPeripheralSpiHost0 = 5,
+    TopWrenAlertPeripheralRvTimer = 6,
+    TopWrenAlertPeripheralUsbdev = 7,
+    TopWrenAlertPeripheralPwrmgrAon = 8,
+    TopWrenAlertPeripheralSpiHost1 = 9,
+    TopWrenAlertPeripheralPwmAon = 10,
+    TopWrenAlertPeripheralRstmgrAon = 11,
+    TopWrenAlertPeripheralClkmgrAon = 12,
+    TopWrenAlertPeripheralPinmuxAon = 13,
+    TopWrenAlertPeripheralAonTimerAon = 14,
+    TopWrenAlertPeripheralFlashCtrl = 15,
+    TopWrenAlertPeripheralRvPlic = 16,
+    TopWrenAlertPeripheralSramCtrlMain = 17,
+    TopWrenAlertPeripheralRomCtrl = 18,
+    TopWrenAlertPeripheralRvDm = 19,
+    TopWrenAlertPeripheralRvCoreIbex = 20,
     TopWrenOutgoingAlertWrenPeripheralCount
   } outgoing_alert_wren_peripheral_e;
 
@@ -275,35 +328,39 @@ package top_wren_pkg;
     TopWrenAlertIdUart1FatalFault = 1,
     TopWrenAlertIdGpioFatalFault = 2,
     TopWrenAlertIdSpiDeviceFatalFault = 3,
-    TopWrenAlertIdSpiHost0FatalFault = 4,
-    TopWrenAlertIdRvTimerFatalFault = 5,
-    TopWrenAlertIdUsbdevFatalFault = 6,
-    TopWrenAlertIdPwrmgrAonFatalFault = 7,
-    TopWrenAlertIdRstmgrAonFatalFault = 8,
-    TopWrenAlertIdRstmgrAonFatalCnstyFault = 9,
-    TopWrenAlertIdClkmgrAonRecovFault = 10,
-    TopWrenAlertIdClkmgrAonFatalFault = 11,
-    TopWrenAlertIdPinmuxAonFatalFault = 12,
-    TopWrenAlertIdAonTimerAonFatalFault = 13,
-    TopWrenAlertIdFlashCtrlRecovErr = 14,
-    TopWrenAlertIdFlashCtrlFatalStdErr = 15,
-    TopWrenAlertIdFlashCtrlFatalErr = 16,
-    TopWrenAlertIdFlashCtrlFatalPrimFlashAlert = 17,
-    TopWrenAlertIdFlashCtrlRecovPrimFlashAlert = 18,
-    TopWrenAlertIdRvPlicFatalFault = 19,
-    TopWrenAlertIdAesRecovCtrlUpdateErr = 20,
-    TopWrenAlertIdAesFatalFault = 21,
-    TopWrenAlertIdSramCtrlMainFatalError = 22,
-    TopWrenAlertIdRomCtrlFatal = 23,
-    TopWrenAlertIdRvCoreIbexFatalSwErr = 24,
-    TopWrenAlertIdRvCoreIbexRecovSwErr = 25,
-    TopWrenAlertIdRvCoreIbexFatalHwErr = 26,
-    TopWrenAlertIdRvCoreIbexRecovHwErr = 27,
+    TopWrenAlertIdI2c0FatalFault = 4,
+    TopWrenAlertIdSpiHost0FatalFault = 5,
+    TopWrenAlertIdRvTimerFatalFault = 6,
+    TopWrenAlertIdUsbdevFatalFault = 7,
+    TopWrenAlertIdPwrmgrAonFatalFault = 8,
+    TopWrenAlertIdSpiHost1FatalFault = 9,
+    TopWrenAlertIdPwmAonFatalFault = 10,
+    TopWrenAlertIdRstmgrAonFatalFault = 11,
+    TopWrenAlertIdRstmgrAonFatalCnstyFault = 12,
+    TopWrenAlertIdClkmgrAonRecovFault = 13,
+    TopWrenAlertIdClkmgrAonFatalFault = 14,
+    TopWrenAlertIdPinmuxAonFatalFault = 15,
+    TopWrenAlertIdAonTimerAonFatalFault = 16,
+    TopWrenAlertIdFlashCtrlRecovErr = 17,
+    TopWrenAlertIdFlashCtrlFatalStdErr = 18,
+    TopWrenAlertIdFlashCtrlFatalErr = 19,
+    TopWrenAlertIdFlashCtrlFatalPrimFlashAlert = 20,
+    TopWrenAlertIdFlashCtrlRecovPrimFlashAlert = 21,
+    TopWrenAlertIdRvPlicFatalFault = 22,
+    TopWrenAlertIdSramCtrlMainFatalError = 23,
+    TopWrenAlertIdRomCtrlFatal = 24,
+    TopWrenAlertIdRvDmFatalFault = 25,
+    TopWrenAlertIdRvCoreIbexFatalSwErr = 26,
+    TopWrenAlertIdRvCoreIbexRecovSwErr = 27,
+    TopWrenAlertIdRvCoreIbexFatalHwErr = 28,
+    TopWrenAlertIdRvCoreIbexRecovHwErr = 29,
     TopWrenOutgoingAlertWrenIdCount
   } outgoing_alert_wren_id_e;
 
   // Enumeration of wren outgoing alerts AsyncOn configuration
   parameter logic [NOutgoingAlertsWren-1:0] AsyncOnOutgoingAlertWren = {
+    1'b1,
+    1'b1,
     1'b1,
     1'b1,
     1'b1,
@@ -395,35 +452,52 @@ package top_wren_pkg;
     TopWrenPlicIrqIdSpiDeviceTpmHeaderNotEmpty = 56,
     TopWrenPlicIrqIdSpiDeviceTpmRdfifoCmdEnd = 57,
     TopWrenPlicIrqIdSpiDeviceTpmRdfifoDrop = 58,
-    TopWrenPlicIrqIdSpiHost0Error = 59,
-    TopWrenPlicIrqIdSpiHost0SpiEvent = 60,
-    TopWrenPlicIrqIdUsbdevPktReceived = 61,
-    TopWrenPlicIrqIdUsbdevPktSent = 62,
-    TopWrenPlicIrqIdUsbdevDisconnected = 63,
-    TopWrenPlicIrqIdUsbdevHostLost = 64,
-    TopWrenPlicIrqIdUsbdevLinkReset = 65,
-    TopWrenPlicIrqIdUsbdevLinkSuspend = 66,
-    TopWrenPlicIrqIdUsbdevLinkResume = 67,
-    TopWrenPlicIrqIdUsbdevAvOutEmpty = 68,
-    TopWrenPlicIrqIdUsbdevRxFull = 69,
-    TopWrenPlicIrqIdUsbdevAvOverflow = 70,
-    TopWrenPlicIrqIdUsbdevLinkInErr = 71,
-    TopWrenPlicIrqIdUsbdevRxCrcErr = 72,
-    TopWrenPlicIrqIdUsbdevRxPidErr = 73,
-    TopWrenPlicIrqIdUsbdevRxBitstuffErr = 74,
-    TopWrenPlicIrqIdUsbdevFrame = 75,
-    TopWrenPlicIrqIdUsbdevPowered = 76,
-    TopWrenPlicIrqIdUsbdevLinkOutErr = 77,
-    TopWrenPlicIrqIdUsbdevAvSetupEmpty = 78,
-    TopWrenPlicIrqIdPwrmgrAonWakeup = 79,
-    TopWrenPlicIrqIdAonTimerAonWkupTimerExpired = 80,
-    TopWrenPlicIrqIdAonTimerAonWdogTimerBark = 81,
-    TopWrenPlicIrqIdFlashCtrlProgEmpty = 82,
-    TopWrenPlicIrqIdFlashCtrlProgLvl = 83,
-    TopWrenPlicIrqIdFlashCtrlRdFull = 84,
-    TopWrenPlicIrqIdFlashCtrlRdLvl = 85,
-    TopWrenPlicIrqIdFlashCtrlOpDone = 86,
-    TopWrenPlicIrqIdFlashCtrlCorrErr = 87,
+    TopWrenPlicIrqIdI2c0FmtThreshold = 59,
+    TopWrenPlicIrqIdI2c0RxThreshold = 60,
+    TopWrenPlicIrqIdI2c0AcqThreshold = 61,
+    TopWrenPlicIrqIdI2c0RxOverflow = 62,
+    TopWrenPlicIrqIdI2c0ControllerHalt = 63,
+    TopWrenPlicIrqIdI2c0SclInterference = 64,
+    TopWrenPlicIrqIdI2c0SdaInterference = 65,
+    TopWrenPlicIrqIdI2c0StretchTimeout = 66,
+    TopWrenPlicIrqIdI2c0SdaUnstable = 67,
+    TopWrenPlicIrqIdI2c0CmdComplete = 68,
+    TopWrenPlicIrqIdI2c0TxStretch = 69,
+    TopWrenPlicIrqIdI2c0TxThreshold = 70,
+    TopWrenPlicIrqIdI2c0AcqStretch = 71,
+    TopWrenPlicIrqIdI2c0UnexpStop = 72,
+    TopWrenPlicIrqIdI2c0HostTimeout = 73,
+    TopWrenPlicIrqIdSpiHost0Error = 74,
+    TopWrenPlicIrqIdSpiHost0SpiEvent = 75,
+    TopWrenPlicIrqIdSpiHost1Error = 76,
+    TopWrenPlicIrqIdSpiHost1SpiEvent = 77,
+    TopWrenPlicIrqIdUsbdevPktReceived = 78,
+    TopWrenPlicIrqIdUsbdevPktSent = 79,
+    TopWrenPlicIrqIdUsbdevDisconnected = 80,
+    TopWrenPlicIrqIdUsbdevHostLost = 81,
+    TopWrenPlicIrqIdUsbdevLinkReset = 82,
+    TopWrenPlicIrqIdUsbdevLinkSuspend = 83,
+    TopWrenPlicIrqIdUsbdevLinkResume = 84,
+    TopWrenPlicIrqIdUsbdevAvOutEmpty = 85,
+    TopWrenPlicIrqIdUsbdevRxFull = 86,
+    TopWrenPlicIrqIdUsbdevAvOverflow = 87,
+    TopWrenPlicIrqIdUsbdevLinkInErr = 88,
+    TopWrenPlicIrqIdUsbdevRxCrcErr = 89,
+    TopWrenPlicIrqIdUsbdevRxPidErr = 90,
+    TopWrenPlicIrqIdUsbdevRxBitstuffErr = 91,
+    TopWrenPlicIrqIdUsbdevFrame = 92,
+    TopWrenPlicIrqIdUsbdevPowered = 93,
+    TopWrenPlicIrqIdUsbdevLinkOutErr = 94,
+    TopWrenPlicIrqIdUsbdevAvSetupEmpty = 95,
+    TopWrenPlicIrqIdPwrmgrAonWakeup = 96,
+    TopWrenPlicIrqIdAonTimerAonWkupTimerExpired = 97,
+    TopWrenPlicIrqIdAonTimerAonWdogTimerBark = 98,
+    TopWrenPlicIrqIdFlashCtrlProgEmpty = 99,
+    TopWrenPlicIrqIdFlashCtrlProgLvl = 100,
+    TopWrenPlicIrqIdFlashCtrlRdFull = 101,
+    TopWrenPlicIrqIdFlashCtrlRdLvl = 102,
+    TopWrenPlicIrqIdFlashCtrlOpDone = 103,
+    TopWrenPlicIrqIdFlashCtrlCorrErr = 104,
     TopWrenPlicIrqIdCount
   } interrupt_rv_plic_id_e;
 
@@ -472,10 +546,16 @@ package top_wren_pkg;
     MioInGpioGpio29 = 29,
     MioInGpioGpio30 = 30,
     MioInGpioGpio31 = 31,
-    MioInUart0Rx = 32,
-    MioInUart1Rx = 33,
-    MioInUsbdevSense = 34,
-    MioInCount = 35
+    MioInI2c0Sda = 32,
+    MioInI2c0Scl = 33,
+    MioInSpiHost1Sd0 = 34,
+    MioInSpiHost1Sd1 = 35,
+    MioInSpiHost1Sd2 = 36,
+    MioInSpiHost1Sd3 = 37,
+    MioInUart0Rx = 38,
+    MioInUart1Rx = 39,
+    MioInUsbdevSense = 40,
+    MioInCount = 41
   } mio_in_e;
 
   typedef enum {
@@ -511,9 +591,23 @@ package top_wren_pkg;
     MioOutGpioGpio29 = 29,
     MioOutGpioGpio30 = 30,
     MioOutGpioGpio31 = 31,
-    MioOutUart0Tx = 32,
-    MioOutUart1Tx = 33,
-    MioOutCount = 34
+    MioOutI2c0Sda = 32,
+    MioOutI2c0Scl = 33,
+    MioOutSpiHost1Sd0 = 34,
+    MioOutSpiHost1Sd1 = 35,
+    MioOutSpiHost1Sd2 = 36,
+    MioOutSpiHost1Sd3 = 37,
+    MioOutUart0Tx = 38,
+    MioOutUart1Tx = 39,
+    MioOutSpiHost1Sck = 40,
+    MioOutSpiHost1Csb = 41,
+    MioOutPwmAonPwm0 = 42,
+    MioOutPwmAonPwm1 = 43,
+    MioOutPwmAonPwm2 = 44,
+    MioOutPwmAonPwm3 = 45,
+    MioOutPwmAonPwm4 = 46,
+    MioOutPwmAonPwm5 = 47,
+    MioOutCount = 48
   } mio_out_e;
 
   // Enumeration for DIO signals, used on both the top and chip-levels.
@@ -621,22 +715,25 @@ package top_wren_pkg;
 
   // List of peripheral instantiated in this chip.
   typedef enum {
-    PeripheralAes,
     PeripheralAonTimerAon,
     PeripheralAst,
     PeripheralClkmgrAon,
     PeripheralFlashCtrl,
     PeripheralFlashMacroWrapper,
     PeripheralGpio,
+    PeripheralI2c0,
     PeripheralPinmuxAon,
+    PeripheralPwmAon,
     PeripheralPwrmgrAon,
     PeripheralRomCtrl,
     PeripheralRstmgrAon,
     PeripheralRvCoreIbex,
+    PeripheralRvDm,
     PeripheralRvPlic,
     PeripheralRvTimer,
     PeripheralSpiDevice,
     PeripheralSpiHost0,
+    PeripheralSpiHost1,
     PeripheralSramCtrlMain,
     PeripheralUart0,
     PeripheralUart1,

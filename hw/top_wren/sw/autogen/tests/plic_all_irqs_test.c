@@ -21,7 +21,7 @@
 #endif
 
 #ifndef TEST_MAX_IRQ_PERIPHERAL
-#define TEST_MAX_IRQ_PERIPHERAL 8
+#define TEST_MAX_IRQ_PERIPHERAL 9
 #endif
 
 #include "sw/device/lib/arch/boot_stage.h"
@@ -30,6 +30,7 @@
 #include "sw/device/lib/dif/autogen/dif_aon_timer_autogen.h"
 #include "sw/device/lib/dif/autogen/dif_flash_ctrl_autogen.h"
 #include "sw/device/lib/dif/autogen/dif_gpio_autogen.h"
+#include "sw/device/lib/dif/autogen/dif_i2c_autogen.h"
 #include "sw/device/lib/dif/autogen/dif_pwrmgr_autogen.h"
 #include "sw/device/lib/dif/autogen/dif_rv_plic_autogen.h"
 #include "sw/device/lib/dif/autogen/dif_spi_device_autogen.h"
@@ -59,26 +60,34 @@ static dif_gpio_t gpio;
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 3 && 3 < TEST_MAX_IRQ_PERIPHERAL
-static dif_pwrmgr_t pwrmgr_aon;
+static dif_i2c_t i2c0;
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
-static dif_spi_device_t spi_device;
+static dif_pwrmgr_t pwrmgr_aon;
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
+static dif_spi_device_t spi_device;
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
 static dif_spi_host_t spi_host0;
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
-static dif_uart_t uart0;
-#endif
-
-#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
-static dif_uart_t uart1;
+static dif_spi_host_t spi_host1;
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
+static dif_uart_t uart0;
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
+static dif_uart_t uart1;
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 8 && 8 < TEST_MAX_IRQ_PERIPHERAL
 static dif_usbdev_t usbdev;
 #endif
 
@@ -117,26 +126,31 @@ static volatile dif_gpio_irq_t gpio_irq_serviced;
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 3 && 3 < TEST_MAX_IRQ_PERIPHERAL
+static volatile dif_i2c_irq_t i2c_irq_expected;
+static volatile dif_i2c_irq_t i2c_irq_serviced;
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
 static volatile dif_pwrmgr_irq_t pwrmgr_irq_expected;
 static volatile dif_pwrmgr_irq_t pwrmgr_irq_serviced;
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
 static volatile dif_spi_device_irq_t spi_device_irq_expected;
 static volatile dif_spi_device_irq_t spi_device_irq_serviced;
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
 static volatile dif_spi_host_irq_t spi_host_irq_expected;
 static volatile dif_spi_host_irq_t spi_host_irq_serviced;
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
 static volatile dif_uart_irq_t uart_irq_expected;
 static volatile dif_uart_irq_t uart_irq_serviced;
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 8 && 8 < TEST_MAX_IRQ_PERIPHERAL
 static volatile dif_usbdev_irq_t usbdev_irq_expected;
 static volatile dif_usbdev_irq_t usbdev_irq_serviced;
 #endif
@@ -248,6 +262,42 @@ void ottf_external_isr(uint32_t *exc_info) {
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 3 && 3 < TEST_MAX_IRQ_PERIPHERAL
+    case kTopWrenPlicPeripheralI2c0: {
+      dif_i2c_irq_t irq =
+          (dif_i2c_irq_t)(plic_irq_id -
+                          (dif_rv_plic_irq_id_t)
+                              kTopWrenPlicIrqIdI2c0FmtThreshold);
+      CHECK(irq == i2c_irq_expected,
+            "Incorrect i2c0 IRQ triggered: exp = %d, obs = %d",
+            i2c_irq_expected, irq);
+      i2c_irq_serviced = irq;
+
+      dif_i2c_irq_state_snapshot_t snapshot;
+      CHECK_DIF_OK(dif_i2c_irq_get_state(&i2c0, &snapshot));
+      CHECK(snapshot == (dif_i2c_irq_state_snapshot_t)(1 << irq),
+            "Only i2c0 IRQ %d expected to fire. Actual interrupt "
+            "status = %x",
+            irq, snapshot);
+
+      if (0x1c17 & (1 << irq)) {
+        // We do not acknowledge status type interrupt at the IP side, but we
+        // need to clear the test force register.
+        CHECK_DIF_OK(dif_i2c_irq_force(&i2c0, irq, false));
+        // In case this status interrupt is asserted by default, we also
+        // disable it at this point so that it does not interfere with the
+        // rest of the test.
+        if ((0x0 & (1 << irq))) {
+          CHECK_DIF_OK(dif_i2c_irq_set_enabled(&i2c0, irq, false));
+        }
+      } else {
+        // We acknowledge event type interrupt.
+        CHECK_DIF_OK(dif_i2c_irq_acknowledge(&i2c0, irq));
+      }
+      break;
+    }
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
     case kTopWrenPlicPeripheralPwrmgrAon: {
       dif_pwrmgr_irq_t irq =
           (dif_pwrmgr_irq_t)(plic_irq_id -
@@ -270,7 +320,7 @@ void ottf_external_isr(uint32_t *exc_info) {
     }
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
     case kTopWrenPlicPeripheralSpiDevice: {
       dif_spi_device_irq_t irq =
           (dif_spi_device_irq_t)(plic_irq_id -
@@ -306,7 +356,7 @@ void ottf_external_isr(uint32_t *exc_info) {
     }
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
     case kTopWrenPlicPeripheralSpiHost0: {
       dif_spi_host_irq_t irq =
           (dif_spi_host_irq_t)(plic_irq_id -
@@ -343,6 +393,42 @@ void ottf_external_isr(uint32_t *exc_info) {
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
+    case kTopWrenPlicPeripheralSpiHost1: {
+      dif_spi_host_irq_t irq =
+          (dif_spi_host_irq_t)(plic_irq_id -
+                               (dif_rv_plic_irq_id_t)
+                                   kTopWrenPlicIrqIdSpiHost1Error);
+      CHECK(irq == spi_host_irq_expected,
+            "Incorrect spi_host1 IRQ triggered: exp = %d, obs = %d",
+            spi_host_irq_expected, irq);
+      spi_host_irq_serviced = irq;
+
+      dif_spi_host_irq_state_snapshot_t snapshot;
+      CHECK_DIF_OK(dif_spi_host_irq_get_state(&spi_host1, &snapshot));
+      CHECK(snapshot == (dif_spi_host_irq_state_snapshot_t)(1 << irq),
+            "Only spi_host1 IRQ %d expected to fire. Actual interrupt "
+            "status = %x",
+            irq, snapshot);
+
+      if (0x2 & (1 << irq)) {
+        // We do not acknowledge status type interrupt at the IP side, but we
+        // need to clear the test force register.
+        CHECK_DIF_OK(dif_spi_host_irq_force(&spi_host1, irq, false));
+        // In case this status interrupt is asserted by default, we also
+        // disable it at this point so that it does not interfere with the
+        // rest of the test.
+        if ((0x0 & (1 << irq))) {
+          CHECK_DIF_OK(dif_spi_host_irq_set_enabled(&spi_host1, irq, false));
+        }
+      } else {
+        // We acknowledge event type interrupt.
+        CHECK_DIF_OK(dif_spi_host_irq_acknowledge(&spi_host1, irq));
+      }
+      break;
+    }
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
     case kTopWrenPlicPeripheralUart0: {
       dif_uart_irq_t irq =
           (dif_uart_irq_t)(plic_irq_id -
@@ -378,7 +464,7 @@ void ottf_external_isr(uint32_t *exc_info) {
     }
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
     case kTopWrenPlicPeripheralUart1: {
       dif_uart_irq_t irq =
           (dif_uart_irq_t)(plic_irq_id -
@@ -414,7 +500,7 @@ void ottf_external_isr(uint32_t *exc_info) {
     }
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 8 && 8 < TEST_MAX_IRQ_PERIPHERAL
     case kTopWrenPlicPeripheralUsbdev: {
       dif_usbdev_irq_t irq =
           (dif_usbdev_irq_t)(plic_irq_id -
@@ -480,31 +566,41 @@ static void peripherals_init(void) {
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 3 && 3 < TEST_MAX_IRQ_PERIPHERAL
+  base_addr = mmio_region_from_addr(TOP_WREN_I2C0_BASE_ADDR);
+  CHECK_DIF_OK(dif_i2c_init(base_addr, &i2c0));
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
   base_addr = mmio_region_from_addr(TOP_WREN_PWRMGR_AON_BASE_ADDR);
   CHECK_DIF_OK(dif_pwrmgr_init(base_addr, &pwrmgr_aon));
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
   base_addr = mmio_region_from_addr(TOP_WREN_SPI_DEVICE_BASE_ADDR);
   CHECK_DIF_OK(dif_spi_device_init(base_addr, &spi_device));
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
   base_addr = mmio_region_from_addr(TOP_WREN_SPI_HOST0_BASE_ADDR);
   CHECK_DIF_OK(dif_spi_host_init(base_addr, &spi_host0));
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
+  base_addr = mmio_region_from_addr(TOP_WREN_SPI_HOST1_BASE_ADDR);
+  CHECK_DIF_OK(dif_spi_host_init(base_addr, &spi_host1));
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
   base_addr = mmio_region_from_addr(TOP_WREN_UART0_BASE_ADDR);
   CHECK_DIF_OK(dif_uart_init(base_addr, &uart0));
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
   base_addr = mmio_region_from_addr(TOP_WREN_UART1_BASE_ADDR);
   CHECK_DIF_OK(dif_uart_init(base_addr, &uart1));
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 8 && 8 < TEST_MAX_IRQ_PERIPHERAL
   base_addr = mmio_region_from_addr(TOP_WREN_USBDEV_BASE_ADDR);
   CHECK_DIF_OK(dif_usbdev_init(base_addr, &usbdev));
 #endif
@@ -530,26 +626,34 @@ static void peripheral_irqs_clear(void) {
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 3 && 3 < TEST_MAX_IRQ_PERIPHERAL
-  CHECK_DIF_OK(dif_pwrmgr_irq_acknowledge_all(&pwrmgr_aon));
+  CHECK_DIF_OK(dif_i2c_irq_acknowledge_all(&i2c0));
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
-  CHECK_DIF_OK(dif_spi_device_irq_acknowledge_all(&spi_device));
+  CHECK_DIF_OK(dif_pwrmgr_irq_acknowledge_all(&pwrmgr_aon));
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
+  CHECK_DIF_OK(dif_spi_device_irq_acknowledge_all(&spi_device));
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
   CHECK_DIF_OK(dif_spi_host_irq_acknowledge_all(&spi_host0));
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
-  CHECK_DIF_OK(dif_uart_irq_acknowledge_all(&uart0));
-#endif
-
-#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
-  CHECK_DIF_OK(dif_uart_irq_acknowledge_all(&uart1));
+  CHECK_DIF_OK(dif_spi_host_irq_acknowledge_all(&spi_host1));
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
+  CHECK_DIF_OK(dif_uart_irq_acknowledge_all(&uart0));
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
+  CHECK_DIF_OK(dif_uart_irq_acknowledge_all(&uart1));
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 8 && 8 < TEST_MAX_IRQ_PERIPHERAL
   CHECK_DIF_OK(dif_usbdev_irq_acknowledge_all(&usbdev));
 #endif
 }
@@ -573,21 +677,26 @@ static void peripheral_irqs_enable(void) {
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 3 && 3 < TEST_MAX_IRQ_PERIPHERAL
+  dif_i2c_irq_state_snapshot_t i2c_irqs =
+      (dif_i2c_irq_state_snapshot_t)0xffffffff;
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
   dif_pwrmgr_irq_state_snapshot_t pwrmgr_irqs =
       (dif_pwrmgr_irq_state_snapshot_t)0xffffffff;
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
   dif_spi_device_irq_state_snapshot_t spi_device_irqs =
       (dif_spi_device_irq_state_snapshot_t)0xffffffff;
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
   dif_spi_host_irq_state_snapshot_t spi_host_irqs =
       (dif_spi_host_irq_state_snapshot_t)0xffffffff;
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
   // Note: this peripheral contains status interrupts that are asserted by
   // default. Therefore, not all interrupts are enabled here, since that
   // would interfere with this test. Instead, these interrupts are enabled on
@@ -596,7 +705,7 @@ static void peripheral_irqs_enable(void) {
       (dif_uart_irq_state_snapshot_t)0xfffffefe;
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 8 && 8 < TEST_MAX_IRQ_PERIPHERAL
   dif_usbdev_irq_state_snapshot_t usbdev_irqs =
       (dif_usbdev_irq_state_snapshot_t)0xffffffff;
 #endif
@@ -610,18 +719,26 @@ static void peripheral_irqs_enable(void) {
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 3 && 3 < TEST_MAX_IRQ_PERIPHERAL
-  CHECK_DIF_OK(dif_pwrmgr_irq_restore_all(&pwrmgr_aon, &pwrmgr_irqs));
+  CHECK_DIF_OK(dif_i2c_irq_restore_all(&i2c0, &i2c_irqs));
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
-  CHECK_DIF_OK(dif_spi_device_irq_restore_all(&spi_device, &spi_device_irqs));
+  CHECK_DIF_OK(dif_pwrmgr_irq_restore_all(&pwrmgr_aon, &pwrmgr_irqs));
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
+  CHECK_DIF_OK(dif_spi_device_irq_restore_all(&spi_device, &spi_device_irqs));
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
   CHECK_DIF_OK(dif_spi_host_irq_restore_all(&spi_host0, &spi_host_irqs));
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
+  CHECK_DIF_OK(dif_spi_host_irq_restore_all(&spi_host1, &spi_host_irqs));
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
   // lowrisc/opentitan#8656: Skip UART0 in non-DV setups due to interference
   // from the logging facility.
   if (kDeviceType == kDeviceSimDV) {
@@ -629,11 +746,11 @@ static void peripheral_irqs_enable(void) {
   }
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
   CHECK_DIF_OK(dif_uart_irq_restore_all(&uart1, &uart_irqs));
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 8 && 8 < TEST_MAX_IRQ_PERIPHERAL
   CHECK_DIF_OK(dif_usbdev_irq_restore_all(&usbdev, &usbdev_irqs));
 #endif
 }
@@ -715,6 +832,30 @@ static void peripheral_irqs_trigger(void) {
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 3 && 3 < TEST_MAX_IRQ_PERIPHERAL
+  peripheral_expected = kTopWrenPlicPeripheralI2c0;
+  status_default_mask = 0x0;
+  for (dif_i2c_irq_t irq = kDifI2cIrqFmtThreshold; irq <= kDifI2cIrqHostTimeout;
+       ++irq) {
+    i2c_irq_expected = irq;
+    LOG_INFO("Triggering i2c0 IRQ %d.", irq);
+    CHECK_DIF_OK(dif_i2c_irq_force(&i2c0, irq, true));
+
+    // In this case, the interrupt has not been enabled yet because that would
+    // interfere with testing other interrupts. We enable it here and let the
+    // interrupt handler disable it again.
+    if ((status_default_mask & 0x1)) {
+      CHECK_DIF_OK(dif_i2c_irq_set_enabled(&i2c0, irq, true));
+    }
+    status_default_mask >>= 1;
+
+    // This avoids a race where *irq_serviced is read before
+    // entering the ISR.
+    IBEX_SPIN_FOR(i2c_irq_serviced == irq, 1);
+    LOG_INFO("IRQ %d from i2c0 is serviced.", irq);
+  }
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
   peripheral_expected = kTopWrenPlicPeripheralPwrmgrAon;
   for (dif_pwrmgr_irq_t irq = kDifPwrmgrIrqWakeup; irq <= kDifPwrmgrIrqWakeup;
        ++irq) {
@@ -729,7 +870,7 @@ static void peripheral_irqs_trigger(void) {
   }
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 4 && 4 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
   peripheral_expected = kTopWrenPlicPeripheralSpiDevice;
   status_default_mask = 0x0;
   for (dif_spi_device_irq_t irq = kDifSpiDeviceIrqUploadCmdfifoNotEmpty; irq <= kDifSpiDeviceIrqTpmRdfifoDrop;
@@ -753,7 +894,7 @@ static void peripheral_irqs_trigger(void) {
   }
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 5 && 5 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
   peripheral_expected = kTopWrenPlicPeripheralSpiHost0;
   status_default_mask = 0x0;
   for (dif_spi_host_irq_t irq = kDifSpiHostIrqError; irq <= kDifSpiHostIrqSpiEvent;
@@ -778,6 +919,30 @@ static void peripheral_irqs_trigger(void) {
 #endif
 
 #if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
+  peripheral_expected = kTopWrenPlicPeripheralSpiHost1;
+  status_default_mask = 0x0;
+  for (dif_spi_host_irq_t irq = kDifSpiHostIrqError; irq <= kDifSpiHostIrqSpiEvent;
+       ++irq) {
+    spi_host_irq_expected = irq;
+    LOG_INFO("Triggering spi_host1 IRQ %d.", irq);
+    CHECK_DIF_OK(dif_spi_host_irq_force(&spi_host1, irq, true));
+
+    // In this case, the interrupt has not been enabled yet because that would
+    // interfere with testing other interrupts. We enable it here and let the
+    // interrupt handler disable it again.
+    if ((status_default_mask & 0x1)) {
+      CHECK_DIF_OK(dif_spi_host_irq_set_enabled(&spi_host1, irq, true));
+    }
+    status_default_mask >>= 1;
+
+    // This avoids a race where *irq_serviced is read before
+    // entering the ISR.
+    IBEX_SPIN_FOR(spi_host_irq_serviced == irq, 1);
+    LOG_INFO("IRQ %d from spi_host1 is serviced.", irq);
+  }
+#endif
+
+#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
   // lowrisc/opentitan#8656: Skip UART0 in non-DV setups due to interference
   // from the logging facility.
   // aon_timer may generate a NMI instead of a PLIC IRQ depending on the ROM.
@@ -808,7 +973,7 @@ static void peripheral_irqs_trigger(void) {
   }
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 6 && 6 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
   peripheral_expected = kTopWrenPlicPeripheralUart1;
   status_default_mask = 0x101;
   for (dif_uart_irq_t irq = kDifUartIrqTxWatermark; irq <= kDifUartIrqTxEmpty;
@@ -832,7 +997,7 @@ static void peripheral_irqs_trigger(void) {
   }
 #endif
 
-#if TEST_MIN_IRQ_PERIPHERAL <= 7 && 7 < TEST_MAX_IRQ_PERIPHERAL
+#if TEST_MIN_IRQ_PERIPHERAL <= 8 && 8 < TEST_MAX_IRQ_PERIPHERAL
   peripheral_expected = kTopWrenPlicPeripheralUsbdev;
   status_default_mask = 0x0;
   for (dif_usbdev_irq_t irq = kDifUsbdevIrqPktReceived; irq <= kDifUsbdevIrqAvSetupEmpty;

@@ -15,10 +15,14 @@
 | rstmgr.[`SW_RST_REGWEN_0`](#sw_rst_regwen) | 0x1c     |        4 | Register write enable for software controllable resets.            |
 | rstmgr.[`SW_RST_REGWEN_1`](#sw_rst_regwen) | 0x20     |        4 | Register write enable for software controllable resets.            |
 | rstmgr.[`SW_RST_REGWEN_2`](#sw_rst_regwen) | 0x24     |        4 | Register write enable for software controllable resets.            |
-| rstmgr.[`SW_RST_CTRL_N_0`](#sw_rst_ctrl_n) | 0x28     |        4 | Software controllable resets.                                      |
-| rstmgr.[`SW_RST_CTRL_N_1`](#sw_rst_ctrl_n) | 0x2c     |        4 | Software controllable resets.                                      |
-| rstmgr.[`SW_RST_CTRL_N_2`](#sw_rst_ctrl_n) | 0x30     |        4 | Software controllable resets.                                      |
-| rstmgr.[`ERR_CODE`](#err_code)             | 0x34     |        4 | A bit vector of all the errors that have occurred in reset manager |
+| rstmgr.[`SW_RST_REGWEN_3`](#sw_rst_regwen) | 0x28     |        4 | Register write enable for software controllable resets.            |
+| rstmgr.[`SW_RST_REGWEN_4`](#sw_rst_regwen) | 0x2c     |        4 | Register write enable for software controllable resets.            |
+| rstmgr.[`SW_RST_CTRL_N_0`](#sw_rst_ctrl_n) | 0x30     |        4 | Software controllable resets.                                      |
+| rstmgr.[`SW_RST_CTRL_N_1`](#sw_rst_ctrl_n) | 0x34     |        4 | Software controllable resets.                                      |
+| rstmgr.[`SW_RST_CTRL_N_2`](#sw_rst_ctrl_n) | 0x38     |        4 | Software controllable resets.                                      |
+| rstmgr.[`SW_RST_CTRL_N_3`](#sw_rst_ctrl_n) | 0x3c     |        4 | Software controllable resets.                                      |
+| rstmgr.[`SW_RST_CTRL_N_4`](#sw_rst_ctrl_n) | 0x40     |        4 | Software controllable resets.                                      |
+| rstmgr.[`ERR_CODE`](#err_code)             | 0x44     |        4 | A bit vector of all the errors that have occurred in reset manager |
 
 ## ALERT_TEST
 Alert Test Register
@@ -177,6 +181,8 @@ When a particular bit value is 1, the corresponding value in [`SW_RST_CTRL_N`](#
 | SW_RST_REGWEN_0 | 0x1c     |
 | SW_RST_REGWEN_1 | 0x20     |
 | SW_RST_REGWEN_2 | 0x24     |
+| SW_RST_REGWEN_3 | 0x28     |
+| SW_RST_REGWEN_4 | 0x2c     |
 
 
 ### Fields
@@ -202,9 +208,11 @@ When a particular bit value is 1, the corresponding module is not held in reset.
 
 | Name            | Offset   |
 |:----------------|:---------|
-| SW_RST_CTRL_N_0 | 0x28     |
-| SW_RST_CTRL_N_1 | 0x2c     |
-| SW_RST_CTRL_N_2 | 0x30     |
+| SW_RST_CTRL_N_0 | 0x30     |
+| SW_RST_CTRL_N_1 | 0x34     |
+| SW_RST_CTRL_N_2 | 0x38     |
+| SW_RST_CTRL_N_3 | 0x3c     |
+| SW_RST_CTRL_N_4 | 0x40     |
 
 
 ### Fields
@@ -220,7 +228,7 @@ When a particular bit value is 1, the corresponding module is not held in reset.
 
 ## ERR_CODE
 A bit vector of all the errors that have occurred in reset manager
-- Offset: `0x34`
+- Offset: `0x44`
 - Reset default: `0x0`
 - Reset mask: `0x7`
 

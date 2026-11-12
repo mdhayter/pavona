@@ -24,6 +24,12 @@
       act:    "rsp"
       package: "tlul_pkg"
     }
+    { struct: "tl"
+      type:   "req_rsp"
+      name:   "tl_rv_dm__sba"
+      act:    "rsp"
+      package: "tlul_pkg"
+    }
     // device
     { struct: "tl"
       type:   "req_rsp"
@@ -34,6 +40,18 @@
     { struct: "tl"
       type:   "req_rsp"
       name:   "tl_rom_ctrl__regs"
+      act:    "req"
+      package: "tlul_pkg"
+    }
+    { struct: "tl"
+      type:   "req_rsp"
+      name:   "tl_rv_dm__regs"
+      act:    "req"
+      package: "tlul_pkg"
+    }
+    { struct: "tl"
+      type:   "req_rsp"
+      name:   "tl_rv_dm__mem"
       act:    "req"
       package: "tlul_pkg"
     }
@@ -58,12 +76,6 @@
     { struct: "tl"
       type:   "req_rsp"
       name:   "tl_flash_ctrl__mem"
-      act:    "req"
-      package: "tlul_pkg"
-    }
-    { struct: "tl"
-      type:   "req_rsp"
-      name:   "tl_aes"
       act:    "req"
       package: "tlul_pkg"
     }

@@ -4,10 +4,6 @@
 
 package clkmgr_pkg;
 
-  typedef enum int {
-    HintMainAes = 0
-  } hint_names_e;
-
   // clocks generated and broadcast
   typedef struct packed {
     logic clk_io_div4_powerup;
@@ -19,10 +15,10 @@ package clkmgr_pkg;
     logic clk_aon_secure;
     logic clk_aon_peri;
     logic clk_aon_timers;
-    logic clk_main_aes;
     logic clk_main_infra;
     logic clk_io_div4_infra;
     logic clk_io_infra;
+    logic clk_io_div2_infra;
     logic clk_usb_infra;
     logic clk_io_div4_secure;
     logic clk_main_secure;
@@ -44,10 +40,10 @@ package clkmgr_pkg;
     prim_mubi_pkg::mubi4_t aon_secure;
     prim_mubi_pkg::mubi4_t aon_peri;
     prim_mubi_pkg::mubi4_t aon_timers;
-    prim_mubi_pkg::mubi4_t main_aes;
     prim_mubi_pkg::mubi4_t main_infra;
     prim_mubi_pkg::mubi4_t io_div4_infra;
     prim_mubi_pkg::mubi4_t io_infra;
+    prim_mubi_pkg::mubi4_t io_div2_infra;
     prim_mubi_pkg::mubi4_t usb_infra;
     prim_mubi_pkg::mubi4_t io_div4_secure;
     prim_mubi_pkg::mubi4_t main_secure;
@@ -60,13 +56,5 @@ package clkmgr_pkg;
 
   parameter int NumOutputClk = 21;
 
-
-  typedef struct packed {
-    logic [1-1:0] idle;
-  } clk_hint_status_t;
-
-  parameter clk_hint_status_t CLK_HINT_STATUS_DEFAULT = '{
-    idle: {1{1'b1}}
-  };
 
 endpackage // clkmgr_pkg

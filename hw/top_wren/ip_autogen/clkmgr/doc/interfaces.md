@@ -26,7 +26,6 @@ Referring to the [Comportable guideline for peripheral device functionality](../
 | lc_clk_byp_ack    | lc_ctrl_pkg::lc_tx       | uni     | req   |       1 |                                                          |
 | jitter_en         | prim_mubi_pkg::mubi4     | uni     | req   |       1 |                                                          |
 | pwr               | pwr_clk                  | req_rsp | rsp   |       1 |                                                          |
-| idle              | prim_mubi_pkg::mubi4     | uni     | rcv   |       1 |                                                          |
 | calib_rdy         | prim_mubi_pkg::mubi4     | uni     | rcv   |       1 | Indicates clocks are calibrated and frequencies accurate |
 | tl                | tlul_pkg::tl             | req_rsp | rsp   |       1 |                                                          |
 

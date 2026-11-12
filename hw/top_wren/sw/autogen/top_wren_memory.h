@@ -124,6 +124,23 @@
  */
 #define TOP_WREN_SPI_DEVICE_SIZE_BYTES 0x2000
 /**
+ * Peripheral base address for i2c0 in top wren.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_WREN_I2C0_BASE_ADDR 0x40080000
+
+/**
+ * Peripheral size for i2c0 in top wren.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_WREN_I2C0_BASE_ADDR and
+ * `TOP_WREN_I2C0_BASE_ADDR + TOP_WREN_I2C0_SIZE_BYTES`.
+ */
+#define TOP_WREN_I2C0_SIZE_BYTES 0x80
+/**
  * Peripheral base address for spi_host0 in top wren.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
@@ -192,6 +209,40 @@
  */
 #define TOP_WREN_PWRMGR_AON_SIZE_BYTES 0x80
 /**
+ * Peripheral base address for spi_host1 in top wren.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_WREN_SPI_HOST1_BASE_ADDR 0x40310000
+
+/**
+ * Peripheral size for spi_host1 in top wren.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_WREN_SPI_HOST1_BASE_ADDR and
+ * `TOP_WREN_SPI_HOST1_BASE_ADDR + TOP_WREN_SPI_HOST1_SIZE_BYTES`.
+ */
+#define TOP_WREN_SPI_HOST1_SIZE_BYTES 0x40
+/**
+ * Peripheral base address for pwm_aon in top wren.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_WREN_PWM_AON_BASE_ADDR 0x40450000
+
+/**
+ * Peripheral size for pwm_aon in top wren.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_WREN_PWM_AON_BASE_ADDR and
+ * `TOP_WREN_PWM_AON_BASE_ADDR + TOP_WREN_PWM_AON_SIZE_BYTES`.
+ */
+#define TOP_WREN_PWM_AON_SIZE_BYTES 0x80
+/**
  * Peripheral base address for rstmgr_aon in top wren.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
@@ -207,7 +258,7 @@
  * address between #TOP_WREN_RSTMGR_AON_BASE_ADDR and
  * `TOP_WREN_RSTMGR_AON_BASE_ADDR + TOP_WREN_RSTMGR_AON_SIZE_BYTES`.
  */
-#define TOP_WREN_RSTMGR_AON_SIZE_BYTES 0x40
+#define TOP_WREN_RSTMGR_AON_SIZE_BYTES 0x80
 /**
  * Peripheral base address for clkmgr_aon in top wren.
  *
@@ -328,23 +379,6 @@
  */
 #define TOP_WREN_RV_PLIC_SIZE_BYTES 0x8000000
 /**
- * Peripheral base address for aes in top wren.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_WREN_AES_BASE_ADDR 0x41100000
-
-/**
- * Peripheral size for aes in top wren.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_WREN_AES_BASE_ADDR and
- * `TOP_WREN_AES_BASE_ADDR + TOP_WREN_AES_SIZE_BYTES`.
- */
-#define TOP_WREN_AES_SIZE_BYTES 0x100
-/**
  * Peripheral base address for regs device on sram_ctrl_main in top wren.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
@@ -378,6 +412,57 @@
  * `TOP_WREN_ROM_CTRL_REGS_BASE_ADDR + TOP_WREN_ROM_CTRL_REGS_SIZE_BYTES`.
  */
 #define TOP_WREN_ROM_CTRL_REGS_SIZE_BYTES 0x80
+/**
+ * Peripheral base address for regs device on rv_dm in top wren.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_WREN_RV_DM_REGS_BASE_ADDR 0x41200000
+
+/**
+ * Peripheral size for regs device on rv_dm in top wren.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_WREN_RV_DM_REGS_BASE_ADDR and
+ * `TOP_WREN_RV_DM_REGS_BASE_ADDR + TOP_WREN_RV_DM_REGS_SIZE_BYTES`.
+ */
+#define TOP_WREN_RV_DM_REGS_SIZE_BYTES 0x10
+/**
+ * Peripheral base address for mem device on rv_dm in top wren.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_WREN_RV_DM_MEM_BASE_ADDR 0x10000
+
+/**
+ * Peripheral size for mem device on rv_dm in top wren.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_WREN_RV_DM_MEM_BASE_ADDR and
+ * `TOP_WREN_RV_DM_MEM_BASE_ADDR + TOP_WREN_RV_DM_MEM_SIZE_BYTES`.
+ */
+#define TOP_WREN_RV_DM_MEM_SIZE_BYTES 0x1000
+/**
+ * Peripheral base address for dbg device on rv_dm in top wren.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_WREN_RV_DM_DBG_BASE_ADDR 0x1000
+
+/**
+ * Peripheral size for dbg device on rv_dm in top wren.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_WREN_RV_DM_DBG_BASE_ADDR and
+ * `TOP_WREN_RV_DM_DBG_BASE_ADDR + TOP_WREN_RV_DM_DBG_SIZE_BYTES`.
+ */
+#define TOP_WREN_RV_DM_DBG_SIZE_BYTES 0x200
 /**
  * Peripheral base address for cfg device on rv_core_ibex in top wren.
  *
