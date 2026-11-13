@@ -103,6 +103,10 @@ cc_library(
         "//sw/device/silicon_creator/rom:no_otp_test_rom_bootstrap_srcs",
     ],
     local_defines = pavona_if_ip(
+        "flash_ctrl",
+        ["HAS_FLASH_CTRL"],
+        [],
+    ) + pavona_if_ip(
         "otp_ctrl",
         ["HAS_OTP_CTRL"],
         [],
