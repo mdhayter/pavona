@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -7,10 +8,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "hw/top/dt/rstmgr.h"
 #include "sw/device/lib/base/mmio.h"
 #include "sw/device/lib/dif/dif_rstmgr.h"
 #include "sw/device/lib/testing/test_framework/check.h"
+#ifdef HAS_RETENTION_RAM
 #include "sw/device/silicon_creator/lib/drivers/retention_sram.h"
+#endif
 
 #define MODULE_ID MAKE_MODULE_ID('r', 'm', 'g')
 
@@ -67,8 +71,13 @@ status_t rstmgr_testutils_pre_reset(const dif_rstmgr_t *rstmgr) {
   // Clear reset_info.
   rstmgr_testutils_reason_clear();
 
-  // Enable alert and cpu dump capture, even if the test doesn't read it.
-  TRY(dif_rstmgr_alert_info_set_enabled(rstmgr, kDifToggleEnabled));
+  // Enable alert and cpu dump capture, even if the test doesn't read it. Tops
+  // without an alert handler have no alert dump.
+  dif_result_t alert_info =
+      dif_rstmgr_alert_info_set_enabled(rstmgr, kDifToggleEnabled);
+  if (alert_info != kDifUnavailable) {
+    TRY(alert_info);
+  }
   TRY(dif_rstmgr_cpu_info_set_enabled(rstmgr, kDifToggleEnabled));
   return OK_STATUS();
 }
@@ -98,6 +107,7 @@ status_t rstmgr_testutils_post_reset(
   return OK_STATUS();
 }
 
+#ifdef HAS_RETENTION_RAM
 dif_rstmgr_reset_info_bitfield_t rstmgr_testutils_reason_get(void) {
   return retention_sram_get()->creator.reset_reasons;
 }
@@ -105,3 +115,23 @@ dif_rstmgr_reset_info_bitfield_t rstmgr_testutils_reason_get(void) {
 void rstmgr_testutils_reason_clear(void) {
   retention_sram_get()->creator.reset_reasons = 0;
 }
+#else
+// Without retention RAM, the test ROM leaves the reason in RESET_INFO.
+static dif_rstmgr_t reason_rstmgr(void) {
+  dif_rstmgr_t rstmgr;
+  CHECK_DIF_OK(dif_rstmgr_init_from_dt((dt_rstmgr_t)0, &rstmgr));
+  return rstmgr;
+}
+
+dif_rstmgr_reset_info_bitfield_t rstmgr_testutils_reason_get(void) {
+  dif_rstmgr_t rstmgr = reason_rstmgr();
+  dif_rstmgr_reset_info_bitfield_t info;
+  CHECK_DIF_OK(dif_rstmgr_reset_info_get(&rstmgr, &info));
+  return info;
+}
+
+void rstmgr_testutils_reason_clear(void) {
+  dif_rstmgr_t rstmgr = reason_rstmgr();
+  CHECK_DIF_OK(dif_rstmgr_reset_info_clear(&rstmgr));
+}
+#endif
