@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -21,10 +22,11 @@ pub struct Spi<T> {
 impl<T: gpio::GpioPin> Spi<T> {
     pub fn open(
         ftdi_interfaces: &Rc<HashMap<ftdi::Interface, ftdi_embedded_hal::FtHal<ftdi::Device>>>,
+        interface: ftdi::Interface,
         cs: T,
     ) -> Result<Self> {
         let hal = ftdi_interfaces
-            .get(&ftdi::Interface::B)
+            .get(&interface)
             .ok_or_else(|| SpiError::InvalidOption("spi interface".to_owned()))?;
         let spi = hal.spi()?;
         Ok(Spi {
