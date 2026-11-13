@@ -4342,7 +4342,7 @@ pavona_test(
     # in CI/nightlies.
     verilator = verilator_params(tags = ["manual"]),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/arch:device",
         "//sw/device/lib/base:mmio",
         "//sw/device/lib/dif:base",
@@ -5309,7 +5309,7 @@ pavona_test(
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:usbdev",
         "//sw/device/lib/runtime:log",

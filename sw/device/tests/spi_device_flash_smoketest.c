@@ -1,10 +1,12 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "hw/top/dt/spi_device.h"
 #include "sw/device/lib/arch/device.h"
 #include "sw/device/lib/base/status.h"
 #include "sw/device/lib/dif/dif_spi_device.h"
@@ -14,8 +16,6 @@
 #include "sw/device/lib/testing/spi_flash_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
-
-#include "hw/top_egret/sw/autogen/top_egret.h"
 
 OTTF_DEFINE_TEST_CONFIG(.enable_uart_flow_control = true);
 
@@ -126,8 +126,7 @@ static status_t configure_flash_mode(dif_spi_device_handle_t *spid) {
 
 bool test_main(void) {
   dif_spi_device_handle_t spid;
-  CHECK_DIF_OK(dif_spi_device_init_handle(
-      mmio_region_from_addr(TOP_EGRET_SPI_DEVICE_BASE_ADDR), &spid));
+  CHECK_DIF_OK(dif_spi_device_init_handle_from_dt(kDtSpiDevice, &spid));
 
   CHECK_STATUS_OK(configure_flash_mode(&spid));
 

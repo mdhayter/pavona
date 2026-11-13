@@ -1,17 +1,15 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 #include "sw/device/lib/testing/usb_testutils.h"
 
+#include "hw/top/dt/usbdev.h"
 #include "sw/device/lib/dif/dif_usbdev.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 
-#include "hw/top_egret/sw/autogen/top_egret.h"
-
 #define MODULE_ID MAKE_MODULE_ID('u', 's', 't')
-
-#define USBDEV_BASE_ADDR TOP_EGRET_USBDEV_BASE_ADDR
 
 static dif_usbdev_t usbdev;
 static dif_usbdev_buffer_pool_t buffer_pool;
@@ -459,7 +457,7 @@ status_t usb_testutils_init(usb_testutils_ctx_t *ctx, bool pinflip,
   // No callback handler for link events
   ctx->link_callback = NULL;
 
-  TRY(dif_usbdev_init(mmio_region_from_addr(USBDEV_BASE_ADDR), ctx->dev));
+  TRY(dif_usbdev_init_from_dt(kDtUsbdev, ctx->dev));
 
   dif_usbdev_config_t config = {
       .have_differential_receiver = dif_bool_to_toggle(en_diff_rcvr),
