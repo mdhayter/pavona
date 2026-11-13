@@ -25,6 +25,7 @@ load(
     _fpga_cw305 = "fpga_cw305",
     _fpga_cw310 = "fpga_cw310",
     _fpga_cw340 = "fpga_cw340",
+    _fpga_genesys2 = "fpga_genesys2",
     _fpga_params = "fpga_params",
 )
 load(
@@ -87,6 +88,7 @@ pavona_transition = _pavona_transition
 fpga_cw305 = _fpga_cw305
 fpga_cw310 = _fpga_cw310
 fpga_cw340 = _fpga_cw340
+fpga_genesys2 = _fpga_genesys2
 fpga_params = _fpga_params
 
 # Temporary export of the old name to prevent merge skew breakage.

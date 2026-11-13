@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -23,6 +24,10 @@ Cw340BinaryInfo = provider(
     doc = "CW340 Binary Info",
 )
 
+Genesys2BinaryInfo = provider(
+    doc = "Digilent Genesys 2 Binary Info",
+)
+
 SiliconBinaryInfo = provider(
     doc = "Silicon Binary Info",
 )
@@ -42,6 +47,7 @@ SimQemuBinaryInfo = provider(
 ALL_BINARY_PROVIDERS = [
     Cw310BinaryInfo,
     Cw340BinaryInfo,
+    Genesys2BinaryInfo,
     SiliconBinaryInfo,
     SimDvBinaryInfo,
     SimVerilatorBinaryInfo,

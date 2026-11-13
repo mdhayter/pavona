@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -61,6 +62,19 @@ cc_library(
 cc_library(
     name = "fpga_cw305",
     srcs = ["device_fpga_cw305.c"],
+    deps = [
+        ":device",
+        "//sw/device/lib/base:macros",
+    ] + pavona_if_ip(
+        "uart",
+        [":uart"],
+        [":stub"],
+    ),
+)
+
+cc_library(
+    name = "fpga_genesys2",
+    srcs = ["device_fpga_genesys2.c"],
     deps = [
         ":device",
         "//sw/device/lib/base:macros",
