@@ -1,9 +1,12 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 #include <stdint.h>
 
+#include "hw/top/dt/pinmux.h"
+#include "hw/top/dt/uart.h"
 #include "sw/device/lib/arch/device.h"
 #include "sw/device/lib/base/mmio.h"
 #include "sw/device/lib/dif/dif_pinmux.h"
@@ -15,18 +18,10 @@
 #include "sw/device/lib/testing/test_framework/ottf_utils.h"
 #include "sw/device/lib/testing/uart_testutils.h"
 
-#include "hw/top_egret/sw/autogen/top_egret.h"
-
 static const uint8_t kSendData[] = "UART baud test!";
-static const uint32_t kBaseAddrs[4] = {
-    TOP_EGRET_UART0_BASE_ADDR,
-    TOP_EGRET_UART1_BASE_ADDR,
-    TOP_EGRET_UART2_BASE_ADDR,
-    TOP_EGRET_UART3_BASE_ADDR,
-};
 static const uint32_t kBauds[11] = {
     4800, 9600, 19200, 38400, 57600, 115200, 230400, 128000, 256000, 1000000,
-    // This baud rate will only work on silicon, the FPGA cannot go fast enough:
+    // This baud rate needs the chip's 24MHz peripheral clock:
     1500000};
 
 enum {
@@ -92,34 +87,30 @@ static status_t test_uart_baud(void) {
 bool test_main(void) {
   OTTF_WAIT_FOR(uart_idx != 0xff, kTestTimeoutMillis);
 
-  mmio_region_t base_addr;
-
-  base_addr = mmio_region_from_addr(TOP_EGRET_PINMUX_AON_BASE_ADDR);
-  CHECK_DIF_OK(dif_pinmux_init(base_addr, &pinmux));
-
-  base_addr = mmio_region_from_addr(kBaseAddrs[uart_idx]);
-  CHECK_DIF_OK(dif_uart_init(base_addr, &uart));
+  CHECK(uart_idx < kDtUartCount, "UART index out of bounds");
+  CHECK_DIF_OK(dif_pinmux_init_from_dt(kDtPinmuxAon, &pinmux));
+  CHECK_DIF_OK(dif_uart_init_from_dt((dt_uart_t)uart_idx, &uart));
 
   if (uart_idx == 0) {
     CHECK_STATUS_OK(
         uart_testutils_select_pinmux(&pinmux, 1, kUartPinmuxChannelConsole));
-    ottf_console_configure_uart(ottf_console_get(), TOP_EGRET_UART1_BASE_ADDR);
+    ottf_console_configure_uart(ottf_console_get(),
+                                dt_uart_primary_reg_block(kDtUart1));
   }
 
   CHECK_STATUS_OK(
       uart_testutils_select_pinmux(&pinmux, uart_idx, kUartPinmuxChannelDut));
 
-  size_t baud_count = ARRAYSIZE(kBauds);
-
-  // We only want to run the highest bauds (1MBd and 1.5MBd) on chips going
-  // at the real speed (24MHz). FPGAs clocking slower cannot test these.
-  if (kClockFreqPeripheralHz < 24 * 1000 * 1000) {
-    baud_count -= 2;
-  }
-
-  // Check every baud rate is sent and received okay.
+  // Check every baud rate is sent and received okay. The UART samples at 16x
+  // the baud rate, so FPGAs clocking slower than the chip cannot reach the
+  // highest rates; skip those.
   status_t result = OK_STATUS();
-  for (size_t baud_idx = 0; baud_idx < baud_count; ++baud_idx) {
+  for (size_t baud_idx = 0; baud_idx < ARRAYSIZE(kBauds); ++baud_idx) {
+    if (16 * (uint64_t)kBauds[baud_idx] > kClockFreqPeripheralHz) {
+      LOG_INFO("Skipping baud rate %d: above the peripheral clock / 16",
+               kBauds[baud_idx]);
+      continue;
+    }
     baud_rate = kBauds[baud_idx];
     EXECUTE_TEST(result, test_uart_baud);
   }

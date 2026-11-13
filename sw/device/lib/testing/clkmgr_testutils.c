@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -216,6 +217,11 @@ status_t clkmgr_testutils_enable_clock_counts_with_expected_thresholds(
       count_info = &kNoJitterCountInfos[dt_clk_to_meas_clk[dt_actual_clk]];
 #elif defined(OPENTITAN_IS_DRAGONFLY)
       TRY_CHECK(false, "Dragonfly has no external clock");
+      OT_UNREACHABLE();
+#elif defined(OPENTITAN_IS_SCAFI_DEPRECATED) || defined(OPENTITAN_IS_WREN)
+      // These tops have the external clock controls, but how their clocks
+      // switch to it has not been characterized.
+      TRY_CHECK(false, "No expected external clock counts for this top");
       OT_UNREACHABLE();
 #else
 #error Unsupported top

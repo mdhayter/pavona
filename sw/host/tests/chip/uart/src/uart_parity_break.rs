@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -65,9 +66,17 @@ fn main() -> Result<()> {
 
     let transport = opts.init.init_target()?;
     let uart_console = transport.uart("console")?;
+    // Test each of the top's UARTs.
+    let num_uarts = u8::try_from(
+        transport
+            .top()?
+            .addr_space("hart")?
+            .devices_of("uart")
+            .count(),
+    )?;
 
-    // Test all four UARTs with both parities.
-    for uart_id in 0..4 {
+    // Test every UART with both parities.
+    for uart_id in 0..num_uarts {
         for parity in [Parity::Odd, Parity::Even, Parity::None] {
             transport.reset_with_delay(UartRx::Clear, Duration::from_millis(500))?;
 

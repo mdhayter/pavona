@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -70,6 +71,8 @@ static status_t get_uart_pads_for_channel(dt_uart_t uart_dt,
         *rx_pad = kDtPadIob4;
         *tx_pad = kDtPadIob5;
         break;
+#if defined(OPENTITAN_IS_EGRET)
+      // Scafi and Wren have two UARTs.
       case kDtUart2:
         *rx_pad = kDtPadIoa4;
         *tx_pad = kDtPadIoa5;
@@ -78,6 +81,7 @@ static status_t get_uart_pads_for_channel(dt_uart_t uart_dt,
         *rx_pad = kDtPadIoa0;
         *tx_pad = kDtPadIoa1;
         break;
+#endif
       default:
         return INVALID_ARGUMENT();
     }

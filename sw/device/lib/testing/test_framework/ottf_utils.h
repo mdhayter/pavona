@@ -73,7 +73,8 @@
  */
 #define OTTF_BACKDOOR_VAR_DV OT_USED OT_SECTION(".rodata")
 
-#if defined(OPENTITAN_IS_EGRET)
+#if defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED) || \
+    defined(OPENTITAN_IS_WREN)
 
 static inline void ottf_backdoor_flush_read_buffers(void) {
   // On egret, some backdoor variables may live on flash, which

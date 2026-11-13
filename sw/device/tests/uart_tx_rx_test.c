@@ -1,14 +1,19 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
+#ifdef OT_HAS_LC_CTRL
 #include "hw/top/dt/lc_ctrl.h"
+#endif
 #include "hw/top/dt/uart.h"
 #include "sw/device/lib/arch/device.h"
 #include "sw/device/lib/base/mmio.h"
 #include "sw/device/lib/dif/dif_base.h"
 #include "sw/device/lib/dif/dif_clkmgr.h"
+#ifdef OT_HAS_LC_CTRL
 #include "sw/device/lib/dif/dif_lc_ctrl.h"
+#endif
 #include "sw/device/lib/dif/dif_pinmux.h"
 #include "sw/device/lib/dif/dif_rv_plic.h"
 #include "sw/device/lib/dif/dif_uart.h"
@@ -466,6 +471,9 @@ static void execute_test(const dif_uart_t *uart) {
 }
 
 void config_external_clock(const dif_clkmgr_t *clkmgr) {
+#ifdef OT_HAS_LC_CTRL
+  // The external clock is only allowed in some life cycle states. Tops
+  // without a life cycle controller skip the check.
   dif_lc_ctrl_t lc;
   CHECK_DIF_OK(dif_lc_ctrl_init_from_dt(kDtLcCtrl, &lc));
 
@@ -474,6 +482,7 @@ void config_external_clock(const dif_clkmgr_t *clkmgr) {
   CHECK_DIF_OK(dif_lc_ctrl_get_state(&lc, &curr_state));
   CHECK(curr_state == kDifLcCtrlStateRma || curr_state == kDifLcCtrlStateDev,
         "LC State isn't in {kDifLcCtrlStateRma, kDifLcCtrlStateDev}!");
+#endif
 
   CHECK_STATUS_OK(
       clkmgr_testutils_enable_external_clock_blocking(clkmgr, kUseLowSpeedSel));

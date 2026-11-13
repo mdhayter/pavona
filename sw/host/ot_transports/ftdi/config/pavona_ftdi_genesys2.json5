@@ -13,10 +13,15 @@
 // The straps are active low at the board (the chip file inverts them, so the
 // FTDI's idle pull-ups do not request bootstrap), hence `invert` here.
 //
-// The console is the board's FT232R (USB UART port). Numbered UARTs count the
-// FT232R ports in enumeration order; with a second one attached (such as a
-// PmodUSBUART), give the port path in a local configuration file instead:
-//   { "uarts": [{ "name": "console", "alias_of": "/dev/serial/by-id/usb-FTDI_..." }] }
+// The console is the board's FT232R (USB UART port, uart0); `dut` is a
+// PmodUSBUART on Pmod JC (uart1's pads, where the UART tests attach the UART
+// under test). Both are FT232Rs with the same USB strings, and their
+// /dev/ttyUSB numbers follow enumeration order, so they are opened by names
+// that a udev rule on the host gives them from their serial numbers:
+//   SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001",
+//     ATTRS{serial}=="<serial>", SYMLINK+="genesys2-console"  (and genesys2-dut)
+// (`udevadm info -q property -n /dev/ttyUSBn | grep SERIAL_SHORT` shows a
+// port's serial.)
 {
   "interface": "ftdi_genesys2",
   "pins": [
@@ -92,7 +97,11 @@
       "baudrate": 115200,
       "parity": "None",
       "stopbits": "Stop1",
-      "alias_of": "0"
+      "alias_of": "/dev/genesys2-console"
+    },
+    {
+      "name": "dut",
+      "alias_of": "/dev/genesys2-dut"
     }
   ],
   "provides": {
