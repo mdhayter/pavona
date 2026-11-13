@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -12,6 +13,7 @@
 // (i)  direct access using the mmio_ routines
 // (ii) DIF-based buffer reading/writing
 
+#include "hw/top/dt/usbdev.h"
 #include "sw/device/lib/dif/dif_pinmux.h"
 #include "sw/device/lib/dif/dif_usbdev.h"
 #include "sw/device/lib/runtime/log.h"
@@ -20,10 +22,7 @@
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
 
-#include "hw/top_egret/sw/autogen/top_egret.h"  // Generated.
 #include "sw/device/lib/dif/autogen/dif_usbdev_autogen.h"
-
-#define USBDEV_BASE_ADDR TOP_EGRET_USBDEV_BASE_ADDR
 
 #ifndef USBDEV_BUFFER_REG_OFFSET
 #define USBDEV_BUFFER_REG_OFFSET 0x800u
@@ -112,8 +111,7 @@ bool test_main(void) {
   LOG_INFO("Running USBDEV Mem Test");
 
   // Initialize DIF-based access to the packet buffer memory
-  CHECK_DIF_OK(
-      dif_usbdev_init(mmio_region_from_addr(USBDEV_BASE_ADDR), &usbdev));
+  CHECK_DIF_OK(dif_usbdev_init_from_dt(kDtUsbdev, &usbdev));
 
   // Exercise mmio_ routines and then dif_usbdev_ routines in turn; it provides
   // a bit more testing of the packet memory because the two routines exhibit

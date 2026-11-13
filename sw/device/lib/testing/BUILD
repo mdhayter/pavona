@@ -566,7 +566,7 @@ cc_library(
     ],
     target_compatible_with = [PAVONA_CPU],
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:usbdev",
         "//sw/device/lib/testing/test_framework:check",
     ],
