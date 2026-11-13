@@ -18,12 +18,14 @@ use opentitanlib::io::uart::flow::SoftwareFlowControl;
 use opentitanlib::io::uart::serial::SerialPortUart;
 use opentitanlib::io::uart::{Uart, UartError};
 use opentitanlib::transport::{
-    Capabilities, Capability, Transport, TransportError, TransportInterfaceType,
+    Capabilities, Capability, FpgaOps, ProgressIndicator, Transport, TransportError,
+    TransportInterfaceType,
 };
 use opentitanlib::util::fs::builtin_file;
 use opentitanlib::util::parse_int::ParseInt;
 
 pub mod chip;
+pub mod fpga;
 pub mod gpio;
 pub mod spi;
 
@@ -142,6 +144,36 @@ impl<C: Chip> Transport for Ftdi<C> {
             )?));
         }
         Ok(inner.spi.as_ref().unwrap().clone())
+    }
+
+    fn fpga_ops(&self) -> Result<&dyn FpgaOps> {
+        if C::FPGA_JTAG.is_some() {
+            Ok(self)
+        } else {
+            Err(TransportError::UnsupportedOperation.into())
+        }
+    }
+}
+
+impl<C: Chip> Ftdi<C> {
+    fn fpga_jtag(&self) -> Result<fpga::Jtag> {
+        let cable = C::FPGA_JTAG
+            .as_ref()
+            .ok_or(TransportError::UnsupportedOperation)?;
+        fpga::Jtag::open(C::VENDOR_ID, C::PRODUCT_ID, cable)
+    }
+}
+
+impl<C: Chip> FpgaOps for Ftdi<C> {
+    fn load_bitstream(&self, bitstream: &[u8], progress: &dyn ProgressIndicator) -> Result<()> {
+        log::info!("Programming the FPGA bitstream over JTAG.");
+        self.fpga_jtag()?
+            .program(bitstream, progress)
+            .map_err(|e| TransportError::FpgaProgramFailed(e.to_string()).into())
+    }
+
+    fn clear_bitstream(&self) -> Result<()> {
+        self.fpga_jtag()?.clear_bitstream()
     }
 }
 
