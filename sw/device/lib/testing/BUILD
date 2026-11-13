@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -397,12 +398,24 @@ cc_library(
     name = "rstmgr_testutils",
     srcs = ["rstmgr_testutils.c"],
     hdrs = ["rstmgr_testutils.h"],
+    # As in the test ROM: these tops have no retention SRAM.
+    local_defines = pavona_select_top(
+        {
+            "scafi_deprecated": [],
+        },
+        ["HAS_RETENTION_RAM"],
+    ),
     target_compatible_with = [PAVONA_CPU],
     deps = [
+        "//hw/top/dt",
         "//sw/device/lib/dif:rstmgr",
         "//sw/device/lib/testing/test_framework:check",
-        "//sw/device/silicon_creator/lib/drivers:retention_sram",
-    ],
+    ] + pavona_select_top(
+        {
+            "scafi_deprecated": [],
+        },
+        ["//sw/device/silicon_creator/lib/drivers:retention_sram"],
+    ),
 )
 
 cc_library(

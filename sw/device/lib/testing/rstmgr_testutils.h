@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -105,14 +106,16 @@ status_t rstmgr_testutils_post_reset(
     size_t cpu_dump_size);
 
 /**
- * Gets the reason for a reset in retention SRAM.
+ * Gets the reason for a reset, from retention SRAM where the ROM saved it, or
+ * from the reset manager on tops without retention SRAM.
  *
  * @returns reset reason
  */
 dif_rstmgr_reset_info_bitfield_t rstmgr_testutils_reason_get(void);
 
 /**
- * Clears the reset information in Retention SRAM
+ * Clears the reset information in retention SRAM, or in the reset manager on
+ * tops without retention SRAM.
  */
 void rstmgr_testutils_reason_clear(void);
 
