@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -26,13 +27,13 @@ pub mod chip;
 pub mod gpio;
 pub mod spi;
 
-use chip::{Chip, Ft4232hq};
+use chip::{Chip, Ft2232hGenesys2, Ft4232hq};
 
 #[derive(Default)]
 struct Inner {
     spi: Option<Rc<dyn Target>>,
     gpio: HashMap<String, Rc<dyn GpioPin>>,
-    uart: HashMap<u32, Rc<dyn Uart>>,
+    uart: HashMap<String, Rc<dyn Uart>>,
 }
 
 pub struct Ftdi<C: Chip> {
@@ -63,21 +64,33 @@ impl<C: Chip> Ftdi<C> {
         Ok(ftdi_dev)
     }
 
-    fn open_uart(&self, instance: u32) -> Result<SoftwareFlowControl<SerialPortUart>> {
+    /// Opens a UART. The instance is either the index of a serial port with
+    /// the chip's UART product ID, or the path of a serial port device, such as
+    /// `/dev/serial/by-id/...`, for boards with more than one such port.
+    fn open_uart(&self, instance: &str) -> Result<SoftwareFlowControl<SerialPortUart>> {
+        if instance.starts_with('/') {
+            return Ok(SoftwareFlowControl::new(SerialPortUart::open(
+                instance,
+                C::UART_BAUD,
+            )?));
+        }
+        let index = u32::from_str(instance).ok().ok_or_else(|| {
+            TransportError::InvalidInstance(TransportInterfaceType::Uart, instance.to_string())
+        })?;
         let mut ports = serialport::available_ports()
             .map_err(|e| UartError::EnumerationError(e.to_string()))?;
 
         ports.retain(|port| {
             if let SerialPortType::UsbPort(info) = &port.port_type
                 && info.vid == C::VENDOR_ID
-                && info.pid == C::PRODUCT_ID
+                && info.pid == C::UART_PRODUCT_ID
             {
                 return true;
             }
             false
         });
 
-        let port = ports.get(instance as usize).ok_or_else(|| {
+        let port = ports.get(index as usize).ok_or_else(|| {
             TransportError::InvalidInstance(TransportInterfaceType::Uart, instance.to_string())
         })?;
 
@@ -97,10 +110,7 @@ impl<C: Chip> Transport for Ftdi<C> {
 
     fn uart(&self, instance: &str) -> Result<Rc<dyn Uart>> {
         let mut inner = self.inner.borrow_mut();
-        let instance = u32::from_str(instance).ok().ok_or_else(|| {
-            TransportError::InvalidInstance(TransportInterfaceType::Uart, instance.to_string())
-        })?;
-        let uart = match inner.uart.entry(instance) {
+        let uart = match inner.uart.entry(instance.to_string()) {
             Entry::Vacant(v) => v.insert(Rc::new(self.open_uart(instance)?)).clone(),
             Entry::Occupied(o) => o.get().clone(),
         };
@@ -121,11 +131,15 @@ impl<C: Chip> Transport for Ftdi<C> {
     }
 
     fn spi(&self, _instance: &str) -> Result<Rc<dyn Target>> {
-        let spi_cs = gpio::Pin::open::<C>(&self.ftdi_interfaces, "bdbus3".to_string())?;
+        let spi_cs = gpio::Pin::open::<C>(&self.ftdi_interfaces, C::SPI_CS_PIN.to_string())?;
         spi_cs.set_mode(PinMode::PushPull)?;
         let mut inner = self.inner.borrow_mut();
         if inner.spi.is_none() {
-            inner.spi = Some(Rc::new(spi::Spi::open(&self.ftdi_interfaces, spi_cs)?));
+            inner.spi = Some(Rc::new(spi::Spi::open(
+                &self.ftdi_interfaces,
+                C::SPI_INTERFACE,
+                spi_cs,
+            )?));
         }
         Ok(inner.spi.as_ref().unwrap().clone())
     }
@@ -149,4 +163,14 @@ define_interface!(
 builtin_file!(
     "pavona_ftdi_voyager.json5",
     include_str!("../config/pavona_ftdi_voyager.json5")
+);
+
+define_interface!(
+    "ftdi_genesys2",
+    FtdiBackend<Ft2232hGenesys2>,
+    "/__builtin__/pavona_ftdi_genesys2.json5"
+);
+builtin_file!(
+    "pavona_ftdi_genesys2.json5",
+    include_str!("../config/pavona_ftdi_genesys2.json5")
 );

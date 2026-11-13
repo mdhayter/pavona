@@ -1,0 +1,42 @@
+// Copyright Mark Hayter.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
+// A Digilent Genesys 2, through the FT2232H on its USB PROG port, for any top
+// built for the board. Channel A: ADBUS0-3 carry SPI (chip select on ADBUS3);
+// ADBUS4-7 are general-purpose pins. Channel B is the board's JTAG, used to
+// load bitstreams.
+//
+// Which of ADBUS4-7 drive the chip's reset and straps depends on the top's
+// FPGA build, so this board configuration does not name them. A top gives its
+// own configuration with `--conf`, which includes this file and adds them:
+//   {
+//     "includes": ["/__builtin__/pavona_ftdi_genesys2.json5"],
+//     "pins": [{ "name": "RESET", "alias_of": "adbus7", ... }],
+//     "strappings": [...]
+//   }
+//
+// The console is the board's FT232R (USB UART port). Numbered UARTs count the
+// FT232R ports in enumeration order; with a second one attached (such as a
+// PmodUSBUART), give the port path in a local configuration file instead:
+//   { "uarts": [{ "name": "console", "alias_of": "/dev/serial/by-id/usb-FTDI_..." }] }
+{
+  "interface": "ftdi_genesys2",
+  "spi": [
+    {
+      "name": "BOOTSTRAP"
+    }
+  ],
+  "uarts": [
+    {
+      "name": "console",
+      "baudrate": 115200,
+      "parity": "None",
+      "stopbits": "Stop1",
+      "alias_of": "0"
+    }
+  ],
+  "provides": {
+    "chip": "opentitan"
+  }
+}
