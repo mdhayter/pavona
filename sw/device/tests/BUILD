@@ -628,6 +628,9 @@ pavona_test(
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         DRAGONFLY_TEST_ENVS,
+        {
+            "//hw/top_wren:fpga_genesys2_test_rom": None,
+        },
     ),
     deps = [
         "//hw/top/dt",
@@ -1120,6 +1123,7 @@ pavona_test(
         DRAGONFLY_TEST_ENVS,
         {
             "//hw/top_egret:silicon_creator": None,
+            "//hw/top_wren:fpga_genesys2_test_rom": None,
         },
     ),
     deps = [
@@ -2137,6 +2141,7 @@ pavona_test(
         ),
         {
             "//hw/top_egret:silicon_creator": None,
+            "//hw/top_wren:fpga_genesys2_test_rom": None,
         },
     ),
     silicon = silicon_params(tags = ["broken"]),
@@ -3830,6 +3835,7 @@ pavona_test(
         {
             "//hw/top_egret:fpga_cw310_sival": None,
             "//hw/top_egret:silicon_creator": None,
+            "//hw/top_wren:fpga_genesys2_test_rom": None,
         },
     ),
     verilator = verilator_params(
@@ -3906,6 +3912,7 @@ pavona_test(
         DRAGONFLY_TEST_ENVS,
         {
             "//hw/top_egret:silicon_creator": None,
+            "//hw/top_wren:fpga_genesys2_test_rom": None,
         },
     ),
     qemu = qemu_params(
@@ -4036,6 +4043,7 @@ pavona_test(
         DRAGONFLY_TEST_ENVS,
         {
             "//hw/top_egret:silicon_creator": None,
+            "//hw/top_wren:fpga_genesys2_test_rom": None,
         },
     ),
     deps = [
@@ -4060,6 +4068,7 @@ pavona_test(
         DRAGONFLY_TEST_ENVS,
         {
             "//hw/top_egret:silicon_creator": None,
+            "//hw/top_wren:fpga_genesys2_test_rom": None,
         },
     ),
     deps = [
@@ -4149,6 +4158,9 @@ pavona_test(
     exec_env = dicts.add(
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
+        {
+            "//hw/top_wren:fpga_genesys2_test_rom": None,
+        },
     ),
     fpga = fpga_params(
         test_cmd = """
@@ -4711,6 +4723,9 @@ pavona_test(
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         DRAGONFLY_TEST_ENVS,
+        {
+            "//hw/top_wren:fpga_genesys2_test_rom": None,
+        },
     ),
     deps = [
         "//hw/top/dt",
@@ -4757,6 +4772,7 @@ pavona_test(
         {
             "//hw/top_egret:silicon_creator": None,
             "//hw/top_wren:sim_verilator": None,
+            "//hw/top_wren:fpga_genesys2_test_rom": None,
         },
     ),
     deps = [
@@ -5118,6 +5134,9 @@ pavona_test(
     exec_env = dicts.add(
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
+        {
+            "//hw/top_wren:fpga_genesys2_test_rom": None,
+        },
     ),
     deps = [
         "//hw/top/dt",

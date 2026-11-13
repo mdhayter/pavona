@@ -217,6 +217,11 @@ uint32_t pinmux_testutils_get_testable_gpios_mask(void) {
     case kDeviceFpgaCw340:
       // Only IOR6, IOR7, and IOR10 to IOR13 are available for use as GPIOs.
       return 0xfc000000;
+    case kDeviceFpgaGenesys2:
+      // The LEDs (GPIO 0-7) and Pmod JA7 (GPIO 21). The switches, buttons and
+      // straps are driven by the board, the OLED controls switch its power,
+      // and GPIO 29-31 have no pads.
+      return 0x002000ff;
     case kDeviceSilicon:
       // IOA3/6, IOB6, IOC9-12, IOR5-7 and IOR10-13.
       return 0xfe0f0248;
