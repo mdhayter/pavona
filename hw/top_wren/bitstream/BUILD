@@ -8,6 +8,9 @@
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("//rules:fusesoc.bzl", "fusesoc_build")
 load("//rules:bitstreams.bzl", "bitstream_manifest_fragment")
+load("//rules/pavona:splice.bzl", "bitstream_splice")
+
+package(default_visibility = ["//visibility:public"])
 
 _FPGA_PATH_TMPL = "lowrisc_systems_{}_0.1/synth-vivado/{}"
 
@@ -28,6 +31,14 @@ fusesoc_build(
     systems = ["lowrisc:systems:chip_wren_genesys2:0.1"],
     tags = ["manual"],
     target = "synth",
+)
+
+filegroup(
+    name = "genesys2_bitstream",
+    testonly = True,
+    srcs = [":fpga_genesys2"],
+    output_group = "bitstream",
+    tags = ["manual"],
 )
 
 filegroup(
@@ -58,5 +69,14 @@ pkg_tar(
     mode = "0444",
     package_dir = "build-bin/hw/top_wren/chip_wren_genesys2",
     strip_prefix = "/hw/top_wren/bitstream/wren_genesys2_manifest",
+    tags = ["manual"],
+)
+
+# The bitstream with the test ROM spliced in, for loading by hand (tests in
+# //hw/top_wren:fpga_genesys2_test_rom load their own splice).
+bitstream_splice(
+    name = "fpga_genesys2_test_rom",
+    testonly = True,
+    exec_env = "//hw/top_wren:fpga_genesys2_test_rom",
     tags = ["manual"],
 )

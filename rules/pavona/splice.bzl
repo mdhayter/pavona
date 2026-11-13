@@ -119,6 +119,7 @@ def _bitstream_splice_impl(ctx):
 
     # OTP size in number of 2-byte words.
     top_name = ctx.attr._top[BuildSettingInfo].value
+    rom_field = "rom"
     if top_name == "egret":
         # Egret: 1024-word OTP memory map.
         otp_size = 1024
@@ -127,8 +128,13 @@ def _bitstream_splice_impl(ctx):
         # Dragonfly: 10240-word OTP memory map.
         otp_size = 10240
         otp_padding = 0
+    elif top_name == "wren":
+        # Wren: no OTP, and an unscrambled 32-bit ROM.
+        otp_size = 0
+        otp_padding = 0
+        rom_field = "rom32"
     else:
-        fail("Top name should be 'egret' or 'dragonfly' for bitstream splice; got `{}`".format(top_name))
+        fail("Top name should be 'egret', 'dragonfly' or 'wren' for bitstream splice; got `{}`".format(top_name))
 
     # Splice in a ROM image if we have one either in attrs or the exec_env.
     if not ctx.attr.rom or ctx.attr.rom.label.name == "none":
@@ -137,7 +143,7 @@ def _bitstream_splice_impl(ctx):
         rom = ctx.attr.rom
 
     if rom and rom.label.name != "none":
-        rom = get_one_binary_file(rom, field = "rom", providers = [exec_env.provider])
+        rom = get_one_binary_file(rom, field = rom_field, providers = [exec_env.provider])
         mem = gen_vivado_mem_file(
             ctx = ctx,
             name = "{}-rom".format(ctx.label.name),

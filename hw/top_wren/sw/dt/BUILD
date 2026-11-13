@@ -13,3 +13,12 @@ cc_library(
         "//sw/device/lib/base:macros",
     ],
 )
+
+cc_library(
+    name = "fpga_genesys2",
+    srcs = ["fpga_genesys2.c"],
+    deps = [
+        "//hw/top/dt:api",
+        "//sw/device/lib/base:macros",
+    ],
+)

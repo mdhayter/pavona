@@ -44,6 +44,7 @@ pavona_binary(
         "//hw/top_egret:sim_verilator_base",
         "//hw/top_dragonfly:sim_dv_base",
         "//hw/top_dragonfly:sim_verilator_base",
+        "//hw/top_wren:fpga_genesys2",
         "//hw/top_wren:sim_verilator_base",
     ],
     features = ["use_lld"],

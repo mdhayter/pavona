@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -210,7 +211,10 @@ set gen_mem_info {{brams mem_type_regex fake_word_width addr_end_multiplier sche
 }}
 
 set rom_brams [split [get_cells -hierarchical -filter " PRIMITIVE_TYPE =~ ${bram_regex} && NAME =~ *u_rom_ctrl*"] " "]
-dict set memInfo rom [apply $gen_mem_info $rom_brams $mem_type_regex 0 1 "MemoryArray"]
+# Describe the ROM with the little-endian Processor schema, as Egret does:
+# gen_vivado_mem_image.py reverses the bytes of each word for it, and with the
+# MemoryArray schema the spliced ROM words come out byte-reversed.
+dict set memInfo rom [apply $gen_mem_info $rom_brams $mem_type_regex 0 1 "Processor"]
 
 # Wren likely doesn't use the info pages, and this organization
 # isn't correct for current RTL.

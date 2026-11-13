@@ -7,6 +7,7 @@ load(
     "//rules/pavona:defs.bzl",
     "DEFAULT_TEST_FAILURE_MSG",
     "DEFAULT_TEST_SUCCESS_MSG",
+    "fpga_genesys2",
     "sim_verilator",
 )
 
@@ -89,6 +90,57 @@ sim_verilator(
     },
     rom = "//sw/device/lib/testing/test_rom:test_rom",
     test_cmd = """
+        --exec="console --non-interactive --exit-success='{exit_success}' --exit-failure='{exit_failure}'"
+        no-op
+    """,
+)
+
+###########################################################################
+# FPGA Genesys 2 Environments
+#
+# The fpga_genesys2 target is only meant to be used for building ROMs and
+# other items without `testonly=True`.
+#
+# Tests run through the board's FT2232H (interface `ftdi_genesys2`): load the
+# bitstream over JTAG (skipped when the ROM reports the same bitstream already
+# loaded), bootstrap over spi_device, then the console.
+###########################################################################
+fpga_genesys2(
+    name = "fpga_genesys2",
+    design = "wren",
+    exec_env = "fpga_genesys2",
+    libs = [
+        "//sw/device/lib/arch:boot_stage_rom_ext",
+        "//sw/device/lib/arch:fpga_genesys2",
+        "//hw/top_wren/sw/dt:fpga_genesys2",
+    ],
+    linker_script = "//sw/device/lib/testing/test_framework:ottf_ld_silicon_creator_slot_a",
+    test_cmd = "testing-not-supported",
+)
+
+fpga_genesys2(
+    name = "fpga_genesys2_test_rom",
+    testonly = True,
+    args = [
+        "--rcfile=",
+        "--logging=info",
+        "--top=wren",
+        "--interface={interface}",
+    ],
+    base = ":fpga_genesys2",
+    base_bitstream = "//hw/top_wren/bitstream:genesys2_bitstream",
+    exec_env = "fpga_genesys2_test_rom",
+    mmi = "//hw/top_wren/bitstream:genesys2_mmi",
+    param = {
+        "interface": "ftdi_genesys2",
+        "exit_success": DEFAULT_TEST_SUCCESS_MSG,
+        "exit_failure": DEFAULT_TEST_FAILURE_MSG,
+    },
+    rom = "//sw/device/lib/testing/test_rom:test_rom",
+    test_cmd = """
+        --exec="transport init"
+        --exec="fpga load-bitstream {bitstream}"
+        --exec="bootstrap --clear-uart=true {firmware}"
         --exec="console --non-interactive --exit-success='{exit_success}' --exit-failure='{exit_failure}'"
         no-op
     """,
