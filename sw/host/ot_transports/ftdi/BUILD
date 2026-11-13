@@ -10,6 +10,7 @@ rust_library(
     name = "ftdi",
     srcs = [
         "src/chip.rs",
+        "src/fpga.rs",
         "src/gpio.rs",
         "src/lib.rs",
         "src/spi.rs",
@@ -22,6 +23,7 @@ rust_library(
         "@crate_index//:embedded-hal",
         "@crate_index//:ftdi",
         "@crate_index//:ftdi-embedded-hal",
+        "@crate_index//:ftdi-mpsse",
         "@crate_index//:log",
         "@crate_index//:serialport",
     ],
