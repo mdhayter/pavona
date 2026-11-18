@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """This contains a class which is used to help generate the device tables (DT)
@@ -200,12 +201,52 @@ class RstmgrExt(Extension):
             self.HW_REQS_FIELD_NAME: hw_reqs,
         }
 
+    # The internal and debug reset requests, which have no reset request
+    # declared by their module (see `fill_dt_ip`), by request name.
+    HARDWIRED_REQ_NAMES = {
+        "MainPwr": Name(["main", "pwr"]),
+        "Esc": Name(["esc"]),
+        "Ndm": Name(["ndm"]),
+    }
+    # Bit of the first reset request in the `RESET_INFO` register; see the
+    # `HW_REQ` field in `rstmgr.hjson.tpl`.
+    RESET_INFO_HW_REQ_OFFSET = 3
+
+    def _render_hw_req_bits(self) -> str:
+        """
+        Define `OPENTITAN_RSTMGR_HW_REQ_<SOURCE>_BIT` for each hardware reset
+        request: the bit of the `RESET_INFO` register it sets. The source is
+        named by the module type and the simplified request name (for example
+        `AON_TIMER_AON_TIMER`), or `MAIN_PWR`, `ESC` and `NDM` for the hardwired
+        requests, so that software can name a request without knowing the top,
+        and use `#ifdef` to know whether the top has it.
+        """
+        text = "\n/**\n"
+        text += " * Bit of the `RESET_INFO` register that each hardware reset request sets.\n"
+        text += " */\n"
+        seen = set()
+        for (idx, reset) in enumerate(self.ipconfig.hw_reset_req_list()):
+            if reset["name"] in self.HARDWIRED_REQ_NAMES:
+                source = self.HARDWIRED_REQ_NAMES[reset["name"]]
+            else:
+                module_type = self.ip_helper.top_helper.get_module_type(reset["module"])
+                source = Name.from_snake_case(module_type)
+                source += Name.from_snake_case(
+                    self.ip_helper.simplify_reset_request_name(reset["name"]))
+            macro = (Name(["opentitan", "rstmgr", "hw", "req"]) + source +
+                     Name(["bit"])).as_c_define()
+            if macro in seen:
+                raise RuntimeError(f"two reset requests are both named {macro}")
+            seen.add(macro)
+            text += f"#define {macro} {self.RESET_INFO_HW_REQ_OFFSET + idx}\n"
+        return text
+
     def render_dt_ip(self, pos: Extension.DtIpPos) -> str:
         if pos == Extension.DtIpPos.HeaderEnd:
             subs = {
                 'reset_req_src_struct': self.reset_req_src_struct.render_type_def(),
             }
-            return HEADER_EXT_TEMPLATE % subs
+            return HEADER_EXT_TEMPLATE % subs + self._render_hw_req_bits()
         elif pos == Extension.DtIpPos.SourceIncludes:
             includes = ""
             for ip in self._extra_includes:
