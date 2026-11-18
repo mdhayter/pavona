@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -15,8 +16,6 @@
 
 #include "hw/top/rstmgr_regs.h"  // Generated.
 
-// These assertions are only defined for the Egret chip.
-#if defined(OPENTITAN_IS_EGRET)
 // This macro simplifies the `static_assert` check to make sure that the
 // public reset info register bitfield matches register bits.
 #define RSTMGR_RESET_INFO_CHECK(pub_name, priv_name)         \
@@ -32,10 +31,6 @@ static_assert(kDifRstmgrResetInfoHwReq == (RSTMGR_RESET_INFO_HW_REQ_MASK
                                            << RSTMGR_RESET_INFO_HW_REQ_OFFSET),
               "kDifRstmgrResetInfoHwReq must match the register definition!");
 
-static_assert(
-    RSTMGR_PARAM_NUM_SW_RESETS == 8,
-    "Number of software resets has changed, please update this file!");
-
 // The Reset Manager implementation will have to be updated if the number
 // of software resets grows, as it would span across multiple registers, so
 // there will be multiple of Reset Enable and Reset Control registers. The
@@ -45,6 +40,7 @@ static_assert(
     RSTMGR_PARAM_NUM_SW_RESETS <= 32,
     "Reset Enable and Control registers span across multiple registers!");
 
+#if OPENTITAN_RSTMGR_HAS_ALERT_INFO_CAPTURE
 // Make sure that the public alert info crash dump size matches the HW.
 // Note that `RSTMGR_ALERT_INFO_CTRL_INDEX_MASK` implies 16 indexes ( 0 - 15
 // inclusive). However, in reality it only supports 15, as
@@ -53,12 +49,9 @@ static_assert(
 static_assert(
     DIF_RSTMGR_ALERT_INFO_MAX_SIZE == RSTMGR_ALERT_INFO_CTRL_INDEX_MASK,
     "Alert info dump max size has grown, please update the public define!");
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-// TODO: equivalent assertations are not yet defined for Dragonfly
-#else
-#error "dif_rstmgr does not support this top"
 #endif
 
+#if OPENTITAN_RSTMGR_HAS_ALERT_INFO_CAPTURE
 /**
  * Checks whether alert_info capture is disabled.
  */
@@ -69,6 +62,7 @@ static bool alert_capture_is_locked(mmio_region_t base_addr) {
   // When bit is cleared, alert capture is disabled.
   return !bitfield_bit32_read(bitfield, RSTMGR_ALERT_REGWEN_EN_BIT);
 }
+#endif
 
 /**
  * Checks whether CPU info capture is disabled.
@@ -183,6 +177,7 @@ dif_result_t dif_rstmgr_reset_info_clear(const dif_rstmgr_t *handle) {
   return kDifOk;
 }
 
+#if OPENTITAN_RSTMGR_HAS_ALERT_INFO_CAPTURE
 dif_result_t dif_rstmgr_alert_info_set_enabled(const dif_rstmgr_t *handle,
                                                dif_toggle_t state) {
   if (handle == NULL) {
@@ -271,6 +266,29 @@ dif_result_t dif_rstmgr_alert_info_dump_read(
 
   return kDifOk;
 }
+#else
+// This top's reset manager has no alert info crash dump.
+dif_result_t dif_rstmgr_alert_info_set_enabled(const dif_rstmgr_t *handle,
+                                               dif_toggle_t state) {
+  return kDifUnavailable;
+}
+
+dif_result_t dif_rstmgr_alert_info_get_enabled(const dif_rstmgr_t *handle,
+                                               dif_toggle_t *state) {
+  return kDifUnavailable;
+}
+
+dif_result_t dif_rstmgr_alert_info_get_size(const dif_rstmgr_t *handle,
+                                            size_t *size) {
+  return kDifUnavailable;
+}
+
+dif_result_t dif_rstmgr_alert_info_dump_read(
+    const dif_rstmgr_t *handle, dif_rstmgr_alert_info_dump_segment_t *dump,
+    size_t dump_size, size_t *segments_read) {
+  return kDifUnavailable;
+}
+#endif
 
 dif_result_t dif_rstmgr_cpu_info_set_enabled(const dif_rstmgr_t *handle,
                                              dif_toggle_t state) {

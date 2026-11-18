@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -208,7 +209,7 @@ status_t clkmgr_testutils_enable_clock_counts_with_expected_thresholds(
     if (jitter_enabled) {
       count_info = &kJitterCountInfos[clk];
     } else if (external_clk) {
-#if defined(OPENTITAN_IS_EGRET)
+#if OPENTITAN_CLKMGR_HAS_SW_EXTCLK_REGWEN
       dt_clock_t dt_actual_clk =
           dt_clkmgr_measurable_clock(clkmgr_dt, clk).clock;
       // When software switches to an external clock, all clock sources switch
@@ -228,11 +229,9 @@ status_t clkmgr_testutils_enable_clock_counts_with_expected_thresholds(
                 dt_clkmgr_measurable_clock_count(clkmgr_dt),
             "this clock is not measurable!");
       count_info = &kNoJitterCountInfos[dt_clk_to_meas_clk[dt_actual_clk]];
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-      TRY_CHECK(false, "Dragonfly has no external clock");
-      OT_UNREACHABLE();
 #else
-#error Unsupported top
+      TRY_CHECK(false, "This top has no external clock");
+      OT_UNREACHABLE();
 #endif
     } else {
       count_info = &kNoJitterCountInfos[clk];
@@ -312,7 +311,7 @@ status_t clkmgr_testutils_check_measurement_counts(const dif_clkmgr_t *clkmgr) {
 
 status_t clkmgr_testutils_enable_external_clock_blocking(
     const dif_clkmgr_t *clkmgr, bool is_low_speed) {
-#if defined(OPENTITAN_IS_EGRET)
+#if OPENTITAN_CLKMGR_HAS_SW_EXTCLK_REGWEN
   LOG_INFO("Configure clkmgr to enable external clock");
   TRY(dif_clkmgr_external_clock_set_enabled(clkmgr, is_low_speed));
   TRY(dif_clkmgr_wait_for_ext_clk_switch(clkmgr));
