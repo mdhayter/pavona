@@ -136,6 +136,38 @@ def pavona_select_ips(cases, default):
         branches["@pavona_pavona//hw/top:is_{}".format(top.name)] = value
     return select(branches)
 
+def pavona_test_envs(roles, value = None):
+    """
+    Return an `exec_env` dictionary for `pavona_test` with, for every registered
+    top, its execution environment for each of the requested roles. A top names
+    its environments by role in its `test_envs` attribute, for example
+    `test_envs = {"sim_verilator": "//hw/top_egret:sim_verilator"}`; a top
+    without the attribute, or without a role, gets nothing for it. A test that
+    asks for roles instead of naming environments then also runs on tops added
+    later, including tops registered outside this repository.
+
+    `value` is the value for each environment in the dictionary (the name of an
+    override parameter, or `None`). Combine with explicitly named environments
+    using `|`.
+
+    Example:
+    ```python
+    pavona_test(
+      name = "my_test",
+      exec_env = pavona_test_envs(["sim_dv", "sim_verilator"]) | {
+        "//hw/top_egret:fpga_cw310_test_rom": None,
+      },
+    )
+    ```
+    """
+    envs = {}
+    for top in ALL_TOPS:
+        top_envs = top.attrs.get("test_envs", {})
+        for role in roles:
+            if role in top_envs:
+                envs[top_envs[role]] = value
+    return envs
+
 def pavona_select_top(values, default):
     """
     Select a value based on the top. If no top matches, a default

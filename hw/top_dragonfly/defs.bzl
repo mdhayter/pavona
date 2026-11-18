@@ -13,6 +13,11 @@ DRAGONFLY = pavona_top(
     hjson = "//hw/top_dragonfly/data/autogen:top_dragonfly.gen.hjson",
     top_lib = "//hw/top_dragonfly/sw/autogen:top_dragonfly",
     test_pinout = "//hw/top_dragonfly/sw:test_pinout",
+    # Execution environments by role, for pavona_test_envs().
+    test_envs = {
+        "sim_dv": "//hw/top_dragonfly:sim_dv",
+        "sim_verilator": "//hw/top_dragonfly:sim_verilator",
+    },
     top_rtl = "//hw/top_dragonfly:rtl_files",
     top_verilator_core = ["lowrisc:dv:top_dragonfly_chip_verilator_sim"],
     top_verilator_binary = {"binary": ["lowrisc_dv_top_dragonfly_chip_verilator_sim_0.1/sim-verilator/Vchip_sim_tb"]},
