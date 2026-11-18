@@ -11,6 +11,7 @@ SCAFI_DEPRECATED = pavona_top(
     name = "scafi_deprecated",
     hjson = "//hw/top_scafi_deprecated/data/autogen:top_scafi_deprecated.gen.hjson",
     top_lib = "//hw/top_scafi_deprecated/sw/autogen:top_scafi_deprecated",
+    test_pinout = "//hw/top_scafi_deprecated/sw:test_pinout",
     top_rtl = "//hw/top_scafi_deprecated:rtl_files",
     top_verilator_core = ["lowrisc:dv:top_scafi_deprecated_chip_verilator_sim"],
     top_verilator_binary = {"binary": ["lowrisc_dv_top_scafi_deprecated_chip_verilator_sim_0.1/sim-verilator/Vchip_sim_tb"]},

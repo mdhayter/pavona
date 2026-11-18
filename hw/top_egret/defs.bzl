@@ -12,6 +12,7 @@ EGRET = pavona_top(
     name = "egret",
     hjson = "//hw/top_egret/data/autogen:top_egret.gen.hjson",
     top_lib = "//hw/top_egret/sw/autogen:top_egret",
+    test_pinout = "//hw/top_egret/sw:test_pinout",
     top_rtl = "//hw/top_egret:rtl_files",
     top_verilator_core = ["lowrisc:dv:top_egret_chip_verilator_sim"],
     top_verilator_binary = {"binary": ["lowrisc_dv_top_egret_chip_verilator_sim_0.1/sim-verilator/Vchip_sim_tb"]},

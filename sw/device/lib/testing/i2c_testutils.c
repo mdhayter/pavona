@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -46,69 +47,6 @@ static dt_i2c_t get_i2c_instance(uint8_t i2c_idx) {
     return kDtI2cCount;
   }
   return (dt_i2c_t)i2c_idx;
-}
-
-/**
- * Get the appropriate pads for an I2C instance and platform based on the
- * platform. This replicates the original behavior with different mappings for
- * different platforms.
- *
- * @param i2c_dt I2C DT instance.
- * @param platform The platform to connect the I2C to.
- * @param sda_pad Output parameter for SDA pad.
- * @param scl_pad Output parameter for SCL pad.
- * @return OK_STATUS if successful, error status otherwise.
- */
-static status_t get_i2c_pads_for_platform(dt_i2c_t i2c_dt,
-                                          i2c_pinmux_platform_id_t platform,
-                                          dt_pad_t *sda_pad,
-                                          dt_pad_t *scl_pad) {
-#if defined(OPENTITAN_IS_DRAGONFLY)
-  // Dragonfly only has I2C0 and uses dedicated pads
-  if (i2c_dt != kDtI2c0) {
-    return INVALID_ARGUMENT();
-  }
-  *sda_pad = kDtPadI2c0Sda;
-  *scl_pad = kDtPadI2c0Scl;
-#elif defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED)
-  // For Egret and Scafi_Deprecated platforms
-  switch (platform) {
-    case I2cPinmuxPlatformIdHyper310:  // CW310 HyperDebug
-      *sda_pad = kDtPadIoa7;
-      *scl_pad = kDtPadIoa8;
-      break;
-    case I2cPinmuxPlatformIdDvsim:  // DV
-      // In DV, there's one agent for each I2C instance, with a fixed set of
-      // muxed pins.
-      switch (i2c_dt) {
-        case kDtI2c0:  // I2C0 uses the same pins as CW310 HyperDebug
-          *sda_pad = kDtPadIoa7;
-          *scl_pad = kDtPadIoa8;
-          break;
-        case kDtI2c1:
-          *sda_pad = kDtPadIob10;
-          *scl_pad = kDtPadIob9;
-          break;
-        case kDtI2c2:  // I2C2 uses the same pins as CW310 PMOD
-          *sda_pad = kDtPadIob12;
-          *scl_pad = kDtPadIob11;
-          break;
-        default:
-          return INVALID_ARGUMENT();
-      }
-      break;
-    case I2cPinmuxPlatformIdCw310Pmod:  // CW310 PMOD
-      *sda_pad = kDtPadIob12;
-      *scl_pad = kDtPadIob11;
-      break;
-    default:
-      return INVALID_ARGUMENT();
-  }
-#else
-  return UNIMPLEMENTED();
-#endif
-
-  return OK_STATUS();
 }
 
 status_t i2c_testutils_write(const dif_i2c_t *i2c, uint8_t addr,
@@ -308,7 +246,7 @@ status_t i2c_testutils_select_pinmux(const dif_pinmux_t *pinmux, uint8_t i2c_id,
 
   // Get the appropriate pads for this I2C instance and platform
   dt_pad_t sda_pad, scl_pad;
-  TRY(get_i2c_pads_for_platform(i2c_dt, platform, &sda_pad, &scl_pad));
+  TRY(test_pinout_i2c_pads(i2c_dt, platform, &sda_pad, &scl_pad));
 
   // Connect SDA and SCL using pinmux testutils
   TRY(pinmux_testutils_connect(pinmux, sda_periph_io, kDtPeriphIoDirInout,

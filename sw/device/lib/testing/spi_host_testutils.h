@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -12,13 +13,7 @@
 #include "sw/device/lib/base/status.h"
 #include "sw/device/lib/dif/dif_pinmux.h"
 #include "sw/device/lib/dif/dif_spi_host.h"
-
-typedef enum spi_pinmux_platform_id {
-  kSpiPinmuxPlatformIdCw310 = 0,
-  kSpiPinmuxPlatformIdCw340,
-  kSpiPinmuxPlatformIdTeacup,
-  kSpiPinmuxPlatformIdCount,
-} spi_pinmux_platform_id_t;
+#include "sw/device/lib/testing/test_pinout.h"  // spi_pinmux_platform_id_t
 
 /**
  * Configure the pad attributes of SPI Host 0.
@@ -52,9 +47,10 @@ static inline status_t spi_host_testutils_is_active(dif_spi_host_t *spi_host) {
 OT_WARN_UNUSED_RESULT
 status_t spi_host_testutils_flush(dif_spi_host_t *spi_host);
 
-#if defined(OPENTITAN_IS_EGRET)
 /**
  * Connect the spi host 1 to the BoB.
+ *
+ * Only defined on a top with SPI host 1.
  *
  * @param pinmux A pinmux handle.
  * @param csb_outsel The chip select pin, this should be one of the eight
@@ -68,10 +64,5 @@ OT_WARN_UNUSED_RESULT
 status_t spi_host1_pinmux_connect_to_bob(const dif_pinmux_t *pinmux,
                                          dt_pad_t csb_outsel,
                                          spi_pinmux_platform_id_t platform_id);
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-// Dragonfly only has a single SPI host
-#else
-#error "spi_host_testutils does not support this top"
-#endif
 
 #endif  // OPENTITAN_SW_DEVICE_LIB_TESTING_SPI_HOST_TESTUTILS_H_

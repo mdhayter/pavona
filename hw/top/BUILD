@@ -97,6 +97,12 @@ pavona_alias_top_attr(
     attr_name = "top_lib",
 )
 
+# The active top's test pinout: see sw/device/lib/testing/test_pinout.h.
+pavona_alias_top_attr(
+    name = "test_pinout",
+    attr_name = "test_pinout",
+)
+
 # The top's addresses without its name: "hw/top/top_memory.h".
 alias(
     name = "top_memory",

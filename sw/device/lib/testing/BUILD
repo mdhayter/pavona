@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -232,7 +233,9 @@ cc_library(
     hdrs = ["i2c_testutils.h"],
     target_compatible_with = [PAVONA_CPU],
     deps = [
+        ":test_pinout_intf",
         "//hw/top:i2c_c_regs",
+        "//hw/top:test_pinout",
         "//hw/top/dt",
         "//sw/device/lib/dif:i2c",
         "//sw/device/lib/dif:pinmux",
@@ -331,12 +334,30 @@ cc_library(
     ],
 )
 
+# The interface each top's test pinout implements; see test_pinout.h. The
+# implementation for the active top is //hw/top:test_pinout.
+cc_library(
+    name = "test_pinout_intf",
+    hdrs = ["test_pinout.h"],
+    target_compatible_with = [PAVONA_CPU],
+    deps = [
+        "//hw/top:top_memory",
+        "//hw/top/dt",
+        "//sw/device/lib/base:macros",
+        "//sw/device/lib/base:status",
+        "//sw/device/lib/dif:gpio",
+        "//sw/device/lib/dif:pinmux",
+    ],
+)
+
 cc_library(
     name = "pinmux_testutils",
     srcs = ["pinmux_testutils.c"],
     hdrs = ["pinmux_testutils.h"],
     target_compatible_with = [PAVONA_CPU],
     deps = [
+        ":test_pinout_intf",
+        "//hw/top:test_pinout",
         "//hw/top/dt",
         "//sw/device/lib/arch:device",
         "//sw/device/lib/dif:base",
@@ -493,6 +514,9 @@ cc_library(
     target_compatible_with = [PAVONA_CPU],
     deps = [
         ":pinmux_testutils",
+        ":test_pinout_intf",
+        "//hw/top:test_pinout",
+        "//hw/top:top_memory",
         "//hw/top/dt",
         "//sw/device/lib/base:status",
         "//sw/device/lib/dif:pinmux",
@@ -543,6 +567,8 @@ cc_library(
     hdrs = ["uart_testutils.h"],
     target_compatible_with = [PAVONA_CPU],
     deps = [
+        ":test_pinout_intf",
+        "//hw/top:test_pinout",
         "//hw/top:uart_c_regs",
         "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",

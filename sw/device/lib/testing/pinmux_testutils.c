@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -18,104 +19,39 @@
 static const dt_gpio_t kGpioDt = kDtGpio;
 static const dt_uart_t kUart0Dt = kDtUart0;
 
-#if defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED)
-static const dt_pad_t kPadUart0Tx = kDtPadIoc4;
-static const dt_pad_t kPadUart0Rx = kDtPadIoc3;
-#define HAS_UART1
-static const dt_uart_t kUart1Dt = kDtUart1;
-static const dt_pad_t kPadUart1Tx = kDtPadIob5;
-static const dt_pad_t kPadUart1Rx = kDtPadIob4;
-static const dt_pad_t kPadStrap0 = kDtPadIoc0;
-static const dt_pad_t kPadStrap1 = kDtPadIoc1;
-static const dt_pad_t kPadStrap2 = kDtPadIoc2;
-
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-static const dt_pad_t kPadUart0Tx = kDtPadUart0Tx;
-static const dt_pad_t kPadUart0Rx = kDtPadUart0Rx;
-/* No UART1 */
-static const dt_pad_t kPadStrap0 = kDtPadGpioGpio22;
-static const dt_pad_t kPadStrap1 = kDtPadGpioGpio23;
-static const dt_pad_t kPadStrap2 = kDtPadGpioGpio24;
-
-#else /* OPENTITAN_IS_* */
-#error Unsupported top
-#endif /* OPENTITAN_IS_* */
-
 void pinmux_testutils_init(dif_pinmux_t *pinmux) {
   // Set up SW straps on IOC0-IOC2, for GPIOs 22-24
   CHECK_STATUS_OK(pinmux_testutils_connect(
       pinmux, dt_gpio_periph_io(kGpioDt, kDtGpioPeriphIoGpio22),
-      kDtPeriphIoDirIn, kPadStrap0));
+      kDtPeriphIoDirIn, kTestPinoutInit.straps[0]));
   CHECK_STATUS_OK(pinmux_testutils_connect(
       pinmux, dt_gpio_periph_io(kGpioDt, kDtGpioPeriphIoGpio23),
-      kDtPeriphIoDirIn, kPadStrap1));
+      kDtPeriphIoDirIn, kTestPinoutInit.straps[1]));
   CHECK_STATUS_OK(pinmux_testutils_connect(
       pinmux, dt_gpio_periph_io(kGpioDt, kDtGpioPeriphIoGpio24),
-      kDtPeriphIoDirIn, kPadStrap2));
+      kDtPeriphIoDirIn, kTestPinoutInit.straps[2]));
 
   // Configure UART0 RX input.
   CHECK_STATUS_OK(pinmux_testutils_connect(
       pinmux, dt_uart_periph_io(kUart0Dt, kDtUartPeriphIoRx), kDtPeriphIoDirIn,
-      kPadUart0Rx));
+      kTestPinoutInit.uart0_rx));
   // Configure UART0 TX output.
   CHECK_STATUS_OK(pinmux_testutils_connect(
       pinmux, dt_uart_periph_io(kUart0Dt, kDtUartPeriphIoTx), kDtPeriphIoDirOut,
-      kPadUart0Tx));
+      kTestPinoutInit.uart0_tx));
 
-#ifdef OPENTITAN_IS_EGRET
-  // Enable pull-ups on UART0 RX
-  // Pull-ups are available only on certain platforms.
-  if (kDeviceType == kDeviceSimDV) {
-    dif_pinmux_pad_attr_t out_attr;
-    dif_pinmux_pad_attr_t in_attr = {
-        .slew_rate = 0,
-        .drive_strength = 0,
-        .flags = kDifPinmuxPadAttrPullResistorEnable |
-                 kDifPinmuxPadAttrPullResistorUp};
-
-    CHECK_DIF_OK(
-        dif_pinmux_pad_write_attrs_dt(pinmux, kPadUart0Rx, in_attr, &out_attr));
-  };
-#endif
-
-#ifdef HAS_UART1
-  // Configure UART1 RX input.
-  CHECK_STATUS_OK(pinmux_testutils_connect(
-      pinmux, dt_uart_periph_io(kUart1Dt, kDtUartPeriphIoRx), kDtPeriphIoDirIn,
-      kPadUart1Rx));
-  // Configure UART1 TX output.
-  CHECK_STATUS_OK(pinmux_testutils_connect(
-      pinmux, dt_uart_periph_io(kUart1Dt, kDtUartPeriphIoTx), kDtPeriphIoDirOut,
-      kPadUart1Tx));
-#endif /* HAS_UART1 */
-
-#ifdef OPENTITAN_IS_EGRET
-  // Configure a higher drive strength for the USB_P and USB_N pads because
-  // the pad drivers must be capable of overpowering the 'pull' signal
-  // strength of the internal pull ups in the differential receiver.
-  //
-  // 'pull' strength is required because at the host end of the USB, there
-  // are 'weak' pull downs, allowing it to detect device presence when it
-  // applies its pull up.
-  //    strong PAD driver > internal pull up > weak pull down at host
-  //
-  // Normally the pull up on USB_P will be asserted, but we may be employing
-  // 'pin flipping' and instead choose to apply the _N pull up.
-  if (kDeviceType == kDeviceSimDV) {
-    dif_pinmux_pad_attr_t out_attr;
-    dif_pinmux_pad_attr_t in_attr = {
-        .slew_rate = 0, .drive_strength = 1, .flags = 0};
-
-    CHECK_DIF_OK(dif_pinmux_pad_write_attrs_dt(pinmux, kDtPadUsbdevUsbDp,
-                                               in_attr, &out_attr));
-    CHECK_DIF_OK(dif_pinmux_pad_write_attrs_dt(pinmux, kDtPadUsbdevUsbDn,
-                                               in_attr, &out_attr));
+  if (kTestPinoutInit.has_uart1) {
+    // Configure UART1 RX input.
+    CHECK_STATUS_OK(pinmux_testutils_connect(
+        pinmux, dt_uart_periph_io(kTestPinoutInit.uart1, kDtUartPeriphIoRx),
+        kDtPeriphIoDirIn, kTestPinoutInit.uart1_rx));
+    // Configure UART1 TX output.
+    CHECK_STATUS_OK(pinmux_testutils_connect(
+        pinmux, dt_uart_periph_io(kTestPinoutInit.uart1, kDtUartPeriphIoTx),
+        kDtPeriphIoDirOut, kTestPinoutInit.uart1_tx));
   }
 
-  // Configure USBDEV SENSE outputs to be high-Z (IOC7)
-  CHECK_DIF_OK(dif_pinmux_mio_select_output(pinmux, kDtPadIoc7,
-                                            kDtPeriphIoConstantHighZ));
-#endif /* OPENTITAN_IS_EGRET* */
+  test_pinout_init_extra(pinmux);
 }
 
 status_t pinmux_testutils_connect(const dif_pinmux_t *pinmux,
@@ -158,39 +94,7 @@ status_t pinmux_testutils_connect(const dif_pinmux_t *pinmux,
   }
 }
 
-// Mapping of Chip IOs to the GPIO peripheral.
-//
-// Depending on the simulation platform, there may be a limitation to how chip
-// IOs are allocated to the GPIO peripheral, even for testing. The DV testbench
-// does not have this limitation, and is able to allocate as many chip IOs as
-// the number of GPIOs supported by the peripheral. At this time, these pin
-// assignments matches DV (see `hw/top_egret/dv/env/chip_if.sv`).
-//
-// The pinout spreadsheet allocates fewer pins to GPIOs than what the GPIO IP
-// supports. This oversubscription is intentional to maximize testing.
-#if defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED)
-const dt_pad_t kPinmuxTestutilsGpioPads[kDifGpioNumPins] = {
-    kDtPadIoa0,  kDtPadIoa1, kDtPadIoa2,  kDtPadIoa3,  kDtPadIoa4,
-    kDtPadIoa5,  kDtPadIoa6, kDtPadIoa7,  kDtPadIoa8,  kDtPadIob6,
-    kDtPadIob7,  kDtPadIob8, kDtPadIob9,  kDtPadIob10, kDtPadIob11,
-    kDtPadIob12, kDtPadIoc9, kDtPadIoc10, kDtPadIoc11, kDtPadIoc12,
-    kDtPadIor0,  kDtPadIor1, kDtPadIor2,  kDtPadIor3,  kDtPadIor4,
-    kDtPadIor5,  kDtPadIor6, kDtPadIor7,  kDtPadIor10, kDtPadIor11,
-    kDtPadIor12, kDtPadIor13};
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-const dt_pad_t kPinmuxTestutilsGpioPads[kDifGpioNumPins] = {
-    kDtPadGpioGpio0,  kDtPadGpioGpio1,  kDtPadGpioGpio2,  kDtPadGpioGpio3,
-    kDtPadGpioGpio4,  kDtPadGpioGpio5,  kDtPadGpioGpio6,  kDtPadGpioGpio7,
-    kDtPadGpioGpio8,  kDtPadGpioGpio9,  kDtPadGpioGpio10, kDtPadGpioGpio11,
-    kDtPadGpioGpio12, kDtPadGpioGpio13, kDtPadGpioGpio14, kDtPadGpioGpio15,
-    kDtPadGpioGpio16, kDtPadGpioGpio17, kDtPadGpioGpio18, kDtPadGpioGpio19,
-    kDtPadGpioGpio20, kDtPadGpioGpio21, kDtPadGpioGpio22, kDtPadGpioGpio23,
-    kDtPadGpioGpio24, kDtPadGpioGpio25, kDtPadGpioGpio26, kDtPadGpioGpio27,
-    kDtPadGpioGpio28, kDtPadGpioGpio29, kDtPadGpioGpio30, kDtPadGpioGpio31,
-};
-#else /* OPENTITAN_IS_* */
-#error Unsupported top
-#endif /* OPENTITAN_IS_* */
+// kPinmuxTestutilsGpioPads is defined by the top's test pinout.
 
 uint32_t pinmux_testutils_get_testable_gpios_mask(void) {
   switch (kDeviceType) {
@@ -243,9 +147,14 @@ uint32_t pinmux_testutils_read_strap_pin(dif_pinmux_t *pinmux, dif_gpio_t *gpio,
 
 uint32_t pinmux_testutils_read_straps(dif_pinmux_t *pinmux, dif_gpio_t *gpio) {
   uint32_t strap = 0;
-  strap |= pinmux_testutils_read_strap_pin(pinmux, gpio, 22, kPadStrap0);
-  strap |= pinmux_testutils_read_strap_pin(pinmux, gpio, 23, kPadStrap1) << 2;
-  strap |= pinmux_testutils_read_strap_pin(pinmux, gpio, 24, kPadStrap2) << 4;
+  strap |= pinmux_testutils_read_strap_pin(pinmux, gpio, 22,
+                                           kTestPinoutInit.straps[0]);
+  strap |= pinmux_testutils_read_strap_pin(pinmux, gpio, 23,
+                                           kTestPinoutInit.straps[1])
+           << 2;
+  strap |= pinmux_testutils_read_strap_pin(pinmux, gpio, 24,
+                                           kTestPinoutInit.straps[2])
+           << 4;
   return strap;
 }
 
