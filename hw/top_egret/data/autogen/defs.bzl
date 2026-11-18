@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -82,6 +83,54 @@ EGRET_IPS = [
     SYSRST_CTRL,
     UART,
     USBDEV,
+]
+
+EGRET_INSTANCES = [
+    "uart0",
+    "uart1",
+    "uart2",
+    "uart3",
+    "gpio",
+    "spi_device",
+    "i2c0",
+    "i2c1",
+    "i2c2",
+    "pattgen",
+    "rv_timer",
+    "otp_ctrl",
+    "otp_macro",
+    "lc_ctrl",
+    "alert_handler",
+    "spi_host0",
+    "spi_host1",
+    "usbdev",
+    "pwrmgr_aon",
+    "rstmgr_aon",
+    "clkmgr_aon",
+    "sysrst_ctrl_aon",
+    "adc_ctrl_aon",
+    "pwm_aon",
+    "pinmux_aon",
+    "aon_timer_aon",
+    "ast",
+    "sensor_ctrl_aon",
+    "sram_ctrl_ret_aon",
+    "flash_ctrl",
+    "flash_macro_wrapper",
+    "rv_dm",
+    "rv_plic",
+    "acc",
+    "aes",
+    "hmac",
+    "kmac",
+    "keymgr",
+    "csrng",
+    "entropy_src",
+    "edn0",
+    "edn1",
+    "sram_ctrl_main",
+    "rom_ctrl",
+    "rv_core_ibex",
 ]
 
 EGRET_ALERTS = [

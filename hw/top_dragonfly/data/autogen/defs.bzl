@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -78,6 +79,57 @@ DRAGONFLY_IPS = [
     SPI_HOST,
     SRAM_CTRL,
     UART,
+]
+
+DRAGONFLY_INSTANCES = [
+    "uart0",
+    "gpio",
+    "spi_device",
+    "i2c0",
+    "rv_timer",
+    "otp_ctrl",
+    "otp_macro",
+    "lc_ctrl",
+    "alert_handler",
+    "spi_host0",
+    "pwrmgr_aon",
+    "rstmgr_aon",
+    "clkmgr_aon",
+    "pinmux_aon",
+    "aon_timer_aon",
+    "ast",
+    "soc_proxy",
+    "sram_ctrl_ret_aon",
+    "rv_dm",
+    "rv_plic",
+    "acc",
+    "aes",
+    "hmac",
+    "kmac",
+    "keymgr_dpe",
+    "csrng",
+    "entropy_src",
+    "edn0",
+    "edn1",
+    "sram_ctrl_main",
+    "sram_ctrl_mbox",
+    "rom_ctrl0",
+    "rom_ctrl1",
+    "dma",
+    "mbx0",
+    "mbx1",
+    "mbx2",
+    "mbx3",
+    "mbx4",
+    "mbx5",
+    "mbx6",
+    "mbx_jtag",
+    "mbx_pcie0",
+    "mbx_pcie1",
+    "soc_dbg_ctrl",
+    "racl_ctrl",
+    "ac_range_check",
+    "rv_core_ibex",
 ]
 
 DRAGONFLY_ALERTS = [

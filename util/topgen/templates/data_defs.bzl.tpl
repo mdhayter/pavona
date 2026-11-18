@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 ${gencmd}
@@ -24,6 +25,12 @@ load("//hw/ip/${ip}:defs.bzl", "${ip.upper()}")
 ${top_name.upper()}_IPS = [
 % for ip in all_ips.keys():
     ${ip.upper()},
+% endfor
+]
+
+${top_name.upper()}_INSTANCES = [
+% for m in top["module"]:
+    "${m["name"]}",
 % endfor
 ]
 

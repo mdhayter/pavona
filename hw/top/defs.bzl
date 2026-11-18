@@ -70,6 +70,38 @@ def pavona_require_ip(ip):
     """
     return pavona_if_ip(ip, [], ["@platforms//:incompatible"])
 
+def pavona_if_instance(instance, obj, default):
+    """
+    Return a select expression that evaluates to `obj` if the active top has
+    a module instance with this name, and `default` otherwise. Use it when an
+    IP type is not enough, for example for one particular `sram_ctrl` such as
+    the retention SRAM `sram_ctrl_ret_aon`.
+
+    The instances come from the top's `instances` attribute, which topgen
+    generates as `<TOP>_INSTANCES` in the top's `data/autogen/defs.bzl`.
+
+    Example:
+    ```python
+    cc_library(
+      name = "my_library",
+      defines = pavona_if_instance("sram_ctrl_ret_aon", ["HAS_RETENTION_RAM"], []),
+    )
+    ```
+    """
+    compatible_tops = []
+    for top in ALL_TOPS:
+        if not has_top_attr(top, "instances"):
+            fail("top {} has no 'instances' attribute; pass <TOP>_INSTANCES to pavona_top()".format(top.name))
+        if instance in get_top_attr(top, "instances"):
+            compatible_tops.append(top.name)
+
+    return select({
+        "@pavona_pavona//hw/top:is_{}".format(top): obj
+        for top in compatible_tops
+    } | {
+        "//conditions:default": default,
+    })
+
 def pavona_select_ips(cases, default):
     """
     Select a value based on which IPs the active top has. Use this when the
