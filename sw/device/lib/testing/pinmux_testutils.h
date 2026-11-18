@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -11,6 +12,7 @@
 #include "sw/device/lib/base/status.h"
 #include "sw/device/lib/dif/dif_gpio.h"
 #include "sw/device/lib/dif/dif_pinmux.h"
+#include "sw/device/lib/testing/test_pinout.h"
 
 /**
  * Define a pinmux configuration for a peripheral input and output .
@@ -37,14 +39,12 @@ typedef struct pinmux_testutils_mio_pin {
  *
  * Also ensures IOR0 and IOR1 outputs are disabled, for use as USB sense inputs.
  *
- * This function is specific to top_egret and top_scafi_deprecated.
+ * The pads come from the top's test pinout (see test_pinout.h).
  */
 void pinmux_testutils_init(dif_pinmux_t *pinmux);
 
-/**
- * Maps the chip IOs to the GPIO peripheral in input and output directions.
- */
-extern const dt_pad_t kPinmuxTestutilsGpioPads[kDifGpioNumPins];
+// kPinmuxTestutilsGpioPads, which maps the chip IOs to the GPIO peripheral, is
+// declared in test_pinout.h and defined by the top's test pinout.
 
 /**
  * Connect a peripheral I/O to a pad.
@@ -81,7 +81,8 @@ status_t pinmux_testutils_connect(const dif_pinmux_t *pinmux,
  * Returns the mask of testable GPIO pins.
  *
  * Returns a simulation-device-specific mask that enables testing of only a
- * subset of GPIOs depending on the IO allocation limitations.
+ * subset of GPIOs depending on the IO allocation limitations. The mask comes
+ * from the top's test pinout (see test_pinout.h).
  */
 uint32_t pinmux_testutils_get_testable_gpios_mask(void);
 

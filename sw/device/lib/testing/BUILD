@@ -1,9 +1,10 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
 load("//rules/pavona:defs.bzl", "PAVONA_CPU", "PAVONA_PLATFORM")
-load("//hw/top:defs.bzl", "ALL_IP_NAMES", "pavona_if_ip", "pavona_select_top")
+load("//hw/top:defs.bzl", "ALL_IP_NAMES", "pavona_if_instance", "pavona_if_ip", "pavona_select_top")
 load("//rules/pavona:util.bzl", "flatten")
 load("//rules:doxygen.bzl", "doxygen_gather_cc")
 
@@ -232,7 +233,9 @@ cc_library(
     hdrs = ["i2c_testutils.h"],
     target_compatible_with = [PAVONA_CPU],
     deps = [
+        ":test_pinout_intf",
         "//hw/top:i2c_c_regs",
+        "//hw/top:test_pinout",
         "//hw/top/dt",
         "//sw/device/lib/dif:i2c",
         "//sw/device/lib/dif:pinmux",
@@ -331,14 +334,36 @@ cc_library(
     ],
 )
 
+# The interface each top's test pinout implements; see test_pinout.h. The
+# implementation for the active top is //hw/top:test_pinout.
+cc_library(
+    name = "test_pinout_intf",
+    hdrs = ["test_pinout.h"],
+    # Seen by everything that includes test_pinout.h.
+    defines = pavona_if_ip(
+        "i2c",
+        ["HAS_I2C"],
+        [],
+    ),
+    target_compatible_with = [PAVONA_CPU],
+    deps = [
+        "//hw/top/dt",
+        "//sw/device/lib/base:macros",
+        "//sw/device/lib/base:status",
+        "//sw/device/lib/dif:gpio",
+        "//sw/device/lib/dif:pinmux",
+    ],
+)
+
 cc_library(
     name = "pinmux_testutils",
     srcs = ["pinmux_testutils.c"],
     hdrs = ["pinmux_testutils.h"],
     target_compatible_with = [PAVONA_CPU],
     deps = [
+        ":test_pinout_intf",
+        "//hw/top:test_pinout",
         "//hw/top/dt",
-        "//sw/device/lib/arch:device",
         "//sw/device/lib/dif:base",
         "//sw/device/lib/dif:gpio",
         "//sw/device/lib/dif:pinmux",
@@ -490,9 +515,17 @@ cc_library(
     name = "spi_host_testutils",
     srcs = ["spi_host_testutils.c"],
     hdrs = ["spi_host_testutils.h"],
+    # spi_host1_pinmux_connect_to_bob() is defined on a top with SPI host 1.
+    local_defines = pavona_if_instance(
+        "spi_host1",
+        ["HAS_SPI_HOST1"],
+        [],
+    ),
     target_compatible_with = [PAVONA_CPU],
     deps = [
         ":pinmux_testutils",
+        ":test_pinout_intf",
+        "//hw/top:test_pinout",
         "//hw/top/dt",
         "//sw/device/lib/base:status",
         "//sw/device/lib/dif:pinmux",
@@ -543,6 +576,8 @@ cc_library(
     hdrs = ["uart_testutils.h"],
     target_compatible_with = [PAVONA_CPU],
     deps = [
+        ":test_pinout_intf",
+        "//hw/top:test_pinout",
         "//hw/top:uart_c_regs",
         "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",

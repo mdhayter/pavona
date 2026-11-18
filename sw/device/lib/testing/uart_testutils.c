@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -35,73 +36,6 @@ static dt_uart_t get_uart_instance(uint8_t uart_idx) {
   return (dt_uart_t)uart_idx;
 }
 
-/**
- * Get the appropriate pads for a UART instance and channel based on the
- * platform. This replicates the original behavior with different mappings for
- * DV vs synthesized platforms.
- *
- * @param uart_dt UART DT instance.
- * @param channel The channel to connect the UART to.
- * @param rx_pad Output parameter for RX pad.
- * @param tx_pad Output parameter for TX pad.
- * @return OK_STATUS if successful, error status otherwise.
- */
-static status_t get_uart_pads_for_channel(dt_uart_t uart_dt,
-                                          uart_pinmux_channel_t channel,
-                                          dt_pad_t *rx_pad, dt_pad_t *tx_pad) {
-#if defined(OPENTITAN_IS_DRAGONFLY)
-  // Dragonfly only has UART0 and uses dedicated pads
-  if (uart_dt != kDtUart0) {
-    return INVALID_ARGUMENT();
-  }
-  *rx_pad = kDtPadUart0Rx;
-  *tx_pad = kDtPadUart0Tx;
-#elif defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED)
-  // For Egret and Scafi_Deprecated platforms
-  // For DV platform, each UART has its own specific mapping
-  if (kDeviceType == kDeviceSimDV) {
-    switch (uart_dt) {
-      case kDtUart0:
-        *rx_pad = kDtPadIoc3;
-        *tx_pad = kDtPadIoc4;
-        break;
-      case kDtUart1:
-        *rx_pad = kDtPadIob4;
-        *tx_pad = kDtPadIob5;
-        break;
-      case kDtUart2:
-        *rx_pad = kDtPadIoa4;
-        *tx_pad = kDtPadIoa5;
-        break;
-      case kDtUart3:
-        *rx_pad = kDtPadIoa0;
-        *tx_pad = kDtPadIoa1;
-        break;
-      default:
-        return INVALID_ARGUMENT();
-    }
-  } else {
-    // For synthesized platforms, use channel-based mapping
-    switch (channel) {
-      case kUartPinmuxChannelConsole:
-        *rx_pad = kDtPadIoc3;
-        *tx_pad = kDtPadIoc4;
-        break;
-      case kUartPinmuxChannelDut:
-        *rx_pad = kDtPadIob4;
-        *tx_pad = kDtPadIob5;
-        break;
-      default:
-        return INVALID_ARGUMENT();
-    }
-  }
-#else
-  return UNIMPLEMENTED();
-#endif
-
-  return OK_STATUS();
-}
-
 status_t uart_testutils_select_pinmux(const dif_pinmux_t *pinmux,
                                       uint8_t uart_idx,
                                       uart_pinmux_channel_t channel) {
@@ -116,7 +50,7 @@ status_t uart_testutils_select_pinmux(const dif_pinmux_t *pinmux,
 
   // Get the appropriate pads for this UART instance and channel
   dt_pad_t rx_pad, tx_pad;
-  TRY(get_uart_pads_for_channel(uart_dt, channel, &rx_pad, &tx_pad));
+  TRY(test_pinout_uart_pads(uart_dt, channel, &rx_pad, &tx_pad));
 
   // Connect RX input using low-level pinmux functions
   TRY(dif_pinmux_mio_select_input(pinmux, rx_periph_io, rx_pad));

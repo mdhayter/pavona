@@ -10,6 +10,7 @@
 #include "sw/device/lib/base/status.h"
 #include "sw/device/lib/dif/dif_i2c.h"
 #include "sw/device/lib/dif/dif_pinmux.h"
+#include "sw/device/lib/testing/test_pinout.h"  // i2c_pinmux_platform_id_t
 
 /**
  * Construct an I2C write as an I2C host.
@@ -119,16 +120,6 @@ OT_WARN_UNUSED_RESULT
 status_t i2c_testutils_target_check_write(const dif_i2c_t *i2c,
                                           uint16_t byte_count, uint8_t *addr,
                                           uint8_t *bytes, uint8_t *cont_byte);
-
-/**
- * Define the available platforms which i2c is mapped
- */
-typedef enum i2c_pinmux_platform_id {
-  I2cPinmuxPlatformIdHyper310 = 0,
-  I2cPinmuxPlatformIdDvsim,
-  I2cPinmuxPlatformIdCw310Pmod,
-  I2cPinmuxPlatformIdCount,
-} i2c_pinmux_platform_id_t;
 
 /**
  * Connect the i2c pins to mio pins via pinmux based on the platform the test is

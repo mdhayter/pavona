@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -62,54 +63,13 @@ status_t spi_host_testutils_flush(dif_spi_host_t *spi_host) {
   return OK_STATUS();
 }
 
-#if defined(OPENTITAN_IS_EGRET)
-/**
- * Define a spi pinmux configuration.
- */
-typedef struct spi_host1_pinmux_pads {
-  dt_pad_t clk;
-  dt_pad_t sd0;
-  dt_pad_t sd1;
-  dt_pad_t sd2;
-  dt_pad_t sd3;
-} spi_host1_pinmux_pads_t;
-
-/**
- * This table stores spi host 1 pin mappings of different platforms.
- * This is used to connect spi host 1 to mio pins based on the platform.
- */
-static const spi_host1_pinmux_pads_t kSpiHost1PinmuxMap[] = {
-    [kSpiPinmuxPlatformIdCw310] =
-        {
-            .clk = kDtPadIoa3,
-            .sd0 = kDtPadIoa5,
-            .sd1 = kDtPadIoa4,
-            .sd2 = kDtPadIoa8,
-            .sd3 = kDtPadIoa7,
-        },
-    [kSpiPinmuxPlatformIdCw340] =
-        {
-            .clk = kDtPadIoa3,
-            .sd0 = kDtPadIoa5,
-            .sd1 = kDtPadIoa4,
-            .sd2 = kDtPadIoa8,
-            .sd3 = kDtPadIoa7,
-        },
-    [kSpiPinmuxPlatformIdTeacup] =
-        {
-            .clk = kDtPadIoa3,
-            .sd0 = kDtPadIoa4,
-            .sd1 = kDtPadIoa5,
-            .sd2 = kDtPadIoa8,
-            .sd3 = kDtPadIoa7,
-        },
-};
-
+#ifdef HAS_SPI_HOST1
 status_t spi_host1_pinmux_connect_to_bob(const dif_pinmux_t *pinmux,
                                          dt_pad_t csb_outsel,
                                          spi_pinmux_platform_id_t platform_id) {
-  TRY_CHECK(platform_id < kSpiPinmuxPlatformIdCount);
-  const spi_host1_pinmux_pads_t *platform = &kSpiHost1PinmuxMap[platform_id];
+  test_pinout_spi_host1_pads_t pads;
+  TRY(test_pinout_spi_host1_pads(platform_id, &pads));
+  const test_pinout_spi_host1_pads_t *platform = &pads;
 
   // CSB.
   dt_periph_io_t csb =
@@ -141,8 +101,4 @@ status_t spi_host1_pinmux_connect_to_bob(const dif_pinmux_t *pinmux,
   TRY(dif_pinmux_mio_select_output(pinmux, platform->sd3, sd3));
   return OK_STATUS();
 }
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-// Dragonfly only has a single SPI host
-#else
-#error "spi_host_testutils does not support this top"
-#endif
+#endif  // HAS_SPI_HOST1

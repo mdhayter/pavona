@@ -11,6 +11,7 @@
 #include "sw/device/lib/base/status.h"
 #include "sw/device/lib/dif/dif_pinmux.h"
 #include "sw/device/lib/dif/dif_uart.h"
+#include "sw/device/lib/testing/test_pinout.h"  // uart_pinmux_channel_t
 
 /**
  * Define the available platforms which uart is mapped
@@ -21,15 +22,6 @@ typedef enum uart_pinmux_platform_id {
   kUartPinmuxPlatformIdSilicon,
   kUartPinmuxPlatformIdCount,
 } uart_pinmux_platform_id_t;
-
-/**
- * Define the available external channels that a UART could be connected to.
- */
-typedef enum uart_pinmux_channel {
-  kUartPinmuxChannelConsole,
-  kUartPinmuxChannelDut,
-  kUartPinmuxChannelCount,
-} uart_pinmux_channel_t;
 
 /**
  * Connect the uart pins to mio pins via pinmux based on the platform the test
