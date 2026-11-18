@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """Generate top-specific C, Rust, and/or Bazel software files
@@ -163,6 +164,16 @@ def generate_c(topcfg, name_to_block, root_paths, out_paths, c_helper, gencmd_c,
                             addr_space=addr_space['name'],
                             helper=c_helper,
                             gencmd=gencmd_c)
+
+        # "toplevel_generic_memory.h.tpl" -> "sw/autogen/generic/top_memory.h",
+        # included as "hw/top/top_memory.h" (see toplevel_BUILD.tpl).
+        (sw_dir / "generic").mkdir(parents=True, exist_ok=True)
+        render_template(TOPGEN_TEMPLATE_PATH / "toplevel_generic_memory.h.tpl",
+                        sw_dir / "generic" / "top_memory.h",
+                        topcfg, name_to_block,
+                        addr_space=default_addr_space,
+                        helper=c_helper,
+                        gencmd=gencmd_c)
 
         # "toplevel_memory.ld.tpl" -> "sw/autogen/{top_name}_memory.ld"
         render_template(
