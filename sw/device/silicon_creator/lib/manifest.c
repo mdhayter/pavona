@@ -1,22 +1,18 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 #include "sw/device/silicon_creator/lib/manifest.h"
 
+#include "hw/top/top_memory.h"
 #include "sw/device/silicon_creator/lib/base/chip.h"
 
-#if defined(OPENTITAN_IS_SCAFI_DEPRECATED)
-#include "hw/top_scafi_deprecated/sw/autogen/top_scafi_deprecated.h"
-#define EFLASH_SIZE_BYES TOP_SCAFI_DEPRECATED_FLASH_CTRL_MEM_SIZE_BYTES
-#elif defined(OPENTITAN_IS_EGRET)
-#include "hw/top_egret/sw/autogen/top_egret.h"
-#define EFLASH_SIZE_BYES TOP_EGRET_FLASH_CTRL_MEM_SIZE_BYTES
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-#include "hw/top_dragonfly/sw/autogen/top_dragonfly.h"
-#define EFLASH_SIZE_BYES TOP_DRAGONFLY_SRAM_CTRL_MAIN_RAM_SIZE_BYTES
+// The image slots split the flash, or on a top without flash the main SRAM.
+#ifdef TOP_FLASH_CTRL_MEM_SIZE_BYTES
+#define EFLASH_SIZE_BYES TOP_FLASH_CTRL_MEM_SIZE_BYTES
 #else
-#error unsupported top
+#define EFLASH_SIZE_BYES TOP_SRAM_CTRL_MAIN_RAM_SIZE_BYTES
 #endif
 
 static_assert(CHIP_ROM_EXT_SIZE_MIN >= CHIP_MANIFEST_SIZE,
