@@ -1,10 +1,11 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 #
 
 load("//rules/pavona:hw.bzl", "pavona_top")
-load("//hw/top_dragonfly/data/autogen:defs.bzl", "DRAGONFLY_IPS")
+load("//hw/top_dragonfly/data/autogen:defs.bzl", "DRAGONFLY_INSTANCES", "DRAGONFLY_IPS")
 load("//hw/top_dragonfly/data/otp:defs.bzl", "DRAGONFLY_OTP_SIGVERIFY_FAKE_KEYS", "DRAGONFLY_STD_OTP_OVERLAYS")
 
 DRAGONFLY = pavona_top(
@@ -19,6 +20,7 @@ DRAGONFLY = pavona_top(
     std_otp_overlay = DRAGONFLY_STD_OTP_OVERLAYS,
     otp_sigverify_fake_keys = DRAGONFLY_OTP_SIGVERIFY_FAKE_KEYS,
     ips = DRAGONFLY_IPS,
+    instances = DRAGONFLY_INSTANCES,
     secret_cfgs = {
         "testing": "//hw/top_dragonfly/data/autogen:top_dragonfly.secrets.testing.gen.hjson",
     },

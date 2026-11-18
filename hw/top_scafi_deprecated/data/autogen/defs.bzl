@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -46,6 +47,29 @@ SCAFI_DEPRECATED_IPS = [
     SRAM_CTRL,
     UART,
     USBDEV,
+]
+
+SCAFI_DEPRECATED_INSTANCES = [
+    "uart0",
+    "uart1",
+    "gpio",
+    "spi_device",
+    "spi_host0",
+    "rv_timer",
+    "usbdev",
+    "pwrmgr_aon",
+    "rstmgr_aon",
+    "clkmgr_aon",
+    "pinmux_aon",
+    "aon_timer_aon",
+    "ast",
+    "flash_ctrl",
+    "flash_macro_wrapper",
+    "rv_plic",
+    "aes",
+    "sram_ctrl_main",
+    "rom_ctrl",
+    "rv_core_ibex",
 ]
 
 SCAFI_DEPRECATED_ALERTS = [

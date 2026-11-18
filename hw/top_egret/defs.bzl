@@ -1,10 +1,11 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 #
 
 load("//rules/pavona:hw.bzl", "pavona_top")
-load("//hw/top_egret/data/autogen:defs.bzl", "EGRET_IPS")
+load("//hw/top_egret/data/autogen:defs.bzl", "EGRET_INSTANCES", "EGRET_IPS")
 load("//hw/top_egret/data/otp:defs.bzl", "EGRET_OTP_SIGVERIFY_FAKE_KEYS", "EGRET_STD_OTP_OVERLAYS")
 
 EGRET = pavona_top(
@@ -19,6 +20,7 @@ EGRET = pavona_top(
     std_otp_overlay = EGRET_STD_OTP_OVERLAYS,
     otp_sigverify_fake_keys = EGRET_OTP_SIGVERIFY_FAKE_KEYS,
     ips = EGRET_IPS,
+    instances = EGRET_INSTANCES,
     secret_cfgs = {
         "testing": "//hw/top_egret/data/autogen:top_egret.secrets.testing.gen.hjson",
     },

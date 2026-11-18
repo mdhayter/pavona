@@ -3,7 +3,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-load("//hw/top:defs.bzl", "pavona_if_ip", "pavona_require_top", "pavona_select_ips", "pavona_select_top")
+load("//hw/top:defs.bzl", "pavona_if_instance", "pavona_if_ip", "pavona_require_top", "pavona_select_ips")
 load(
     "//rules/pavona:defs.bzl",
     "PAVONA_CPU",
@@ -209,15 +209,13 @@ cc_library(
         "otp_ctrl",
         ["HAS_OTP_CTRL"],
         [],
-    ) + pavona_select_top(
-        {
-            "scafi_deprecated": [],
-        },
+    ) + pavona_if_instance(
+        "sram_ctrl_ret_aon",
         ["HAS_RETENTION_RAM"],
-    ) + pavona_select_top(
-        {
-            "dragonfly": ["HAS_ROM_CTRL1"],
-        },
+        [],
+    ) + pavona_if_instance(
+        "rom_ctrl1",
+        ["HAS_ROM_CTRL1"],
         [],
     ),
     target_compatible_with = [PAVONA_CPU],
