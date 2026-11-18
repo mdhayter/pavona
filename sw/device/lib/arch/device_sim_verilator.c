@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -41,15 +42,12 @@ uint64_t to_cpu_cycles(uint64_t usec) {
 
 const uint64_t kClockFreqHiSpeedPeripheralHz = 500 * 1000;  // 500kHz
 
-// Egret on Verilator uses a 1/4 clock divider for the peripheral clock, but on
-// Dragonfly the peripheral clock is 1:1 with the high-speed domain clock.
-#if defined(PAVONA_IS_EGRET)
+// The Verilator model runs the IO clock at the high-speed peripheral frequency
+// above. The peripheral (UART) clock keeps the top's ratio to it: a 1/4 divider
+// on Egret (125kHz), 1:1 on Dragonfly (500kHz).
 const uint64_t kClockFreqPeripheralHz =
-    kClockFreqHiSpeedPeripheralHz / 4;  // 125kHz
-#elif defined(PAVONA_IS_DRAGONFLY)
-const uint64_t kClockFreqPeripheralHz =
-    kClockFreqHiSpeedPeripheralHz;  // 500kHz
-#endif
+    kClockFreqHiSpeedPeripheralHz /
+    (OPENTITAN_CLOCK_IO_FREQ_HZ / OPENTITAN_UART0_CLOCK_FREQ_HZ);
 
 const uint64_t kClockFreqUsbHz = 500 * 1000;  // 500kHz
 
