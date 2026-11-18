@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -135,6 +136,15 @@ ${helper.clock_enum.render_type_def()}
  * @return Clock frequency in Hz.
  */
 uint32_t dt_clock_frequency(dt_clock_t clk);
+
+/**
+ * Design frequencies of the clocks and of each instance's primary clock, in Hz.
+ *
+ * These are the frequencies in the top's description, as compile-time
+ * constants. The frequencies in a particular execution environment come from
+ * `dt_clock_frequency()`.
+ */
+${helper.clock_freq_defines.render()}
 
 /**
  * List of resets.

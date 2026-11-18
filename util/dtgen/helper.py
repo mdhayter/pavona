@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """This contains a class which is used to help generate the device tables (DT)
@@ -476,6 +477,32 @@ class TopHelper:
             self.clock_enum.add_constant(clock_name)
 
         self.clock_enum.add_count_constant("Number of clocks")
+
+        # The design frequency of each clock and of each instance's primary
+        # clock (`clk_i`), as constants: OPENTITAN_CLOCK_<CLOCK>_FREQ_HZ and
+        # OPENTITAN_<INSTANCE>_CLOCK_FREQ_HZ. Unlike dt_clock_frequency(), these
+        # do not depend on the execution environment; they let software that
+        # needs a constant (such as a UART NCO value) use the top's clocks.
+        self.clock_freq_defines = DefinesBlock()
+        clock_freqs = {}
+        for clock in clocks["srcs"] + clocks["derived_srcs"]:
+            if "freq" not in clock:
+                continue
+            clock_freqs[clock["name"]] = int(clock["freq"])
+            self.clock_freq_defines.add_define(
+                Name(["opentitan", "clock"]) + Name.from_snake_case(clock["name"]) +
+                Name(["freq", "hz"]), clock_freqs[clock["name"]])
+        for m in self.top["module"]:
+            clock = m.get("clock_srcs", {}).get("clk_i")
+            if clock is None:
+                continue
+            if not isinstance(clock, str):
+                clock = clock["clock"]
+            if clock not in clock_freqs:
+                continue
+            self.clock_freq_defines.add_define(
+                Name(["opentitan"]) + Name.from_snake_case(m["name"]) +
+                Name(["clock", "freq", "hz"]), clock_freqs[clock])
 
         # List of all reset nodes and put them in an enum.
         self.reset_enum = EnumType(self.DT_RESET_ENUM_NAME)

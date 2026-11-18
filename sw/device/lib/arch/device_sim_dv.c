@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -26,27 +27,21 @@ const device_type_t kDeviceType = kDeviceSimDV;
 // TODO: DV testbench completely randomizes these. Need to add code to
 // retrieve these from a preloaded memory location set by the testbench.
 
-#if defined(OPENTITAN_IS_EGRET)
-const uint64_t kClockFreqCpuMhz = 100;
+// Meanwhile, use the design frequencies from the top's description: the CPU
+// clock, the IO clock as the high-speed peripheral clock, and the UART's clock
+// as the peripheral clock.
+const uint64_t kClockFreqCpuMhz =
+    OPENTITAN_RV_CORE_IBEX_CLOCK_FREQ_HZ / (1000 * 1000);
 
-const uint64_t kClockFreqHiSpeedPeripheralHz = 96 * 1000 * 1000;  // 96MHz
+const uint64_t kClockFreqHiSpeedPeripheralHz = OPENTITAN_CLOCK_IO_FREQ_HZ;
 
-const uint64_t kClockFreqPeripheralHz = 24 * 1000 * 1000;  // 24MHz
+const uint64_t kClockFreqPeripheralHz = OPENTITAN_UART0_CLOCK_FREQ_HZ;
 
-const uint64_t kClockFreqUsbHz = 48 * 1000 * 1000;  // 48MHz
-
-const uint64_t kClockFreqAonHz = 200 * 1000;  // 200kHz
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-const uint64_t kClockFreqCpuMhz = 1000;
-
-const uint64_t kClockFreqHiSpeedPeripheralHz = 250 * 1000 * 1000;  // 250MHz
-
-const uint64_t kClockFreqPeripheralHz = 250 * 1000 * 1000;  // 250MHz
-
-const uint64_t kClockFreqAonHz = 62500 * 1000;  // 62.5MHz
-#else
-#error Unsupported top
+#ifdef OPENTITAN_CLOCK_USB_FREQ_HZ
+const uint64_t kClockFreqUsbHz = OPENTITAN_CLOCK_USB_FREQ_HZ;
 #endif
+
+const uint64_t kClockFreqAonHz = OPENTITAN_CLOCK_AON_FREQ_HZ;
 
 uint64_t to_cpu_cycles(uint64_t usec) { return usec * kClockFreqCpuMhz; }
 

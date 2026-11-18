@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 load("//rules:doxygen.bzl", "doxygen_gather_all_package_cc")
-load("//hw/top:defs.bzl", "pavona_if_ip", "pavona_require_ip", "pavona_select_top")
+load("//hw/top:defs.bzl", "pavona_if_ip", "pavona_require_ip")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -120,13 +120,6 @@ cc_library(
 cc_library(
     name = "sim_verilator",
     srcs = ["device_sim_verilator.c"],
-    defines = pavona_select_top(
-        {
-            "egret": ["PAVONA_IS_EGRET"],
-            "dragonfly": ["PAVONA_IS_DRAGONFLY"],
-        },
-        [],
-    ),
     deps = [
         ":device",
         ":stub",
