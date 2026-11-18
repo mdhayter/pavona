@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -51,11 +52,9 @@ cc_library(
     srcs = ["pinmux.c"],
     hdrs = ["pinmux.h"],
     deps = [
+        "//hw/top:top_lib",
         "//sw/device/lib/ujson",
-    ] + select({
-        "//hw/top:egret": ["//hw/top_egret/sw/autogen:top_egret"],
-        "//hw/top:dragonfly": ["//hw/top_dragonfly/sw/autogen:top_dragonfly"],
-    }),
+    ],
 )
 
 cc_library(

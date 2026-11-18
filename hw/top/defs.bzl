@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 load("//rules/pavona:hw.bzl", "get_ip_attr", "get_top_attr", "has_ip_attr", "has_top_attr")
@@ -68,6 +69,40 @@ def pavona_require_ip(ip):
     ```
     """
     return pavona_if_ip(ip, [], ["@platforms//:incompatible"])
+
+def pavona_select_ips(cases, default):
+    """
+    Select a value based on which IPs the active top has. Use this when the
+    choice depends on more than one IP, which `pavona_if_ip` cannot express
+    since selects do not nest.
+
+    `cases` is a list of `(conditions, value)` pairs. `conditions` is a
+    dictionary from IP name to `True` (the top must have this IP) or `False`
+    (it must not). For each top, the first case whose conditions all hold
+    gives the value; if none does, `default` is used. The choice is made for
+    every registered top, including tops registered outside this repository.
+
+    Example:
+    ```python
+    alias(
+      name = "my_alias",
+      actual = pavona_select_ips([
+        ({"otp_ctrl": False}, "//something:without_otp"),
+        ({"flash_ctrl": False}, "//something:without_flash"),
+      ], "//something:default"),
+    )
+    ```
+    """
+    branches = {}
+    for top in ALL_TOPS:
+        ips = [ip.name for ip in top.ips]
+        value = default
+        for (conditions, case_value) in cases:
+            if all([(ip in ips) == want for (ip, want) in conditions.items()]):
+                value = case_value
+                break
+        branches["@pavona_pavona//hw/top:is_{}".format(top.name)] = value
+    return select(branches)
 
 def pavona_select_top(values, default):
     """
