@@ -1,10 +1,11 @@
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
-load("//hw/top:defs.bzl", "pavona_select_top")
+load("//hw/top:defs.bzl", "pavona_select_top", "pavona_test_envs")
 load(
     "//rules:const.bzl",
     "CONST",
@@ -1872,10 +1873,8 @@ pavona_test(
 pavona_test(
     name = "example_test_from_rom",
     srcs = ["example_test_from_rom.c"],
-    exec_env = {
-        "//hw/top_egret:sim_dv": None,
+    exec_env = pavona_test_envs(["sim_dv"]) | {
         "//hw/top_egret:sim_verilator": None,
-        "//hw/top_dragonfly:sim_dv": None,
     },
     # This test is designed to run and complete entirely in the ROM boot stage.
     # Setting the `test_in_rom` flag makes the `pavona_test` rule aware
@@ -6515,11 +6514,9 @@ test_suite(
     pavona_test(
         name = "rv_dm_ndm_reset_req_{}".format(lc_state),
         srcs = ["rv_dm_ndm_reset_req.c"],
-        exec_env = {
+        exec_env = pavona_test_envs(["sim_dv"]) | {
             "//hw/top_egret:fpga_cw310_sival": None,
             "//hw/top_egret:fpga_cw340_sival": None,
-            "//hw/top_egret:sim_dv": None,
-            "//hw/top_dragonfly:sim_dv": None,
         },
         fpga = fpga_params(
             needs_jtag = True,
@@ -6573,11 +6570,9 @@ test_suite(
     pavona_test(
         name = "rv_dm_ndm_reset_req_when_cpu_halted_{}".format(lc_state),
         srcs = ["rv_dm_ndm_reset_req_when_cpu_halted.c"],
-        exec_env = {
+        exec_env = pavona_test_envs(["sim_dv"]) | {
             "//hw/top_egret:fpga_cw310_sival": None,
             "//hw/top_egret:fpga_cw340_sival": None,
-            "//hw/top_egret:sim_dv": None,
-            "//hw/top_dragonfly:sim_dv": None,
         },
         fpga = fpga_params(
             needs_jtag = True,

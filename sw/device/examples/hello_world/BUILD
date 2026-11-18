@@ -1,7 +1,9 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
+load("//hw/top:defs.bzl", "pavona_test_envs")
 load("//rules/pavona:defs.bzl", "pavona_test", "verilator_params")
 
 package(default_visibility = ["//visibility:public"])
@@ -13,13 +15,12 @@ pavona_test(
         # Disable the date-time warning only for the hello world program.
         "-Wno-date-time",
     ],
-    exec_env = {
+    exec_env = pavona_test_envs([
+        "sim_dv",
+        "sim_verilator",
+    ]) | {
         "//hw/top_egret:fpga_cw310_sival_rom_ext": None,
-        "//hw/top_egret:sim_dv": None,
-        "//hw/top_egret:sim_verilator": None,
         "//hw/top_egret:sim_verilator_rom_with_fake_keys": None,
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_dragonfly:sim_verilator": None,
         "//hw/top_dragonfly:sim_verilator_rom_with_fake_keys": None,
     },
     verilator = verilator_params(timeout = "long"),

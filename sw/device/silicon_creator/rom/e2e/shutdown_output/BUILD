@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -35,7 +36,7 @@ load(
     "MSG_PASS",
     "MSG_TEMPLATE_BFV_LCV",
 )
-load("//hw/top:defs.bzl", "pavona_select_top")
+load("//hw/top:defs.bzl", "pavona_select_top", "pavona_test_envs")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -75,10 +76,8 @@ manifest(
             ECDSA_ONLY_KEY_STRUCTS,
             lc_state_val,
         ),
-        exec_env = {
+        exec_env = pavona_test_envs(["sim_dv"]) | {
             "//hw/top_egret:fpga_cw310_rom_with_fake_keys": None,
-            "//hw/top_egret:sim_dv": None,
-            "//hw/top_dragonfly:sim_dv": None,
         },
         fpga = fpga_params(
             binaries = {"//sw/device/silicon_creator/rom/e2e:new_empty_test_slot_a": "firmware"},

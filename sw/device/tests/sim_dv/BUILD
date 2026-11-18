@@ -1,10 +1,11 @@
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
 load("//rules/pavona:defs.bzl", "PAVONA_CPU", "pavona_test")
-load("//hw/top:defs.bzl", "pavona_select_top")
+load("//hw/top:defs.bzl", "pavona_select_top", "pavona_test_envs")
 
 pavona_test(
     name = "i2c_host_tx_rx_test",
@@ -129,10 +130,7 @@ pavona_test(
 pavona_test(
     name = "gpio_test",
     srcs = ["gpio_test.c"],
-    exec_env = {
-        "//hw/top_egret:sim_dv": None,
-        "//hw/top_dragonfly:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//sw/device/lib/arch:device",
         "//sw/device/lib/base:mmio",
@@ -169,10 +167,7 @@ pavona_test(
 pavona_test(
     name = "lc_ctrl_scrap_test",
     srcs = ["lc_ctrl_scrap_test.c"],
-    exec_env = {
-        "//hw/top_egret:sim_dv": None,
-        "//hw/top_dragonfly:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//sw/device/lib/base:bitfield",
         "//sw/device/lib/base:memory",
@@ -187,10 +182,7 @@ pavona_test(
 pavona_test(
     name = "otp_ctrl_vendor_test_csr_access_test",
     srcs = ["otp_ctrl_vendor_test_csr_access_test.c"],
-    exec_env = {
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_egret:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top/dt",
         "//sw/device/lib/base:bitfield",
@@ -241,10 +233,7 @@ cc_library(
 pavona_test(
     name = "lc_ctrl_transition_test",
     srcs = ["lc_ctrl_transition_test.c"],
-    exec_env = {
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_egret:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         ":lc_ctrl_transition_impl",
         "//sw/device/lib/testing/test_framework:ottf_main",
@@ -254,10 +243,7 @@ pavona_test(
 pavona_test(
     name = "lc_ctrl_volatile_raw_unlock_test",
     srcs = ["lc_ctrl_volatile_raw_unlock_test.c"],
-    exec_env = {
-        "//hw/top_egret:sim_dv": None,
-        "//hw/top_dragonfly:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top/dt",
         "//sw/device/lib/base:bitfield",
@@ -274,10 +260,7 @@ pavona_test(
 pavona_test(
     name = "lc_walkthrough_test",
     srcs = ["lc_walkthrough_test.c"],
-    exec_env = {
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_egret:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top/dt",
         "//sw/device/lib/base:memory",
@@ -297,10 +280,7 @@ pavona_test(
 pavona_test(
     name = "lc_walkthrough_testunlocks_test",
     srcs = ["lc_walkthrough_testunlocks_test.c"],
-    exec_env = {
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_egret:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top/dt",
         "//sw/device/lib/base:memory",
@@ -319,10 +299,7 @@ pavona_test(
 pavona_test(
     name = "all_escalation_resets_test",
     srcs = ["all_escalation_resets_test.c"],
-    exec_env = {
-        "//hw/top_egret:sim_dv": None,
-        "//hw/top_dragonfly:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top/dt",
         "//sw/device/lib/base:abs_mmio",
@@ -361,10 +338,7 @@ pavona_test(
 pavona_test(
     name = "data_integrity_escalation_reset_test",
     srcs = ["data_integrity_escalation_reset_test.c"],
-    exec_env = {
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_egret:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top/dt:alert_handler",
         "//hw/top/dt:aon_timer",
@@ -392,10 +366,7 @@ pavona_test(
 pavona_test(
     name = "clkmgr_external_clk_src_for_lc_test",
     srcs = ["clkmgr_external_clk_src_for_lc_test.c"],
-    exec_env = {
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_egret:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         ":lc_ctrl_transition_impl",
         "//sw/device/lib/testing/test_framework:ottf_main",
@@ -405,10 +376,7 @@ pavona_test(
 pavona_test(
     name = "pwrmgr_main_power_glitch_test",
     srcs = ["pwrmgr_main_power_glitch_test.c"],
-    exec_env = {
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_egret:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top/dt",
         "//sw/device/lib/base:mmio",
@@ -511,10 +479,7 @@ pavona_test(
 pavona_test(
     name = "rom_ctrl_integrity_check_test",
     srcs = ["rom_ctrl_integrity_check_test.c"],
-    exec_env = {
-        "//hw/top_egret:sim_dv": None,
-        "//hw/top_dragonfly:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top/dt",
         "//sw/device/lib/arch:device",
@@ -530,10 +495,7 @@ pavona_test(
 pavona_test(
     name = "spi_host_tx_rx_test",
     srcs = ["spi_host_tx_rx_test.c"],
-    exec_env = {
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_egret:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top/dt",
         "//sw/device/lib/base:mmio",
@@ -560,10 +522,7 @@ pavona_test(
 pavona_test(
     name = "spi_passthrough_test",
     srcs = ["spi_passthrough_test.c"],
-    exec_env = {
-        "//hw/top_egret:sim_dv": None,
-        "//hw/top_dragonfly:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top/dt",
         "//sw/device/lib/arch:device",
@@ -674,10 +633,7 @@ pavona_test(
 pavona_test(
     name = "alert_handler_entropy_test",
     srcs = ["alert_handler_entropy_test.c"],
-    exec_env = {
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_egret:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top:alert_handler_c_regs",
         "//hw/top/dt",
@@ -696,10 +652,7 @@ pavona_test(
     name = "alert_handler_lpg_sleep_mode_alerts_test",
     srcs = ["alert_handler_lpg_sleep_mode_alerts.c"],
     # The test requires to drive fatal alerts which is possible only in DV sim.
-    exec_env = {
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_egret:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top:alert_handler_c_regs",
         "//hw/top/dt",
@@ -850,10 +803,7 @@ pavona_test(
 pavona_test(
     name = "exit_test_unlocked_bootstrap",
     srcs = ["exit_test_unlocked_bootstrap.c"],
-    exec_env = {
-        "//hw/top_egret:sim_dv": None,
-        "//hw/top_dragonfly:sim_dv": None,
-    },
+    exec_env = pavona_test_envs(["sim_dv"]),
     deps = [
         "//hw/top:otp_ctrl_c_regs",
         "//hw/top/dt",

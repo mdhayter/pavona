@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -29,7 +30,7 @@ load(
     "pavona_test",
     "verilator_params",
 )
-load("//hw/top:defs.bzl", "pavona_select_top")
+load("//hw/top:defs.bzl", "pavona_select_top", "pavona_test_envs")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -159,12 +160,11 @@ pavona_test(
         testonly = True,
         srcs = [":empty_test"],
         ecdsa_key = ecdsa_key_by_name(ECDSA_ONLY_KEY_STRUCTS, key),
-        exec_env = {
+        exec_env = pavona_test_envs([
+            "sim_dv",
+            "sim_verilator",
+        ]) | {
             "//hw/top_egret:fpga_cw310_rom_with_fake_keys": None,
-            "//hw/top_egret:sim_dv": None,
-            "//hw/top_egret:sim_verilator": None,
-            "//hw/top_dragonfly:sim_dv": None,
-            "//hw/top_dragonfly:sim_verilator": None,
         },
         linker_script = "//sw/device/lib/testing/test_framework:ottf_ld_silicon_creator_slot_{}".format(slot),
         # We need to specify the manifest because the simulation environments do not
@@ -331,14 +331,13 @@ pavona_test(
         second_rom = "//sw/device/silicon_creator/second_rom",
     ),
     ecdsa_key = {"//sw/device/silicon_creator/rom/keys/fake/ecdsa:prod_key_0_ecdsa_p256": "prod_key_0"},
-    exec_env = {
+    exec_env = pavona_test_envs([
+        "sim_dv",
+        "sim_verilator",
+    ]) | {
         "//hw/top_egret:fpga_cw310_sival": None,
         "//hw/top_egret:fpga_cw340_sival": None,
         "//hw/top_egret:silicon_creator": None,
-        "//hw/top_egret:sim_dv": None,
-        "//hw/top_egret:sim_verilator": None,
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_dragonfly:sim_verilator": None,
     },
     manifest = "//sw/device/silicon_creator/rom_ext:manifest",
     verilator = verilator_params(
@@ -360,12 +359,11 @@ pavona_test(
         second_rom = "//sw/device/silicon_creator/second_rom",
     ),
     ecdsa_key = {"//sw/device/silicon_creator/rom/keys/fake/ecdsa:prod_key_0_ecdsa_p256": "prod_key_0"},
-    exec_env = {
-        "//hw/top_egret:sim_dv": None,
-        "//hw/top_egret:sim_verilator": None,
+    exec_env = pavona_test_envs([
+        "sim_dv",
+        "sim_verilator",
+    ]) | {
         "//hw/top_egret:fpga_cw310_rom_with_fake_keys": None,
-        "//hw/top_dragonfly:sim_dv": None,
-        "//hw/top_dragonfly:sim_verilator": None,
     },
     manifest = "//sw/device/silicon_creator/rom_ext:manifest",
     verilator = verilator_params(
