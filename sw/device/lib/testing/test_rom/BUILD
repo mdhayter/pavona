@@ -3,7 +3,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-load("//hw/top:defs.bzl", "pavona_if_instance", "pavona_if_ip", "pavona_require_top", "pavona_select_ips")
+load("//hw/top:defs.bzl", "pavona_if_instance", "pavona_if_ip", "pavona_require_top", "pavona_select_ips", "pavona_test_envs")
 load(
     "//rules/pavona:defs.bzl",
     "PAVONA_CPU",
@@ -286,11 +286,9 @@ cc_library(
 pavona_test(
     name = "test_rom_test",
     srcs = ["test_rom_test.c"],
-    exec_env = {
+    exec_env = pavona_test_envs(["sim_verilator"]) | {
         "//hw/top_egret:fpga_cw310_test_rom": None,
         "//hw/top_egret:sim_dv": None,
-        "//hw/top_egret:sim_verilator": None,
-        "//hw/top_dragonfly:sim_verilator": None,
     },
     deps = [
         "//sw/device/lib/testing/test_framework:ottf_main",

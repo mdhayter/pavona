@@ -1,11 +1,12 @@
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
 load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
-load("//hw/top:defs.bzl", "pavona_if_ip", "pavona_require_ip", "pavona_select_top")
+load("//hw/top:defs.bzl", "pavona_if_ip", "pavona_require_ip", "pavona_select_top", "pavona_test_envs")
 load("//rules:cross_platform.bzl", "dual_cc_library", "dual_inputs")
 load("//rules:files.bzl", "output_groups")
 load("//rules:linker.bzl", "ld_library")
@@ -553,10 +554,7 @@ pavona_test(
     # of this, and instructs it to load the test image into ROM (rather than
     # loading the default test ROM, or any other ROM that may be specified via
     # Verilator or CW310 params).
-    exec_env = {
-        "//hw/top_egret:sim_verilator": None,
-        "//hw/top_dragonfly:sim_verilator": None,
-    },
+    exec_env = pavona_test_envs(["sim_verilator"]),
     kind = "rom",
     linker_script = pavona_select_top(
         {
