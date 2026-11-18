@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -73,10 +74,10 @@
  */
 #define OTTF_BACKDOOR_VAR_DV OT_USED OT_SECTION(".rodata")
 
-#if defined(OPENTITAN_IS_EGRET)
+#if defined(OPENTITAN_HAS_FLASH_CTRL)
 
 static inline void ottf_backdoor_flush_read_buffers(void) {
-  // On egret, some backdoor variables may live on flash, which
+  // On a top with flash, some backdoor variables may live on flash, which
   // has a read buffer that needs to be flushed to get up-to-date value.
   //
   // Cause read buffers to flush since it reads 32 bytes, which is the
@@ -88,12 +89,10 @@ static inline void ottf_backdoor_flush_read_buffers(void) {
   }
 }
 
-#elif defined(OPENTITAN_IS_DRAGONFLY)
+#else
 
 static inline void ottf_backdoor_flush_read_buffers(void) {}
 
-#else
-#error Unsupported top
 #endif
 
 /**

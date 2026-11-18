@@ -1,8 +1,9 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-load("//hw/top:defs.bzl", "pavona_if_ip", "pavona_require_top", "pavona_select_top")
+load("//hw/top:defs.bzl", "pavona_if_ip", "pavona_require_top", "pavona_select_ips", "pavona_select_top")
 load(
     "//rules/pavona:defs.bzl",
     "PAVONA_CPU",
@@ -139,11 +140,19 @@ cc_library(
 
 alias(
     name = "target_test_rom_lib",
-    actual = pavona_select_top(
-        {
-            "dragonfly": ":dragonfly_test_rom_lib",
-            "scafi_deprecated": ":scafi_deprecated_test_rom_lib",
-        },
+    # A top without OTP gets fake versions of the drivers that read it; a top
+    # without flash gets fake flash driver functions.
+    actual = pavona_select_ips(
+        [
+            (
+                {"otp_ctrl": False},
+                ":scafi_deprecated_test_rom_lib",
+            ),
+            (
+                {"flash_ctrl": False},
+                ":dragonfly_test_rom_lib",
+            ),
+        ],
         ":egret_test_rom_lib",
     ),
     visibility = ["//visibility:private"],
@@ -179,11 +188,10 @@ cc_library(
 
 alias(
     name = "test_rom_manifest",
-    actual = pavona_select_top(
-        {
-            "scafi_deprecated": ":scafi_deprecated_test_rom_manifest",
-        },
+    actual = pavona_if_ip(
+        "otp_ctrl",
         "//sw/device/silicon_creator/lib:manifest",
+        ":scafi_deprecated_test_rom_manifest",
     ),
 )
 

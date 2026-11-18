@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -14,7 +15,7 @@ load(
     "verilator_params",
 )
 load("//rules/pavona:util.bzl", "flatten")
-load("//hw/top:defs.bzl", "pavona_if_ip", "pavona_select_top")
+load("//hw/top:defs.bzl", "pavona_if_ip")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -157,10 +158,11 @@ cc_library(
 
 alias(
     name = "test_framework_manifest_def",
-    actual = select({
-        "//sw/device:is_scafi_deprecated": ":scafi_deprecated_test_framework_manifest_def",
-        "//conditions:default": "//sw/device/silicon_creator/lib:manifest_def",
-    }),
+    actual = pavona_if_ip(
+        "otp_ctrl",
+        "//sw/device/silicon_creator/lib:manifest_def",
+        ":scafi_deprecated_test_framework_manifest_def",
+    ),
 )
 
 cc_library(
@@ -188,12 +190,13 @@ cc_library(
         "//sw/device/lib/runtime:hart",
         "//sw/device/lib/runtime:ibex",
         "//sw/device/lib/runtime:log",
-    ] + pavona_select_top(
-        {"scafi_deprecated": []},
+    ] + pavona_if_ip(
+        "alert_handler",
         [
             ":ottf_alerts",
             "//sw/device/lib/dif:alert_handler",
         ],
+        [],
     ),
 )
 
@@ -242,6 +245,11 @@ cc_library(
 cc_library(
     name = "ottf_utils",
     hdrs = ["ottf_utils.h"],
+    defines = pavona_if_ip(
+        "flash_ctrl",
+        ["OPENTITAN_HAS_FLASH_CTRL"],
+        [],
+    ),
     target_compatible_with = [PAVONA_CPU],
     deps = [
         "//sw/device/lib/base:macros",
@@ -303,14 +311,13 @@ cc_library(
         "//sw/device/lib/testing:rand_testutils",
         "//third_party/freertos",
         "@manufacturer_test_hooks//:test_hooks",
-    ] + pavona_select_top(
-        {
-            "scafi_deprecated": [],
-        },
+    ] + pavona_if_ip(
+        "alert_handler",
         [
             ":ottf_alerts",
             ":ottf_test_config",
         ],
+        [],
     ),
     # `:ottf` depends on `:ottf_start`, but `:ottf_start` gets its main function
     # from `:ottf`. Thus we need to include all of the objects in `:ottf`
