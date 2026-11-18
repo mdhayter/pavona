@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -94,6 +95,15 @@ pavona_alias_top_attr(
 pavona_alias_top_attr(
     name = "top_lib",
     attr_name = "top_lib",
+)
+
+# The top's addresses without its name: "hw/top/top_memory.h".
+alias(
+    name = "top_memory",
+    actual = select({
+        ":is_{}".format(top.name): get_top_attr(top, "top_lib") + "_generic_memory"
+        for top in ALL_TOPS
+    }),
 )
 
 # Point to the right top library.

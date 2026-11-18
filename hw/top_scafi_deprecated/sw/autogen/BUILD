@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -22,6 +23,17 @@ cc_library(
     ],
     defines = ["OPENTITAN_IS_SCAFI_DEPRECATED"],
     target_compatible_with = pavona_require_top("scafi_deprecated"),
+)
+
+# The top's addresses without its name, as "hw/top/top_memory.h". Use it
+# through //hw/top:top_memory.
+cc_library(
+    name = "top_scafi_deprecated_generic_memory",
+    hdrs = ["generic/top_memory.h"],
+    include_prefix = "hw/top",
+    strip_include_prefix = "generic",
+    target_compatible_with = pavona_require_top("scafi_deprecated"),
+    deps = [":top_scafi_deprecated"],
 )
 
 ld_library(
