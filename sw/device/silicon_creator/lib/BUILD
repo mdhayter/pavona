@@ -331,6 +331,7 @@ dual_cc_library(
     deps = dual_inputs(
         device = [
             "//hw/top:top_lib",
+            "//hw/top:top_memory",
         ],
         host = [
             "//sw/device/lib/base:global_mock",
