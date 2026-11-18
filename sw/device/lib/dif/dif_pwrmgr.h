@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -17,6 +18,7 @@
 #include "sw/device/lib/base/mmio.h"
 #include "sw/device/lib/dif/dif_base.h"
 
+#include "hw/top/pwrmgr_regs.h"  // Generated.
 #include "sw/device/lib/dif/autogen/dif_pwrmgr_autogen.h"
 
 #ifdef __cplusplus
@@ -42,6 +44,9 @@ typedef enum dif_pwrmgr_req_type {
  * in low and active power states.
  *
  * Constants below are bitmasks that can be combined to define configurations.
+ * Each is the position of its bit in the control register relative to
+ * `PWRMGR_CONTROL_CORE_CLK_EN_BIT`; the USB options exist only on tops whose
+ * power manager controls a USB clock.
  *
  * See also: `dif_pwrmgr_domain_config_t`.
  */
@@ -49,32 +54,34 @@ typedef enum dif_pwrmgr_domain_option {
   /**
    * Enable core clock in low power state.
    */
-  kDifPwrmgrDomainOptionCoreClockInLowPower = (1u << 0),
+  kDifPwrmgrDomainOptionCoreClockInLowPower =
+      (1u << (PWRMGR_CONTROL_CORE_CLK_EN_BIT - PWRMGR_CONTROL_CORE_CLK_EN_BIT)),
   /**
    * Enable input/output (IO) clock in low power state.
    */
-  kDifPwrmgrDomainOptionIoClockInLowPower = (1u << 1),
-#if defined(OPENTITAN_IS_EGRET) || defined(OPENTITAN_IS_SCAFI_DEPRECATED)
+  kDifPwrmgrDomainOptionIoClockInLowPower =
+      (1u << (PWRMGR_CONTROL_IO_CLK_EN_BIT - PWRMGR_CONTROL_CORE_CLK_EN_BIT)),
+#ifdef PWRMGR_CONTROL_USB_CLK_EN_LP_BIT
   /**
    * Enable USB clock in low power state.
    */
-  kDifPwrmgrDomainOptionUsbClockInLowPower = (1u << 2),
+  kDifPwrmgrDomainOptionUsbClockInLowPower =
+      (1u << (PWRMGR_CONTROL_USB_CLK_EN_LP_BIT -
+              PWRMGR_CONTROL_CORE_CLK_EN_BIT)),
+#endif
+#ifdef PWRMGR_CONTROL_USB_CLK_EN_ACTIVE_BIT
   /**
    * Enable USB clock in active power state.
    */
-  kDifPwrmgrDomainOptionUsbClockInActivePower = (1u << 3),
+  kDifPwrmgrDomainOptionUsbClockInActivePower =
+      (1u << (PWRMGR_CONTROL_USB_CLK_EN_ACTIVE_BIT -
+              PWRMGR_CONTROL_CORE_CLK_EN_BIT)),
+#endif
   /**
    * Enable main power domain in low power state.
    */
-  kDifPwrmgrDomainOptionMainPowerInLowPower = (1u << 4),
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-  /**
-   * Enable main power domain in low power state.
-   */
-  kDifPwrmgrDomainOptionMainPowerInLowPower = (1u << 2),
-#else /* OPENTITAN_IS_ */
-#error "dif_pwrmgr does not support this top"
-#endif /* OPENTITAN_IS_ */
+  kDifPwrmgrDomainOptionMainPowerInLowPower =
+      (1u << (PWRMGR_CONTROL_MAIN_PD_N_BIT - PWRMGR_CONTROL_CORE_CLK_EN_BIT)),
 } dif_pwrmgr_domain_option_t;
 
 /**

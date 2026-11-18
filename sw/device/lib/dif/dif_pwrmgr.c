@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -13,58 +14,17 @@
 #include "hw/top/pwrmgr_regs.h"  // Generated.
 
 /**
- * Following static assertions make sure that generated values match the
- * definitions in the header, which we rely on for a simpler implementation.
- * These constants and their usages must be revisited if there is a change in
- * hardware.
- */
-
-/**
- * Relevant bits of the control register must start at
- * `PWRMGR_CONTROL_CORE_CLK_EN_BIT` and be in the same order as
- * `dif_pwrmgr_domain_option_t` constants.
- */
-static_assert(kDifPwrmgrDomainOptionCoreClockInLowPower ==
-                  (1u << (PWRMGR_CONTROL_CORE_CLK_EN_BIT -
-                          PWRMGR_CONTROL_CORE_CLK_EN_BIT)),
-              "Layout of control register changed.");
-
-static_assert(kDifPwrmgrDomainOptionIoClockInLowPower ==
-                  (1u << (PWRMGR_CONTROL_IO_CLK_EN_BIT -
-                          PWRMGR_CONTROL_CORE_CLK_EN_BIT)),
-              "Layout of control register changed.");
-
-#if defined(OPENTITAN_IS_EGRET)
-static_assert(kDifPwrmgrDomainOptionUsbClockInLowPower ==
-                  (1u << (PWRMGR_CONTROL_USB_CLK_EN_LP_BIT -
-                          PWRMGR_CONTROL_CORE_CLK_EN_BIT)),
-              "Layout of control register changed.");
-
-static_assert(kDifPwrmgrDomainOptionUsbClockInActivePower ==
-                  (1u << (PWRMGR_CONTROL_USB_CLK_EN_ACTIVE_BIT -
-                          PWRMGR_CONTROL_CORE_CLK_EN_BIT)),
-              "Layout of control register changed.");
-#endif /* OPENTITAN_IS */
-
-static_assert(kDifPwrmgrDomainOptionMainPowerInLowPower ==
-                  (1u << (PWRMGR_CONTROL_MAIN_PD_N_BIT -
-                          PWRMGR_CONTROL_CORE_CLK_EN_BIT)),
-              "Layout of control register changed.");
-
-/**
  * Bitfield for interpreting the configuration options in the control
  * register.
  */
 static const bitfield_field32_t kDomainConfigBitfield = {
     .mask = kDifPwrmgrDomainOptionCoreClockInLowPower |
             kDifPwrmgrDomainOptionIoClockInLowPower |
-#if defined(OPENTITAN_IS_EGRET)
+#ifdef PWRMGR_CONTROL_USB_CLK_EN_LP_BIT
             kDifPwrmgrDomainOptionUsbClockInLowPower |
+#endif
+#ifdef PWRMGR_CONTROL_USB_CLK_EN_ACTIVE_BIT
             kDifPwrmgrDomainOptionUsbClockInActivePower |
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-/* Dragonfly has no USB clock. */
-#else
-#error "dif_pwrmgr does not support this top"
 #endif
             kDifPwrmgrDomainOptionMainPowerInLowPower,
     .index = PWRMGR_CONTROL_CORE_CLK_EN_BIT,

@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -17,6 +18,7 @@
 #include "sw/device/lib/base/mmio.h"
 #include "sw/device/lib/dif/dif_base.h"
 
+#include "hw/top/clkmgr_regs.h"  // Generated.
 #include "sw/device/lib/dif/autogen/dif_clkmgr_autogen.h"
 
 #ifdef __cplusplus
@@ -42,75 +44,89 @@ typedef uint32_t dif_clkmgr_hintable_clock_t;
 
 typedef uint32_t dif_clkmgr_measure_clock_t;
 
+/**
+ * A recoverable error type.
+ *
+ * Each top has an error bit for each clock it measures; the values are taken
+ * from the generated register definitions.
+ */
 typedef enum dif_clkmgr_recov_err_type {
-#if defined(OPENTITAN_IS_EGRET)
   /**
    * A recoverable update error for one of the clocks.
+   *
+   * The template ensures every clkmgr has the shadow update bit, so this entry
+   * needs no #ifdef and the enum is never empty.
    */
-  kDifClkmgrRecovErrTypeShadowUpdate = 1u << 0,
+  kDifClkmgrRecovErrTypeShadowUpdate = 1u
+      << CLKMGR_RECOV_ERR_CODE_SHADOW_UPDATE_ERR_BIT,
+#ifdef CLKMGR_RECOV_ERR_CODE_IO_MEASURE_ERR_BIT
   /**
    * A recoverable measurement error for IO clock.
    */
-  kDifClkmgrRecovErrTypeIoMeas = 1u << 1,
+  kDifClkmgrRecovErrTypeIoMeas = 1u << CLKMGR_RECOV_ERR_CODE_IO_MEASURE_ERR_BIT,
+#endif
+#ifdef CLKMGR_RECOV_ERR_CODE_IO_DIV2_MEASURE_ERR_BIT
   /**
    * A recoverable measurement error for IO_DIV2 clock.
    */
-  kDifClkmgrRecovErrTypeIoDiv2Meas = 1u << 2,
+  kDifClkmgrRecovErrTypeIoDiv2Meas = 1u
+      << CLKMGR_RECOV_ERR_CODE_IO_DIV2_MEASURE_ERR_BIT,
+#endif
+#ifdef CLKMGR_RECOV_ERR_CODE_IO_DIV4_MEASURE_ERR_BIT
   /**
    * A recoverable measurement error for IO_DIV4 clock.
    */
-  kDifClkmgrRecovErrTypeIoDiv4Meas = 1u << 3,
+  kDifClkmgrRecovErrTypeIoDiv4Meas = 1u
+      << CLKMGR_RECOV_ERR_CODE_IO_DIV4_MEASURE_ERR_BIT,
+#endif
+#ifdef CLKMGR_RECOV_ERR_CODE_MAIN_MEASURE_ERR_BIT
   /**
    * A recoverable measurement error for MAIN clock.
    */
-  kDifClkmgrRecovErrTypeMainMeas = 1u << 4,
+  kDifClkmgrRecovErrTypeMainMeas = 1u
+      << CLKMGR_RECOV_ERR_CODE_MAIN_MEASURE_ERR_BIT,
+#endif
+#ifdef CLKMGR_RECOV_ERR_CODE_USB_MEASURE_ERR_BIT
   /**
    * A recoverable measurement error for USB clock.
    */
-  kDifClkmgrRecovErrTypeUsbMeas = 1u << 5,
+  kDifClkmgrRecovErrTypeUsbMeas = 1u
+      << CLKMGR_RECOV_ERR_CODE_USB_MEASURE_ERR_BIT,
+#endif
+#ifdef CLKMGR_RECOV_ERR_CODE_IO_TIMEOUT_ERR_BIT
   /**
    * A recoverable timeout error for IO clock.
    */
-  kDifClkmgrRecovErrTypeIoTimeout = 1u << 6,
+  kDifClkmgrRecovErrTypeIoTimeout = 1u
+      << CLKMGR_RECOV_ERR_CODE_IO_TIMEOUT_ERR_BIT,
+#endif
+#ifdef CLKMGR_RECOV_ERR_CODE_IO_DIV2_TIMEOUT_ERR_BIT
   /**
    * A recoverable timeout error for IO_DIV2 clock.
    */
-  kDifClkmgrRecovErrTypeIoDiv2Timeout = 1u << 7,
+  kDifClkmgrRecovErrTypeIoDiv2Timeout = 1u
+      << CLKMGR_RECOV_ERR_CODE_IO_DIV2_TIMEOUT_ERR_BIT,
+#endif
+#ifdef CLKMGR_RECOV_ERR_CODE_IO_DIV4_TIMEOUT_ERR_BIT
   /**
    * A recoverable timeout error for IO_DIV4 clock.
    */
-  kDifClkmgrRecovErrTypeIoDiv4Timeout = 1u << 8,
+  kDifClkmgrRecovErrTypeIoDiv4Timeout = 1u
+      << CLKMGR_RECOV_ERR_CODE_IO_DIV4_TIMEOUT_ERR_BIT,
+#endif
+#ifdef CLKMGR_RECOV_ERR_CODE_MAIN_TIMEOUT_ERR_BIT
   /**
    * A recoverable timeout error for MAIN clock.
    */
-  kDifClkmgrRecovErrTypeMainTimeout = 1u << 9,
+  kDifClkmgrRecovErrTypeMainTimeout = 1u
+      << CLKMGR_RECOV_ERR_CODE_MAIN_TIMEOUT_ERR_BIT,
+#endif
+#ifdef CLKMGR_RECOV_ERR_CODE_USB_TIMEOUT_ERR_BIT
   /**
    * A recoverable timeout error for USB clock.
    */
-  kDifClkmgrRecovErrTypeUsbTimeout = 1u << 10,
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-  /**
-   * A recoverable update error for one of the clocks.
-   */
-  kDifClkmgrRecovErrTypeShadowUpdate = 1u << 0,
-  /**
-   * A recoverable measurement error for IO clock.
-   */
-  kDifClkmgrRecovErrTypeIoMeas = 1u << 1,
-  /**
-   * A recoverable measurement error for MAIN clock.
-   */
-  kDifClkmgrRecovErrTypeMainMeas = 1u << 2,
-  /**
-   * A recoverable timeout error for IO clock.
-   */
-  kDifClkmgrRecovErrTypeIoTimeout = 1u << 3,
-  /**
-   * A recoverable timeout error for MAIN clock.
-   */
-  kDifClkmgrRecovErrTypeMainTimeout = 1u << 4,
-#else
-#error "dif_clkmgr does not support this top"
+  kDifClkmgrRecovErrTypeUsbTimeout = 1u
+      << CLKMGR_RECOV_ERR_CODE_USB_TIMEOUT_ERR_BIT,
 #endif
 } dif_clkmgr_recov_err_type_t;
 
@@ -319,7 +335,7 @@ dif_result_t dif_clkmgr_hintable_clock_get_hint(
     const dif_clkmgr_t *clkmgr, dif_clkmgr_hintable_clock_t clock,
     dif_toggle_t *state);
 
-#if defined(OPENTITAN_IS_EGRET)
+#if OPENTITAN_CLKMGR_HAS_SW_EXTCLK_REGWEN
 /**
  * Check if external clock control is locked.
  * @param clkmgr Clock Manager Handle.
@@ -510,7 +526,7 @@ OT_WARN_UNUSED_RESULT
 dif_result_t dif_clkmgr_fatal_err_code_get_codes(
     const dif_clkmgr_t *clkmgr, dif_clkmgr_fatal_err_codes_t *codes);
 
-#if defined(OPENTITAN_IS_EGRET)
+#if OPENTITAN_CLKMGR_HAS_SW_EXTCLK_REGWEN
 /**
  * Wait for external clock switch to finish.
  *
