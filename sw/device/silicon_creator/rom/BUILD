@@ -6,7 +6,7 @@
 
 load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
-load("//hw/top:defs.bzl", "pavona_if_ip", "pavona_require_ip", "pavona_select_top", "pavona_test_envs")
+load("//hw/top:defs.bzl", "pavona_if_instance", "pavona_if_ip", "pavona_require_ip", "pavona_select_top", "pavona_test_envs")
 load("//rules:cross_platform.bzl", "dual_cc_library", "dual_inputs")
 load("//rules:files.bzl", "output_groups")
 load("//rules:linker.bzl", "ld_library")
@@ -355,13 +355,14 @@ cc_library(
         "sensor_ctrl",
         ["HAS_SENSOR_CTRL"],
         [],
+    ) + pavona_if_instance(
+        "rom_ctrl1",
+        ["HAS_ROM_CTRL1"],
+        [],
     ) + pavona_select_top(
         {
             "egret": ["DISCRETE_OTP_MAP"],
-            "dragonfly": [
-                "INTEGRATED_OTP_MAP",
-                "HAS_ROM_CTRL1",
-            ],
+            "dragonfly": ["INTEGRATED_OTP_MAP"],
         },
         [],
     ),
@@ -420,12 +421,10 @@ cc_library(
             "//sw/device/silicon_creator/lib/drivers:sensor_ctrl",
         ],
         [],
-    ) + pavona_select_top(
-        {
-            "egret": [":boot_rom_ext"],
-            "dragonfly": [":boot_second_rom"],
-        },
-        [],
+    ) + pavona_if_instance(
+        "rom_ctrl1",
+        [":boot_second_rom"],
+        [":boot_rom_ext"],
     ),
     alwayslink = True,
 )
