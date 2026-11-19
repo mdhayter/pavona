@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -6,6 +7,7 @@
 
 #include "hw/top/dt/rom_ctrl.h"
 #include "hw/top/dt/sram_ctrl.h"
+#include "hw/top/top_memory.h"
 
 #if HAS_FLASH_CTRL
 #include "hw/top/dt/flash_ctrl.h"
@@ -35,20 +37,15 @@ void rom_epmp_state_init(lifecycle_state_t lc_state) {
       .end = dt_rom_ctrl_memory_base(kDtRomCtrlFirst, kDtRomCtrlMemoryRom) +
              dt_rom_ctrl_memory_size(kDtRomCtrlFirst, kDtRomCtrlMemoryRom)};
 
-#if defined(OPENTITAN_IS_EGRET)
-  // In Egret, the silicon creator firmware lives in internal flash.
+#if HAS_FLASH_CTRL
+  // On a top with flash, the silicon creator firmware lives in internal flash.
   epmp_region_t creator_fw = {
       .start = dt_flash_ctrl_memory_base(kDtFlashCtrl, kDtFlashCtrlMemoryMem),
       .end = dt_flash_ctrl_memory_base(kDtFlashCtrl, kDtFlashCtrlMemoryMem) +
              dt_flash_ctrl_memory_size(kDtFlashCtrl, kDtFlashCtrlMemoryMem)};
-  const epmp_region_t mmio = {
-      .start = TOP_EGRET_MMIO_BASE_ADDR,
-      .end = TOP_EGRET_MMIO_BASE_ADDR + TOP_EGRET_MMIO_SIZE_BYTES};
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-  const epmp_region_t mmio = {
-      .start = TOP_DRAGONFLY_MMIO_BASE_ADDR,
-      .end = TOP_DRAGONFLY_MMIO_BASE_ADDR + TOP_DRAGONFLY_MMIO_SIZE_BYTES};
 #endif
+  const epmp_region_t mmio = {.start = TOP_MMIO_BASE_ADDR,
+                              .end = TOP_MMIO_BASE_ADDR + TOP_MMIO_SIZE_BYTES};
   const epmp_region_t stack_guard = {.start = (uintptr_t)_stack_start,
                                      .end = (uintptr_t)_stack_start + 4};
   epmp_region_t ram = {
@@ -65,7 +62,7 @@ void rom_epmp_state_init(lifecycle_state_t lc_state) {
   epmp_state_configure_tor(1, rom_text, kEpmpPermLockedReadExecute);
   epmp_state_configure_napot(2, rom, kEpmpPermLockedReadOnly);
   epmp_state_configure_tor(11, mmio, kEpmpPermLockedReadWrite);
-#ifdef OPENTITAN_IS_EGRET
+#if HAS_FLASH_CTRL
   epmp_state_configure_napot(13, creator_fw, kEpmpPermLockedReadOnly);
 #endif
   epmp_state_configure_na4(14, stack_guard, kEpmpPermLockedNoAccess);

@@ -1,20 +1,18 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 #include "sw/device/silicon_creator/lib/epmp_defs.h"
 
-#if defined(PAVONA_IS_EGRET)
-#include "hw/top_egret/sw/autogen/top_egret_memory.h"
+#include "hw/top/top_memory.h"
 
-#define TOPLEVEL_CONST(x) TOP_EGRET_##x
+#define TOPLEVEL_CONST(x) TOP_##x
 
-#define TOP_EGRET_ROM_CTRL0_ROM_BASE_ADDR TOP_EGRET_ROM_CTRL_ROM_BASE_ADDR
-#define TOP_EGRET_ROM_CTRL0_ROM_SIZE_BYTES TOP_EGRET_ROM_CTRL_ROM_SIZE_BYTES
-#elif defined(PAVONA_IS_DRAGONFLY)
-#include "hw/top_dragonfly/sw/autogen/top_dragonfly_memory.h"
-
-#define TOPLEVEL_CONST(x) TOP_DRAGONFLY_##x
+// A top with a single ROM names it rom_ctrl rather than rom_ctrl0.
+#ifndef TOP_ROM_CTRL0_ROM_BASE_ADDR
+#define TOP_ROM_CTRL0_ROM_BASE_ADDR TOP_ROM_CTRL_ROM_BASE_ADDR
+#define TOP_ROM_CTRL0_ROM_SIZE_BYTES TOP_ROM_CTRL_ROM_SIZE_BYTES
 #endif
 
 /**
@@ -82,9 +80,9 @@ rom_epmp_init:
   li   t0, TOR(TOPLEVEL_CONST(MMIO_BASE_ADDR) + TOPLEVEL_CONST(MMIO_SIZE_BYTES))
   csrw pmpaddr11, t0
 
-  // FLASH memory containing silicon creator firmware at rest. Unset here in
-  // designs with a second metal ROM stage.
-#ifndef HAS_ROM_CTRL1
+  // FLASH memory containing silicon creator firmware at rest, on a top with
+  // flash.
+#ifdef HAS_FLASH_CTRL
   li   t0, NAPOT(TOPLEVEL_CONST(FLASH_CTRL_MEM_BASE_ADDR), TOPLEVEL_CONST(FLASH_CTRL_MEM_SIZE_BYTES))
   csrw pmpaddr13, t0
 #endif
@@ -101,12 +99,12 @@ rom_epmp_init:
   li   t0, CFG_INDEX(1 %  4, EPMP_CFG_A_TOR   | EPMP_CFG_LRX)  | /* ROM TEXT    */ \
            CFG_INDEX(2 %  4, EPMP_CFG_A_NAPOT | EPMP_CFG_LR)     /* ROM         */
   li   t2, CFG_INDEX(11 % 4, EPMP_CFG_A_TOR   | EPMP_CFG_LRW)    /* MMIO        */
-#ifdef HAS_ROM_CTRL1
-  li   t3, CFG_INDEX(14 % 4, EPMP_CFG_A_NA4   | EPMP_CFG_L)    | /* Stack Guard */ \
-           CFG_INDEX(15 % 4, EPMP_CFG_A_NAPOT | EPMP_CFG_LRW)    /* RAM         */
-#else
+#ifdef HAS_FLASH_CTRL
   li   t3, CFG_INDEX(13 % 4, EPMP_CFG_A_NAPOT | EPMP_CFG_LR)   | /* FLASH       */ \
            CFG_INDEX(14 % 4, EPMP_CFG_A_NA4   | EPMP_CFG_L)    | /* Stack Guard */ \
+           CFG_INDEX(15 % 4, EPMP_CFG_A_NAPOT | EPMP_CFG_LRW)    /* RAM         */
+#else
+  li   t3, CFG_INDEX(14 % 4, EPMP_CFG_A_NA4   | EPMP_CFG_L)    | /* Stack Guard */ \
            CFG_INDEX(15 % 4, EPMP_CFG_A_NAPOT | EPMP_CFG_LRW)    /* RAM         */
 #endif
   csrw pmpcfg0, t0
