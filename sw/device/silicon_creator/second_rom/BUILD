@@ -1,5 +1,6 @@
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -20,15 +21,10 @@ cc_library(
         "second_rom_epmp.c",
     ],
     hdrs = ["second_rom_epmp.h"],
-    defines = pavona_select_top(
-        {
-            "dragonfly": ["PAVONA_IS_DRAGONFLY"],
-        },
-        [],
-    ),
     target_compatible_with = [PAVONA_CPU],
     deps = [
         "//hw/top:rv_dm_c_regs",
+        "//hw/top:top_memory",
         "//hw/top/dt:rv_dm",
         "//hw/top/dt:soc_proxy",
         "//hw/top/dt:sram_ctrl",
