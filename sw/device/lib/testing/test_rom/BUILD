@@ -3,7 +3,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-load("//hw/top:defs.bzl", "pavona_if_instance", "pavona_if_ip", "pavona_require_top", "pavona_select_ips", "pavona_test_envs")
+load("//hw/top:defs.bzl", "pavona_if_instance", "pavona_if_ip", "pavona_if_top_attr", "pavona_require_top", "pavona_select_ips", "pavona_test_envs")
 load(
     "//rules/pavona:defs.bzl",
     "PAVONA_CPU",
@@ -217,6 +217,10 @@ cc_library(
     ) + pavona_if_instance(
         "rom_ctrl1",
         ["HAS_ROM_CTRL1"],
+        [],
+    ) + pavona_if_top_attr(
+        "ast_init_sized",
+        ["AST_INIT_SIZED"],
         [],
     ),
     target_compatible_with = [PAVONA_CPU],
