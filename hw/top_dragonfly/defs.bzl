@@ -27,6 +27,12 @@ DRAGONFLY = pavona_top(
     otp_sigverify_fake_keys = DRAGONFLY_OTP_SIGVERIFY_FAKE_KEYS,
     ips = DRAGONFLY_IPS,
     instances = DRAGONFLY_INSTANCES,
+    # If ast_init_sized is present (whatever its value: remove it rather than
+    # setting it to False), the test ROM reads from OTP the size of the AST
+    # configuration to copy (CREATOR_SW_CFG_AST_INIT_SIZE, in words).
+    # Otherwise it checks CREATOR_SW_CFG_AST_INIT_EN and, if that is true,
+    # copies the AST registers up to and including REGAL.
+    ast_init_sized = True,
     secret_cfgs = {
         "testing": "//hw/top_dragonfly/data/autogen:top_dragonfly.secrets.testing.gen.hjson",
     },

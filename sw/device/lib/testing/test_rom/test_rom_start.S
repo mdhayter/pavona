@@ -173,8 +173,9 @@ _start:
   csrw pmpcfg1, zero
   csrw pmpcfg2, zero
 
-#ifdef OPENTITAN_IS_DRAGONFLY
-  // Copy all required AST words.
+#ifdef AST_INIT_SIZED
+  // Copy as many AST words as OTP says (the top's `ast_init_sized`
+  // attribute).
   li   a0, (TOP_OTP_CTRL_CORE_BASE_ADDR + \
             OTP_CTRL_SW_CFG_WINDOW_REG_OFFSET)
   lw   t0, OTP_CTRL_PARAM_CREATOR_SW_CFG_AST_INIT_SIZE_OFFSET(a0)
