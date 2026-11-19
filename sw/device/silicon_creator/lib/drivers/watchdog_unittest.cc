@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -7,6 +8,8 @@
 #include <array>
 
 #include "gtest/gtest.h"
+#include "hw/top/dt/pwrmgr.h"
+#include "hw/top/top_memory.h"
 #include "sw/device/lib/base/mock_abs_mmio.h"
 #include "sw/device/silicon_creator/lib/base/mock_sec_mmio.h"
 #include "sw/device/silicon_creator/lib/drivers/lifecycle.h"
@@ -16,7 +19,6 @@
 #include "hw/top/aon_timer_regs.h"
 #include "hw/top/otp_ctrl_regs.h"
 #include "hw/top/pwrmgr_regs.h"
-#include "hw/top_egret/sw/autogen/top_egret.h"
 
 namespace watchdog_unittest {
 namespace {
@@ -44,10 +46,11 @@ class WatchdogTest : public rom_test::RomTest {
             OTP_CTRL_PARAM_OWNER_SW_CFG_ROM_WATCHDOG_BITE_THRESHOLD_CYCLES_OFFSET))
         .WillOnce(Return(kBiteThreshold));
 
-    EXPECT_SEC_WRITE32(pwrmgr_ + PWRMGR_RESET_EN_REG_OFFSET,
-                       {
-                           {PWRMGR_RESET_EN_EN_1_BIT, true},
-                       });
+    EXPECT_SEC_WRITE32(
+        pwrmgr_ + PWRMGR_RESET_EN_REG_OFFSET,
+        {
+            {OPENTITAN_PWRMGR_RESET_REQ_AON_TIMER_AON_TIMER_BIT, true},
+        });
     ExpectCdcSync();
     EXPECT_SEC_WRITE32(wdog_ + AON_TIMER_WDOG_CTRL_REG_OFFSET,
                        0 << AON_TIMER_WDOG_CTRL_ENABLE_BIT);
@@ -61,8 +64,8 @@ class WatchdogTest : public rom_test::RomTest {
     ExpectCdcSync();
   }
 
-  uint32_t pwrmgr_ = TOP_EGRET_PWRMGR_AON_BASE_ADDR;
-  uint32_t wdog_ = TOP_EGRET_AON_TIMER_AON_BASE_ADDR;
+  uint32_t pwrmgr_ = TOP_PWRMGR_AON_BASE_ADDR;
+  uint32_t wdog_ = TOP_AON_TIMER_AON_BASE_ADDR;
   rom_test::MockAbsMmio abs_;
   rom_test::MockSecMmio sec_;
   rom_test::MockOtp otp_;

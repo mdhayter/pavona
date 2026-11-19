@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -17,20 +18,10 @@
 #include "hw/top/otp_ctrl_regs.h"
 #include "hw/top/pwrmgr_regs.h"
 
-#ifdef PAVONA_IS_EGRET
-#include "hw/top_egret/sw/autogen/top_egret.h"
 enum {
   kPowerManagerResetRequestsAonTimerAonAonTimerRstReq =
-      kTopEgretPowerManagerResetRequestsAonTimerAonAonTimerRstReq,
+      OPENTITAN_PWRMGR_RESET_REQ_AON_TIMER_AON_TIMER_BIT,
 };
-#endif
-#ifdef PAVONA_IS_DRAGONFLY
-#include "hw/top_dragonfly/sw/autogen/top_dragonfly.h"
-enum {
-  kPowerManagerResetRequestsAonTimerAonAonTimerRstReq =
-      kTopDragonflyPowerManagerResetRequestsAonTimerAonAonTimerRstReq,
-};
-#endif
 
 /**
  * Base address of the aon_timer registers.

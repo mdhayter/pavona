@@ -901,13 +901,6 @@ cc_library(
     name = "watchdog",
     srcs = ["watchdog.c"],
     hdrs = ["watchdog.h"],
-    defines = pavona_select_top(
-        {
-            "egret": ["PAVONA_IS_EGRET"],
-            "dragonfly": ["PAVONA_IS_DRAGONFLY"],
-        },
-        [],
-    ),
     deps = [
         ":pwrmgr",
         "//hw/top:aon_timer_c_regs",
@@ -918,13 +911,7 @@ cc_library(
         "//sw/device/silicon_creator/lib/base:sec_mmio",
         "//sw/device/silicon_creator/lib/drivers:lifecycle",
         "//sw/device/silicon_creator/lib/drivers:otp",
-    ] + pavona_select_top(
-        {
-            "egret": ["//hw/top_egret/sw/autogen:top_egret"],
-            "dragonfly": ["//hw/top_dragonfly/sw/autogen:top_dragonfly"],
-        },
-        [],
-    ),
+    ],
 )
 
 cc_test(
@@ -934,7 +921,8 @@ cc_test(
         ":watchdog",
         "//hw/top:aon_timer_c_regs",
         "//hw/top:otp_ctrl_c_regs",
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top:top_memory",
+        "//hw/top/dt",
         "//sw/device/lib/base:abs_mmio",
         "//sw/device/silicon_creator/lib/base:sec_mmio",
         "//sw/device/silicon_creator/lib/drivers:otp",
