@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """This contains a class which is used to help generate the device tables (DT)
@@ -211,13 +212,42 @@ class PwrmgrExt(Extension):
             self.EXT_RESET_REQS_FIELD_NAME: rst_reqs,
         }
 
+    def _render_reset_req_bits(self) -> str:
+        """
+        Define `OPENTITAN_PWRMGR_RESET_REQ_<SOURCE>_BIT` for each peripheral
+        reset request: its bit in the `RESET_EN` and `RESET_STATUS` registers.
+        The source is named by the module type and the simplified request name
+        (for example `AON_TIMER_AON_TIMER`), as for the rstmgr's
+        `OPENTITAN_RSTMGR_HW_REQ_<SOURCE>_BIT`, so that software can name a
+        request without knowing the top, and use `#ifdef` to know whether the
+        top has it. Unlike `dt_pwrmgr_reset_request_src()`, these are
+        compile-time constants.
+        """
+        text = "\n/**\n"
+        text += " * Bit of the `RESET_EN` and `RESET_STATUS` registers for each peripheral\n"
+        text += " * reset request.\n"
+        text += " */\n"
+        seen = set()
+        for (idx, reset) in enumerate(self.ipconfig.peripheral_reset_req_list()):
+            module_type = self.ip_helper.top_helper.get_module_type(reset["module"])
+            source = Name.from_snake_case(module_type)
+            source += Name.from_snake_case(
+                self.ip_helper.simplify_reset_request_name(reset["name"]))
+            macro = (Name(["opentitan", "pwrmgr", "reset", "req"]) + source +
+                     Name(["bit"])).as_c_define()
+            if macro in seen:
+                raise RuntimeError(f"two reset requests are both named {macro}")
+            seen.add(macro)
+            text += f"#define {macro} {idx}\n"
+        return text
+
     def render_dt_ip(self, pos: Extension.DtIpPos) -> str:
         if pos == Extension.DtIpPos.HeaderEnd:
             subs = {
                 'wakeup_src_struct': self.wakeup_src_struct.render_type_def(),
                 'reset_req_src_struct': self.reset_req_src_struct.render_type_def(),
             }
-            return HEADER_EXT_TEMPLATE % subs
+            return HEADER_EXT_TEMPLATE % subs + self._render_reset_req_bits()
         elif pos == Extension.DtIpPos.SourceIncludes:
             includes = ""
             for ip in self._extra_includes:
