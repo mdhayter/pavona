@@ -307,18 +307,10 @@ cc_library(
         "flash_ctrl",
         ["HAS_FLASH_CTRL"],
         [],
-    ) + pavona_select_top(
-        {
-            "egret": ["PAVONA_IS_EGRET"],
-            "dragonfly": [
-                "PAVONA_IS_DRAGONFLY",
-                "HAS_ROM_CTRL1",
-            ],
-        },
-        [],
     ),
     target_compatible_with = [PAVONA_CPU],
     deps = [
+        "//hw/top:top_memory",
         "//hw/top/dt:rom_ctrl",
         "//hw/top/dt:sram_ctrl",
         "//sw/device/lib/base:bitfield",
@@ -331,12 +323,6 @@ cc_library(
         "flash_ctrl",
         ["//hw/top/dt:flash_ctrl"],
         ["//hw/top/dt:soc_proxy"],
-    ) + pavona_select_top(
-        {
-            "egret": ["//hw/top_egret/sw/autogen:top_egret"],
-            "dragonfly": ["//hw/top_dragonfly/sw/autogen:top_dragonfly"],
-        },
-        [],
     ),
 )
 
@@ -388,6 +374,7 @@ cc_library(
         "//hw/top:edn_c_regs",
         "//hw/top:otp_ctrl_c_regs",
         "//hw/top:rstmgr_c_regs",
+        "//hw/top:top_memory",
         "//hw/top/dt:rom_ctrl",
         "//sw/device/lib/arch:device",
         "//sw/device/lib/base:bitfield",

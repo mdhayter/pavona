@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -32,15 +33,9 @@
 //
 // Using `dt` is unsuitable here for this purpose because it would require
 // explicit `call` instructions prior to setting up the stack.
-#if defined(OPENTITAN_IS_EGRET)
-#include "hw/top_egret/sw/autogen/top_egret_memory.h"
+#include "hw/top/top_memory.h"
 
-#define TOPLEVEL_CONST(x) TOP_EGRET_##x
-#elif defined(OPENTITAN_IS_DRAGONFLY)
-#include "hw/top_dragonfly/sw/autogen/top_dragonfly_memory.h"
-
-#define TOPLEVEL_CONST(x) TOP_DRAGONFLY_##x
-#endif
+#define TOPLEVEL_CONST(x) TOP_##x
 
 .equ UNIMP, 0xc0001073
 // We will configure the watchdog timers to reset the chip in the event that the
