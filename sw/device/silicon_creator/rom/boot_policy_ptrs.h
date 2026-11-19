@@ -1,18 +1,20 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 #ifndef OPENTITAN_SW_DEVICE_SILICON_CREATOR_ROM_BOOT_POLICY_PTRS_H_
 #define OPENTITAN_SW_DEVICE_SILICON_CREATOR_ROM_BOOT_POLICY_PTRS_H_
 
+#include "hw/top/top_memory.h"
 #include "sw/device/silicon_creator/lib/manifest.h"
 
-#ifdef OPENTITAN_IS_EGRET
+// On a top with flash, ROM_EXT is held there; otherwise it lives in CTN
+// memory, which is governed by the soc_proxy.
+#ifdef TOP_FLASH_CTRL_MEM_BASE_ADDR
 #include "hw/top/dt/flash_ctrl.h"
-#elif defined(OPENTITAN_IS_DRAGONFLY)
+#elif defined(TOP_SOC_PROXY_RAM_CTN_BASE_ADDR)
 #include "hw/top/dt/soc_proxy.h"
-
-#include "hw/top_dragonfly/sw/autogen/top_dragonfly.h"
 #endif
 
 typedef enum slot {
@@ -33,19 +35,16 @@ extern "C" {
  */
 OT_WARN_UNUSED_RESULT
 inline const manifest_t *boot_policy_manifest_get(slot_t slot) {
-#ifdef OPENTITAN_IS_EGRET
+#ifdef TOP_FLASH_CTRL_MEM_BASE_ADDR
   uint32_t flash_base =
       dt_flash_ctrl_memory_base(kDtFlashCtrl, kDtFlashCtrlMemoryMem);
   uint32_t flash_size =
       dt_flash_ctrl_memory_size(kDtFlashCtrl, kDtFlashCtrlMemoryMem);
   return (const manifest_t *)(flash_base + (slot * (flash_size / 2)));
-#elif defined(OPENTITAN_IS_DRAGONFLY)
+#elif defined(TOP_SOC_PROXY_RAM_CTN_BASE_ADDR)
   // CTN SRAM only has one slot, because we load to CTN from elsewhere on the
   // SoC.
-  //
-  // TODO: Make offset of CTN RAM within CTN region available in a
-  // top-independent header.
-  return (const manifest_t *)TOP_DRAGONFLY_SOC_PROXY_RAM_CTN_BASE_ADDR;
+  return (const manifest_t *)TOP_SOC_PROXY_RAM_CTN_BASE_ADDR;
 #endif
 }
 #else

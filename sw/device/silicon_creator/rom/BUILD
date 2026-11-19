@@ -55,6 +55,7 @@ dual_cc_library(
             "@googletest//:gtest",
         ],
         shared = [
+            "//hw/top:top_memory",
             "//sw/device/silicon_creator/lib:manifest",
         ] + pavona_if_ip(
             "flash_ctrl",
