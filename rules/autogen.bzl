@@ -4,6 +4,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load("//rules:stamp.bzl", "stamp_attr", "stamping_enabled")
 load("//rules/pavona:util.bzl", "flatten")
 load("//rules:doxygen.bzl", "DoxygenCcInputInfo")
@@ -100,8 +101,16 @@ def _pavona_top_host_desc_impl(ctx):
         jtag_id_pkg_args = ["--jtag-id-pkg", ctx.file.jtag_id_pkg.path]
         jtag_id_pkg_inputs = [ctx.file.jtag_id_pkg]
 
-    # The IP block descriptions are staged at their source paths, so the
-    # generator finds them under the execution root.
+    # The IP block descriptions are staged at their source paths: those of
+    # hw/ip under this repository's root in the execution root, and the
+    # top's own under the top's directory (the parent of this package,
+    # hw/top_<name>/data), which may be in another repository.
+    repo_top = ctx.attr._gen_top_host.label.workspace_root or "."
+    top_dir = "/".join([
+        p
+        for p in [ctx.label.workspace_root, paths.dirname(ctx.label.package)]
+        if p
+    ])
     ctx.actions.run(
         outputs = [host_desc],
         inputs = [completecfg] + ctx.files.ip_descriptions + jtag_id_pkg_inputs,
@@ -111,7 +120,9 @@ def _pavona_top_host_desc_impl(ctx):
             "--outdir",
             host_desc.dirname,
             "--repo-top",
-            ".",
+            repo_top,
+            "--top-dir",
+            top_dir,
         ] + jtag_id_pkg_args,
         executable = ctx.executable._gen_top_host,
     )

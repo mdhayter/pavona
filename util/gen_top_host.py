@@ -265,14 +265,15 @@ def alert_classes(block) -> Dict[str, object]:
     }
 
 
-def load_otp_mmap(completecfg: ConfigT, repo_top: Path) -> Optional[Dict[str, object]]:
+def load_otp_mmap(completecfg: ConfigT, repo_top: Path,
+                  topdir: Optional[Path] = None) -> Optional[Dict[str, object]]:
     """Load the OTP memory map of the top's OTP controller from its ipgen configuration
     (hw/top_<top>/ip_autogen/otp_ctrl/data/top_<top>_otp_ctrl.ipconfig.hjson). Returns None
     if the top has no OTP controller or it is not generated with ipgen."""
     module = find_module(completecfg["module"], "otp_ctrl")
     if not module or not is_ipgen(module):
         return None
-    data_dir = get_ip_hjson_path(module["type"], completecfg, repo_top).parent
+    data_dir = get_ip_hjson_path(module["type"], completecfg, repo_top, topdir).parent
     ipconfig = data_dir / f"top_{completecfg['name']}_{module['name']}.ipconfig.hjson"
     return hjson.loads(ipconfig.read_text())["param_values"]["otp_mmap"]
 
@@ -422,22 +423,30 @@ def main():
                         default=REPO_TOP,
                         help="Directory under which the IP block descriptions are found. "
                              "Defaults to the repository containing this script.")
+    parser.add_argument("--top-dir",
+                        type=Path,
+                        default=None,
+                        help="Directory of the top (hw/top_<topname>), under which its "
+                             "generated and top-specific IP block descriptions are found. "
+                             "Defaults to hw/top_<topname> under --repo-top.")
     parser.add_argument("--jtag-id-pkg",
                         type=Path,
                         default=None,
                         help="JTAG ID package of the top. Defaults to "
-                             "hw/top_<topname>/rtl/jtag_id_pkg.sv under --repo-top, if it "
+                             "rtl/jtag_id_pkg.sv under --top-dir, if it "
                              "exists.")
     args = parser.parse_args()
 
-    completecfg, name_to_block = load_completecfg_and_blocks(args.completecfg, args.repo_top)
+    completecfg, name_to_block = load_completecfg_and_blocks(args.completecfg, args.repo_top,
+                                                             args.top_dir)
+    top_dir = args.top_dir or args.repo_top / f"hw/top_{completecfg['name']}"
     jtag_id_pkg = args.jtag_id_pkg
     if jtag_id_pkg is None:
-        default = args.repo_top / f"hw/top_{completecfg['name']}/rtl/jtag_id_pkg.sv"
+        default = top_dir / "rtl/jtag_id_pkg.sv"
         jtag_id_pkg = default if default.exists() else None
     desc = host_description(completecfg, name_to_block,
                             jtag_id_pkg.read_text() if jtag_id_pkg else None,
-                            load_otp_mmap(completecfg, args.repo_top))
+                            load_otp_mmap(completecfg, args.repo_top, top_dir))
 
     outdir = args.outdir or args.completecfg.parent
     outfile = outdir / f"top_{completecfg['name']}.host.json"
