@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 {
@@ -87,6 +88,12 @@
       desc: "the source clock names for this top, as in 'main', 'io', 'usb'"
       type: "object"
       default: ["main", "io", "usb"]
+    }
+    {
+      name: "fast_to_slow_freq_ratio"
+      desc: "the ratio of the pwrmgr fast clock (clk_i) to its slow clock (clk_slow_i)"
+      type: "int"
+      default: 120
     }
   ]
 }

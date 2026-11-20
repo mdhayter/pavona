@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -456,6 +457,11 @@
         EscNumSeverities: "AlertHandlerEscNumSeverities",
         EscPingCountWidth: "AlertHandlerEscPingCountWidth",
       },
+      ipgen_params: {
+        // The escalation reset bound of the reset request assertions uses a 16x ratio, based on
+        // the main clock (1 GHz / 62.5 MHz), rather than the 4x of clk_i (io) to clk_slow_i (aon).
+        fast_to_slow_freq_ratio: 16
+      }
       attr: "ipgen",
 
     },

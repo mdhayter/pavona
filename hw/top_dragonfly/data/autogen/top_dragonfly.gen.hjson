@@ -2624,6 +2624,10 @@
         EscNumSeverities: AlertHandlerEscNumSeverities
         EscPingCountWidth: AlertHandlerEscPingCountWidth
       }
+      ipgen_params:
+      {
+        fast_to_slow_freq_ratio: 16
+      }
       attr: ipgen
       clock_connections:
       {

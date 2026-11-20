@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 from copy import deepcopy
@@ -200,7 +201,18 @@ def get_pwrmgr_params(top: ConfigT) -> ParamsT:
     src_clks = [obj.name for obj in clocks.srcs.values() if not obj.aon]
 
     pwrmgr = find_module(top["module"], "pwrmgr")
+
     ipgen_params = get_ipgen_params(pwrmgr)
+
+    # The ratio of pwrmgr's fast clock to its slow clock, for the escalation reset bound of the
+    # reset request assertions: from the clocks of the pwrmgr instance, unless the top sets it in
+    # the instance's ipgen_params.
+    def src_freq(port: str) -> int:
+        src = pwrmgr["clock_srcs"][port]
+        return clocks.all_srcs[src["clock"] if isinstance(src, dict) else src].freq
+    fast_to_slow_freq_ratio = ipgen_params.get("fast_to_slow_freq_ratio",
+                                               src_freq("clk_i") // src_freq("clk_slow_i"))
+
     ipgen_params.update({
         "NumWkups": n_wkups,
         "Wkups": top["wakeups"],
@@ -209,7 +221,8 @@ def get_pwrmgr_params(top: ConfigT) -> ParamsT:
         "wait_for_external_reset": top['power']['wait_for_external_reset'],
         "NumRomInputs": n_rom_ctrl,
         "has_aon_clk": any(obj.aon for obj in clocks.srcs.values()),
-        "src_clks": src_clks
+        "src_clks": src_clks,
+        "fast_to_slow_freq_ratio": fast_to_slow_freq_ratio,
     })
     return ipgen_params
 
