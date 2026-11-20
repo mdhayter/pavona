@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 SOC_DBG_CTRL = pavona_ip(
     name = "soc_dbg_ctrl",
-    hjson = "//hw/ip/soc_dbg_ctrl/data:soc_dbg_ctrl.hjson",
-    regs = "//hw/ip/soc_dbg_ctrl/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/soc_dbg_ctrl/data:soc_dbg_ctrl.hjson",
+    regs = "@pavona_pavona//hw/ip/soc_dbg_ctrl/rtl:regs",
 )

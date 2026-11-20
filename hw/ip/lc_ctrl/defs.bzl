@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 LC_CTRL = pavona_ip(
     name = "lc_ctrl",
-    hjson = "//hw/ip/lc_ctrl/data:lc_ctrl.hjson",
-    regs = "//hw/ip/lc_ctrl/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/lc_ctrl/data:lc_ctrl.hjson",
+    regs = "@pavona_pavona//hw/ip/lc_ctrl/rtl:regs",
 )

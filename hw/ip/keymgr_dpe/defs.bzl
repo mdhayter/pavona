@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 KEYMGR_DPE = pavona_ip(
     name = "keymgr_dpe",
-    hjson = "//hw/ip/keymgr_dpe/data:keymgr_dpe.hjson",
-    regs = "//hw/ip/keymgr_dpe/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/keymgr_dpe/data:keymgr_dpe.hjson",
+    regs = "@pavona_pavona//hw/ip/keymgr_dpe/rtl:regs",
 )

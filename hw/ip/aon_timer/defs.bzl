@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 AON_TIMER = pavona_ip(
     name = "aon_timer",
-    hjson = "//hw/ip/aon_timer/data:aon_timer.hjson",
-    regs = "//hw/ip/aon_timer/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/aon_timer/data:aon_timer.hjson",
+    regs = "@pavona_pavona//hw/ip/aon_timer/rtl:regs",
 )

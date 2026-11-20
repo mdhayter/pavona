@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 PATTGEN = pavona_ip(
     name = "pattgen",
-    hjson = "//hw/ip/pattgen/data:pattgen.hjson",
-    regs = "//hw/ip/pattgen/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/pattgen/data:pattgen.hjson",
+    regs = "@pavona_pavona//hw/ip/pattgen/rtl:regs",
 )

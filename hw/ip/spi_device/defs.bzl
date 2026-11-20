@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 SPI_DEVICE = pavona_ip(
     name = "spi_device",
-    hjson = "//hw/ip/spi_device/data:spi_device.hjson",
-    regs = "//hw/ip/spi_device/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/spi_device/data:spi_device.hjson",
+    regs = "@pavona_pavona//hw/ip/spi_device/rtl:regs",
 )

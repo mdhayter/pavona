@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 HMAC = pavona_ip(
     name = "hmac",
-    hjson = "//hw/ip/hmac/data:hmac.hjson",
-    regs = "//hw/ip/hmac/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/hmac/data:hmac.hjson",
+    regs = "@pavona_pavona//hw/ip/hmac/rtl:regs",
 )
