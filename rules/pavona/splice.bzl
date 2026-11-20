@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -7,17 +8,43 @@ load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 load("//rules/pavona:exec_env.bzl", "ExecEnvInfo")
 load("//rules/pavona:providers.bzl", "get_one_binary_file")
 load("//rules/pavona:toolchain.bzl", "LOCALTOOLS_TOOLCHAIN")
+load("//rules/pavona:hw.bzl", "get_top_attr")
 load("//rules/pavona:util.bzl", "get_fallback")
+load("@tops_desc//:defs.bzl", "ALL_TOPS")
 load("@nonhermetic//:env.bzl", "BIN_PATHS", "ENV")
 
 # Rules for memory splicing with Vivado.
 
+# Labels, so that they mean this repository also in BUILD files of other repositories.
 DEFAULTS = struct(
-    rom = "//hw/bitstream/universal:none",
-    second_rom = "//hw/bitstream/universal:none",
-    otp = "//hw/bitstream/universal:none",
-    env = "//hw/bitstream/universal:none",
+    rom = Label("//hw/bitstream/universal:none"),
+    second_rom = Label("//hw/bitstream/universal:none"),
+    otp = Label("//hw/bitstream/universal:none"),
+    env = Label("//hw/bitstream/universal:none"),
 )
+
+def _splice_params(top_name):
+    """
+    Return the splicing parameters of a top, from its `bitstream_splice` attribute: a
+    dictionary with
+    - `otp_size`: the OTP memory map size in 2-byte words (0 without OTP),
+    - `otp_padding`: padding words of the OTP image (default 0),
+    - `rom_field`: the ROM binary's output to splice, "rom" (scrambled) or "rom32" (default
+      "rom"),
+    - `rom_instance`: the ROM's processor instance in the memory map file (default "rom").
+    """
+    for top in ALL_TOPS:
+        if top.name == top_name:
+            params = get_top_attr(top, "bitstream_splice", required = False)
+            if params == None:
+                fail("Top `{}` has no bitstream_splice attribute, needed for bitstream splice".format(top_name))
+            return struct(
+                otp_size = params["otp_size"],
+                otp_padding = params.get("otp_padding", 0),
+                rom_field = params.get("rom_field", "rom"),
+                rom_instance = params.get("rom_instance", "rom"),
+            )
+    fail("Unknown top `{}` for bitstream splice".format(top_name))
 
 def gen_vivado_mem_file(ctx, name, src, tool, otp_size = 1024, otp_padding = 0, swap_nibbles = True, swap_crumbs = False):
     update = ctx.actions.declare_file("{}.update.mem".format(name))
@@ -117,18 +144,10 @@ def _bitstream_splice_impl(ctx):
     if ctx.attr.skip:
         return [DefaultInfo(files = depset([src]))]
 
-    # OTP size in number of 2-byte words.
-    top_name = ctx.attr._top[BuildSettingInfo].value
-    if top_name == "egret":
-        # Egret: 1024-word OTP memory map.
-        otp_size = 1024
-        otp_padding = 15
-    elif top_name == "dragonfly":
-        # Dragonfly: 10240-word OTP memory map.
-        otp_size = 10240
-        otp_padding = 0
-    else:
-        fail("Top name should be 'egret' or 'dragonfly' for bitstream splice; got `{}`".format(top_name))
+    # OTP size in number of 2-byte words, and the ROM's output and instance.
+    params = _splice_params(ctx.attr._top[BuildSettingInfo].value)
+    otp_size = params.otp_size
+    otp_padding = params.otp_padding
 
     # Splice in a ROM image if we have one either in attrs or the exec_env.
     if not ctx.attr.rom or ctx.attr.rom.label.name == "none":
@@ -137,7 +156,7 @@ def _bitstream_splice_impl(ctx):
         rom = ctx.attr.rom
 
     if rom and rom.label.name != "none":
-        rom = get_one_binary_file(rom, field = "rom", providers = [exec_env.provider])
+        rom = get_one_binary_file(rom, field = params.rom_field, providers = [exec_env.provider])
         mem = gen_vivado_mem_file(
             ctx = ctx,
             name = "{}-rom".format(ctx.label.name),
@@ -150,7 +169,7 @@ def _bitstream_splice_impl(ctx):
             ctx = ctx,
             name = "{}-rom".format(ctx.label.name),
             src = src,
-            instance = "rom0" if top_name == "dragonfly" else "rom",
+            instance = params.rom_instance,
             mmi = get_fallback(ctx, "file.mmi", exec_env),
             update = mem,
             debug = ctx.attr.debug,
@@ -239,7 +258,7 @@ bitstream_splice_ = rule(
 def bitstream_splice(**kwargs):
     bitstream_splice_(
         skip = select({
-            "//hw/bitstream:bitstream_skip": True,
+            Label("//hw/bitstream:bitstream_skip"): True,
             "//conditions:default": False,
         }),
         **kwargs

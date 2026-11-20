@@ -25,6 +25,8 @@ DRAGONFLY = pavona_top(
     otp_map = "//hw/top_dragonfly/data/otp:otp_ctrl_mmap.hjson",
     std_otp_overlay = DRAGONFLY_STD_OTP_OVERLAYS,
     otp_sigverify_fake_keys = DRAGONFLY_OTP_SIGVERIFY_FAKE_KEYS,
+    # Bitstream splicing: 10240-word OTP memory map.
+    bitstream_splice = {"otp_size": 10240, "rom_instance": "rom0"},
     ips = DRAGONFLY_IPS,
     instances = DRAGONFLY_INSTANCES,
     # If ast_init_sized is present (whatever its value: remove it rather than

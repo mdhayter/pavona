@@ -25,6 +25,8 @@ EGRET = pavona_top(
     otp_map = "//hw/top_egret/data/otp:otp_ctrl_mmap.hjson",
     std_otp_overlay = EGRET_STD_OTP_OVERLAYS,
     otp_sigverify_fake_keys = EGRET_OTP_SIGVERIFY_FAKE_KEYS,
+    # Bitstream splicing: 1024-word OTP memory map.
+    bitstream_splice = {"otp_size": 1024, "otp_padding": 15},
     ips = EGRET_IPS,
     instances = EGRET_INSTANCES,
     secret_cfgs = {
