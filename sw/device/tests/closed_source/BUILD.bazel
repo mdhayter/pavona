@@ -78,7 +78,7 @@ cc_library(
     name = "test_hooks_1",
     srcs = ["test_hooks_1.c"],
     deps = [
-        "@//sw/device/lib/runtime:log",
+        "@pavona_pavona//sw/device/lib/runtime:log",
     ],
     alwayslink = True,
 )
@@ -98,8 +98,8 @@ cc_library(
 #
 #    # `deps` is a list of dependencies for this library.
 #    # Any dependencies local to this repo can start with `//`.
-#    # Any dependencies from the main opentitan repo must start with `@//`.
-#    deps = ["@//sw/device/lib/runtime:log"],
+#    # Any dependencies from the main Pavona repo must start with `@pavona_pavona//`.
+#    deps = ["@pavona_pavona//sw/device/lib/runtime:log"],
 #
 #    # We use alwayslink to force the symbols exported by this library to
 #    # override the default test hook weak symbols provided by the default
@@ -116,7 +116,7 @@ cc_library(
 cc_library(
     name = "test_hooks",
     srcs = ["test_hooks_default.c"],
-    deps = ["@//sw/device/lib/base:macros"] + _TEST_HOOKS_DEPS,
+    deps = ["@pavona_pavona//sw/device/lib/base:macros"] + _TEST_HOOKS_DEPS,
 )
 
 ################################################################################
@@ -144,24 +144,24 @@ pavona_test(
     name = "example_test",
     srcs = ["example_test.c"],
     dv = dv_params(
-        rom = "@//sw/device/silicon_creator/rom",
-        second_rom = "@//sw/device/silicon_creator/second_rom",
+        rom = "@pavona_pavona//sw/device/silicon_creator/rom",
+        second_rom = "@pavona_pavona//sw/device/silicon_creator/second_rom",
     ),
     ecdsa_key = ecdsa_key_for_lc_state(
         ECDSA_ONLY_KEY_STRUCTS,
         CONST.LCV.TEST_UNLOCKED0,
     ),
     exec_env = {
-        "@//hw/top_egret:fpga_cw310_rom_with_fake_keys": None,
-        "@//hw/top_egret:fpga_cw310_test_rom": None,
-        "@//hw/top_egret:sim_dv": None,
-        "@//hw/top_dragonfly:sim_dv": None,
+        "@pavona_pavona//hw/top_egret:fpga_cw310_rom_with_fake_keys": None,
+        "@pavona_pavona//hw/top_egret:fpga_cw310_test_rom": None,
+        "@pavona_pavona//hw/top_egret:sim_dv": None,
+        "@pavona_pavona//hw/top_dragonfly:sim_dv": None,
     },
     # We need to specify the manifest because the simulation environments do not
     # specify one by default.
-    manifest = "@//sw/device/silicon_creator/rom_ext:manifest",
+    manifest = "@pavona_pavona//sw/device/silicon_creator/rom_ext:manifest",
     deps = [
-        "@//sw/device/lib/testing/test_framework:ottf_main",
+        "@pavona_pavona//sw/device/lib/testing/test_framework:ottf_main",
     ],
 )
 
@@ -185,26 +185,26 @@ pavona_test(
 ################################################################################
 pavona_test(
     name = "statically_hooked_opensource_test",
-    srcs = ["@//sw/device/tests:example_test_from_flash.c"],
+    srcs = ["@pavona_pavona//sw/device/tests:example_test_from_flash.c"],
     dv = dv_params(
-        rom = "@//sw/device/silicon_creator/rom",
-        second_rom = "@//sw/device/silicon_creator/second_rom",
+        rom = "@pavona_pavona//sw/device/silicon_creator/rom",
+        second_rom = "@pavona_pavona//sw/device/silicon_creator/second_rom",
     ),
     ecdsa_key = ecdsa_key_for_lc_state(
         ECDSA_ONLY_KEY_STRUCTS,
         CONST.LCV.TEST_UNLOCKED0,
     ),
     exec_env = {
-        "@//hw/top_egret:fpga_cw310_rom_with_fake_keys": None,
-        "@//hw/top_egret:fpga_cw310_test_rom": None,
-        "@//hw/top_egret:sim_dv": None,
-        "@//hw/top_dragonfly:sim_dv": None,
+        "@pavona_pavona//hw/top_egret:fpga_cw310_rom_with_fake_keys": None,
+        "@pavona_pavona//hw/top_egret:fpga_cw310_test_rom": None,
+        "@pavona_pavona//hw/top_egret:sim_dv": None,
+        "@pavona_pavona//hw/top_dragonfly:sim_dv": None,
     },
     # We need to specify the manifest because the simulation environments do not
     # specify one by default.
-    manifest = "@//sw/device/silicon_creator/rom_ext:manifest",
+    manifest = "@pavona_pavona//sw/device/silicon_creator/rom_ext:manifest",
     deps = [
-        "@//sw/device/lib/testing/test_framework:ottf_main",
         "@manufacturer_test_hooks//:test_hooks_1",
+        "@pavona_pavona//sw/device/lib/testing/test_framework:ottf_main",
     ],
 )
