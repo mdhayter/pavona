@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -71,6 +72,10 @@ typedef enum device_type {
    * independently of the RTL.
    */
   kDeviceSimQemu = 6,
+  /**
+   * Represents the "Digilent Genesys 2" device, a Kintex-7 FPGA board.
+   */
+  kDeviceFpgaGenesys2 = 7,
 } device_type_t;
 
 /**

@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -7,6 +8,7 @@ load(
     "Cw305BinaryInfo",
     "Cw310BinaryInfo",
     "Cw340BinaryInfo",
+    "Genesys2BinaryInfo",
 )
 load(
     "@pavona_pavona//rules/pavona:util.bzl",
@@ -214,6 +216,21 @@ def _fpga_cw340(ctx):
 
 fpga_cw340 = rule(
     implementation = _fpga_cw340,
+    attrs = exec_env_common_attrs(),
+    toolchains = [LOCALTOOLS_TOOLCHAIN],
+)
+
+def _fpga_genesys2(ctx):
+    fields = exec_env_as_dict(ctx)
+    return ExecEnvInfo(
+        provider = Genesys2BinaryInfo,
+        test_dispatch = _test_dispatch,
+        transform = _transform,
+        **fields
+    )
+
+fpga_genesys2 = rule(
+    implementation = _fpga_genesys2,
     attrs = exec_env_common_attrs(),
     toolchains = [LOCALTOOLS_TOOLCHAIN],
 )
