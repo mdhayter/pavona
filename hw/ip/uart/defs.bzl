@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 UART = pavona_ip(
     name = "uart",
-    hjson = "//hw/ip/uart/data:uart.hjson",
-    regs = "//hw/ip/uart/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/uart/data:uart.hjson",
+    regs = "@pavona_pavona//hw/ip/uart/rtl:regs",
 )

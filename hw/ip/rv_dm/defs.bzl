@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 RV_DM = pavona_ip(
     name = "rv_dm",
-    hjson = "//hw/ip/rv_dm/data:rv_dm.hjson",
-    regs = "//hw/ip/rv_dm/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/rv_dm/data:rv_dm.hjson",
+    regs = "@pavona_pavona//hw/ip/rv_dm/rtl:regs",
 )

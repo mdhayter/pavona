@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 ASCON = pavona_ip(
     name = "ascon",
-    hjson = "//hw/ip/ascon/data:ascon.hjson",
-    regs = "//hw/ip/ascon/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/ascon/data:ascon.hjson",
+    regs = "@pavona_pavona//hw/ip/ascon/rtl:regs",
 )

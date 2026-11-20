@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 ENTROPY_SRC = pavona_ip(
     name = "entropy_src",
-    hjson = "//hw/ip/entropy_src/data:entropy_src.hjson",
-    regs = "//hw/ip/entropy_src/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/entropy_src/data:entropy_src.hjson",
+    regs = "@pavona_pavona//hw/ip/entropy_src/rtl:regs",
 )

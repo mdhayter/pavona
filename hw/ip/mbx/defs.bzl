@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 MBX = pavona_ip(
     name = "mbx",
-    hjson = "//hw/ip/mbx/data:mbx.hjson",
-    regs = "//hw/ip/mbx/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/mbx/data:mbx.hjson",
+    regs = "@pavona_pavona//hw/ip/mbx/rtl:regs",
 )

@@ -5,6 +5,6 @@ load("//rules/pavona:hw.bzl", "pavona_ip")
 
 USBDEV = pavona_ip(
     name = "usbdev",
-    hjson = "//hw/ip/usbdev/data:usbdev.hjson",
-    regs = "//hw/ip/usbdev/rtl:regs",
+    hjson = "@pavona_pavona//hw/ip/usbdev/data:usbdev.hjson",
+    regs = "@pavona_pavona//hw/ip/usbdev/rtl:regs",
 )
