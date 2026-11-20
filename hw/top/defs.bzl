@@ -136,6 +136,19 @@ def pavona_select_ips(cases, default):
         branches["@pavona_pavona//hw/top:is_{}".format(top.name)] = value
     return select(branches)
 
+def pavona_test_rom_envs():
+    """
+    Return the execution environments that every registered top builds the test ROM
+    (//sw/device/lib/testing/test_rom) for, from the tops' `test_rom_envs` attribute:
+    a list of environments, usually a top's base environments, for example
+    `test_rom_envs = ["//hw/top_x:sim_verilator_base"]`. This lets a top registered
+    outside this repository get the test ROM.
+    """
+    envs = []
+    for top in ALL_TOPS:
+        envs.extend(top.attrs.get("test_rom_envs", []))
+    return envs
+
 def pavona_test_envs(roles, value = None):
     """
     Return an `exec_env` dictionary for `pavona_test` with, for every registered
