@@ -15,7 +15,7 @@ load(
     "verilator_params",
 )
 load("//rules/pavona:util.bzl", "flatten")
-load("//hw/top:defs.bzl", "pavona_if_ip")
+load("//hw/top:defs.bzl", "pavona_if_ip", "pavona_if_top_attr")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -72,6 +72,13 @@ ld_library(
 
 ld_library(
     name = "ottf_ld_top_config",
+    # A top with too little flash for the OTTF's non-volatile scratch and
+    # counter regions sets ottf_no_nv_storage.
+    defines = pavona_if_top_attr(
+        "ottf_no_nv_storage",
+        ["OTTF_NO_NV_STORAGE"],
+        [],
+    ),
     includes = ["ottf_ld_top_config.ld"],
     deps = [
         "//hw/top:top_ld",
