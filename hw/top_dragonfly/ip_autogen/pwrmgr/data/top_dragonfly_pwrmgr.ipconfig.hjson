@@ -5,6 +5,7 @@
   instance_name: top_dragonfly_pwrmgr
   param_values:
   {
+    fast_to_slow_freq_ratio: 16
     NumWkups: 3
     Wkups:
     [

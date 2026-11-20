@@ -68,6 +68,7 @@
       io
       usb
     ]
+    fast_to_slow_freq_ratio: 120
     topname: scafi_deprecated
     uniquified_modules: {}
     module_instance_name: pwrmgr
