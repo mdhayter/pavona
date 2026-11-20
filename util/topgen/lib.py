@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -372,23 +373,36 @@ def search_ips(ip_path: Path) -> List[str]:
     return ips
 
 
+def top_dir_of(completecfg_path: Path) -> Path:
+    """Return a top's directory (hw/top_<name>) from the path of its
+    complete configuration (hw/top_<name>/data/autogen/top_<name>.gen.hjson).
+
+    The top need not be in this repository: a top kept elsewhere has the same
+    layout under its own hw/ directory.
+    """
+    return Path(completecfg_path).resolve().parents[2]
+
+
 def get_ip_hjson_path(ip_name_snake: str, topcfg: ConfigT,
-                      repotop: Path) -> Path:
+                      repotop: Path, topdir: Optional[Path] = None) -> Path:
     """Return the location of an IP's hjson file for a given top.
 
     This function should be called with the module['type'] for ipgen
     modules, since find_module is called with use_base_template_type
     set to False.
+
+    Generated and top-specific IPs are found under topdir, the top's
+    directory (default: repotop/hw/top_<name>); other IPs under repotop/hw/ip.
     """
+    if topdir is None:
+        topdir = repotop / "hw/top_{}".format(topcfg["name"])
     m = find_module(topcfg["module"],
                     ip_name_snake,
                     use_base_template_type=False)
     if is_ipgen(m):
-        data_dir = repotop / "hw/top_{}/ip_autogen/{}/data".format(
-            topcfg["name"], ip_name_snake)
+        data_dir = topdir / "ip_autogen/{}/data".format(ip_name_snake)
     elif is_top_reggen(m):
-        data_dir = repotop / "hw/top_{}/ip/{}/data/".format(
-            topcfg["name"], ip_name_snake)
+        data_dir = topdir / "ip/{}/data/".format(ip_name_snake)
     else:
         data_dir = repotop / "hw/ip/{}/data".format(ip_name_snake)
     return data_dir / "{}.hjson".format(ip_name_snake)

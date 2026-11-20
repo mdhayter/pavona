@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """Generate top-level SystemVerilog from completecfg
@@ -40,8 +41,9 @@ import logging as log
 from mako.template import Template
 from mako.lookup import TemplateLookup
 from mako import exceptions
+from basegen.lib import display_path
 from topgen.lib import (load_cfg, write_file_secure, get_ip_hjson_path, find_module,
-                        find_module_by_name, get_addr_space_suffix)
+                        find_module_by_name, get_addr_space_suffix, top_dir_of)
 from basegen.typing import ConfigT
 from topgen.typing import IpBlocksT
 from reggen.ip_block import IpBlock
@@ -222,7 +224,7 @@ def generate_from_random(topcfg, seedcfg, out_path, name_to_block, seed_path,
     # compile-time random netlist constants
     gencmd_rnd_cnst_sv = gencmd_sv + f"""//
 // File is generated based on the following seed configuration:
-//   {seed_path.resolve().relative_to(REPO_TOP)}
+//   {display_path(seed_path, REPO_TOP)}
 """
     topgen_seed = seedcfg["seed"]["topgen_seed"]
     seed_mode = topgen_seed["seed_mode"]
@@ -370,7 +372,8 @@ def main():
     name_to_block = {}
     for module in completecfg["module"]:
         block_type = module["type"]
-        ip_hjson = get_ip_hjson_path(block_type, completecfg, REPO_TOP)
+        ip_hjson = get_ip_hjson_path(block_type, completecfg, REPO_TOP,
+                                     top_dir_of(args.completecfg))
         name_to_block[block_type] = IpBlock.from_path(str(ip_hjson), [])
         for intersig in module["inter_signal_list"]:
             recast_widths(module["inter_signal_list"])
@@ -382,8 +385,8 @@ def main():
 
     # set random seed and generated file header
     SecurePrngFactory.create("topgen", int(seedcfg["seed"]["topgen_seed"]["value"]))
-    gencmd_sv = HEADER.format(args.completecfg.relative_to(REPO_TOP),
-                              args.seedcfg.relative_to(REPO_TOP))
+    gencmd_sv = HEADER.format(display_path(args.completecfg, REPO_TOP),
+                              display_path(args.seedcfg, REPO_TOP))
 
     # generate files
     generate_sv(completecfg, seedcfg, outdir, name_to_block, toplevel_template_path, gencmd_sv)

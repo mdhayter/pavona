@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """Generate ipgen IP configuration files from a complete top configuration.
@@ -15,6 +16,7 @@ from typing import Dict
 import hjson
 from basegen.typing import ParamsT
 from ipgen.lib import IpConfig, IpTemplate
+from basegen.lib import display_path
 from topgen.lib import load_cfg, is_ipgen
 from topgen.merge import extract_clocks
 from ipgen.clkmgr_gen import get_clkmgr_params
@@ -143,8 +145,8 @@ def main():
         ip_config = IpConfig(template.params, inst_name, params)
 
         outfile = args.outdir / (ip_config.instance_name + ".ipconfig.hjson")
-        ip_config.to_file(outfile, HEADER.format(args.completecfg.relative_to(REPO_TOP),
-                                                 args.outdir.relative_to(REPO_TOP)))
+        ip_config.to_file(outfile, HEADER.format(display_path(args.completecfg, REPO_TOP),
+                                                 display_path(args.outdir, REPO_TOP)))
 
     if args.xbars:
         for xbar in completecfg["xbar"]:
@@ -153,8 +155,8 @@ def main():
             xbar_name = xbar["name"]
             log.info(f"generating xbar {xbar_name}")
             xbar_hjson_path = args.outdir / f"xbar_{xbar_name}.gen.hjson"
-            xbar_hjson_path.write_text(HEADER.format(args.completecfg.relative_to(REPO_TOP),
-                                                     args.outdir.relative_to(REPO_TOP))
+            xbar_hjson_path.write_text(HEADER.format(display_path(args.completecfg, REPO_TOP),
+                                                     display_path(args.outdir, REPO_TOP))
                                        + hjson.dumps(xbar, for_json=True) + '\n')
 
 
