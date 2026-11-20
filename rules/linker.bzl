@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -78,6 +79,16 @@ def _ld_library_impl(ctx):
         "-Wl,-L,{}".format(include.dirname)
         for include in ctx.files.includes
     ]
+
+    # Linker scripts INCLUDE each other by their path in the repository. That
+    # path resolves from the execution root only for the main repository, so
+    # also search the root of any other repository the includes come from.
+    repo_roots = {}
+    for include in ctx.files.includes:
+        if include.owner and include.owner.workspace_root:
+            root = "/".join([p for p in [include.root.path, include.owner.workspace_root] if p])
+            repo_roots[root] = None
+    user_link_flags += ["-Wl,-L,{}".format(root) for root in repo_roots]
 
     if ctx.file.script:
         output_script = _preprocess_linker_file(ctx)
