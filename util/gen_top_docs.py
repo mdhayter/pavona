@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 r"""Top Module Documentation Generator
@@ -21,7 +22,7 @@ from pathlib import Path
 import argparse
 import logging as log
 
-from topgen.lib import find_module, load_cfg, get_ip_hjson_path
+from topgen.lib import find_module, load_cfg, get_ip_hjson_path, top_dir_of
 from reggen.ip_block import IpBlock
 from topgen.c_test import TopGenCTest
 
@@ -289,7 +290,8 @@ def main():
     name_to_block = {}
     for module in completecfg["module"]:
         block_type = module["type"]
-        ip_hjson = get_ip_hjson_path(block_type, completecfg, REPO_TOP)
+        ip_hjson = get_ip_hjson_path(block_type, completecfg, REPO_TOP,
+                                     top_dir_of(args.completecfg))
         name_to_block[block_type] = IpBlock.from_path(str(ip_hjson), [])
     c_helper = TopGenCTest(completecfg, name_to_block)
     outdir = args.outdir or args.completecfg.parents[2].resolve()

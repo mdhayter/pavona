@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """TileLink Uncached Lightweight crossbar generator."""
@@ -13,6 +14,7 @@ from pathlib import Path
 import hjson
 
 import tlgen
+from basegen.lib import display_path
 
 
 REPO_TOP = Path(__file__).parents[1].resolve()
@@ -85,7 +87,7 @@ def main():
         log.error("Elaboration failed." + repr(xbar))
 
     # Generate
-    outdir = Path(args.outdir).resolve().relative_to(REPO_TOP) / args.ip_path
+    outdir = display_path(Path(args.outdir), REPO_TOP) / args.ip_path
     results = tlgen.generate(xbar, str(outdir), args.libname)
 
     dv_path = Path(args.outdir) / args.ip_path / 'dv/autogen'

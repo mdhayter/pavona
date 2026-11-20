@@ -19,7 +19,8 @@ Rust files generated (relative to <outdir>/sw/autogen):
     - chip/
       - mod.rs
       - top_<topname><addr_space_suffix>.rs
-(Also generates sw/host/ot_hal/src/top/autogen/<topname><addr_space_suffix>.rs)
+(Also generates sw/host/ot_hal/src/top/autogen/<topname><addr_space_suffix>.rs, or for a top
+outside this repository <outdir>/sw/autogen/host/<topname><addr_space_suffix>.rs)
 
 Bazel files generated (relative to <outdir>):
   - sw/autogen/
@@ -32,7 +33,9 @@ Bazel files generated (relative to <outdir>):
 import argparse
 from pathlib import Path
 import logging as log
-from topgen.lib import load_cfg, find_module, get_ip_hjson_path, get_addr_space_suffix
+from basegen.lib import display_path
+from topgen.lib import (load_cfg, find_module, get_ip_hjson_path, get_addr_space_suffix,
+                        top_dir_of)
 from mako.lookup import TemplateLookup
 from mako.template import Template
 from mako import exceptions
@@ -101,8 +104,12 @@ def generate_rust(topname, topcfg, name_to_block, out_path, version_stamp,
                         addr_space=addr_space['name'],
                         helper=rs_helper)
 
-        # Generate Rust host-side files
-        rsformat_dir = src_tree_top / 'sw/host/ot_hal/src/top/autogen'
+        # Generate Rust host-side files: into ot_hal for a top in this repository, or next to the
+        # device-side files for a top kept elsewhere.
+        if out_path.resolve().is_relative_to(src_tree_top):
+            rsformat_dir = src_tree_top / 'sw/host/ot_hal/src/top/autogen'
+        else:
+            rsformat_dir = out_path / "sw/autogen/host/"
         rsformat_dir.mkdir(parents=True, exist_ok=True)
         render_template(topgen_template_path / 'host_toplevel.rs.tpl',
                         rsformat_dir / f"{topname}{addr_space_suffix}.rs",
@@ -270,13 +277,14 @@ def main():
                         type=bool)
     args = parser.parse_args()
 
+    topdir = top_dir_of(args.completecfg)
     completecfg = load_cfg(args.completecfg)
     outdir = args.outdir or args.completecfg.parents[2].resolve()
 
     name_to_block = {}
     for module in completecfg["module"]:
         block_type = module["type"]
-        ip_hjson = get_ip_hjson_path(block_type, completecfg, REPO_TOP)
+        ip_hjson = get_ip_hjson_path(block_type, completecfg, REPO_TOP, topdir)
         name_to_block[block_type] = IpBlock.from_path(str(ip_hjson), [])
 
         # fix translation between Python None and value "null" in Hjson
@@ -295,26 +303,28 @@ def main():
     # twice:
     # - Once under {outdir}/sw/autogen
     # - Once under hw/top_{topname}/sw/autogen
-    topname = "top_" + completecfg["name"]
-    if outdir != REPO_TOP / "hw" / topname:
-        root_paths = [outdir.resolve(), REPO_TOP]
-        out_paths = [outdir.resolve(), (REPO_TOP / "hw" / topname).resolve()]
+    # where hw/top_{topname} is the top's own directory, which may be outside
+    # this repository; its parent's parent is the root for include paths.
+    if outdir.resolve() != topdir:
+        root_paths = [outdir.resolve(), topdir.parents[1]]
+        out_paths = [outdir.resolve(), topdir]
     else:
-        root_paths = [REPO_TOP]
-        out_paths = [(REPO_TOP / "hw" / topname).resolve()]
+        root_paths = [topdir.parents[1]]
+        out_paths = [topdir]
 
     # Extract version stamp from file
     version_stamp = version_file.VersionInformation(args.version_stamp)
 
     if args.sw in ("c", "all"):
-        gencmd_c = HEADER.format(args.completecfg.relative_to(REPO_TOP))
+        gencmd_c = HEADER.format(display_path(args.completecfg, REPO_TOP))
         generate_c(completecfg, name_to_block, root_paths, out_paths, c_helper, gencmd_c,
                    args.default_addr_space)
     if args.sw in ("rust", "all"):
         generate_rust(completecfg["name"], completecfg, name_to_block, outdir,
                       version_stamp, REPO_TOP, TOPGEN_TEMPLATE_PATH)
     if args.sw in ("bazel", "all"):
-        gencmd_bzl = HEADER.replace("//", "#").format(args.completecfg.relative_to(REPO_TOP))
+        gencmd_bzl = HEADER.replace("//", "#").format(
+            display_path(args.completecfg, REPO_TOP))
         generate_bazel(completecfg, name_to_block, root_paths, out_paths, c_helper, gencmd_bzl,
                        args.default_addr_space)
 

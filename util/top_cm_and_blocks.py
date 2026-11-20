@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """Either check countermeasures of each IP block or list all IP blocks within a
@@ -11,7 +12,8 @@ from pathlib import Path
 from typing import Dict
 from basegen.typing import ConfigT
 from topgen.typing import IpBlocksT
-from topgen.lib import load_cfg, get_ip_hjson_path, get_top_reggen_modules, get_ipgen_modules
+from topgen.lib import (load_cfg, get_ip_hjson_path, get_top_reggen_modules, get_ipgen_modules,
+                        top_dir_of)
 from reggen.countermeasure import CounterMeasure
 from reggen.ip_block import IpBlock
 
@@ -95,7 +97,8 @@ def main():
         if block_filtered_out:
             continue
 
-        ip_hjson = get_ip_hjson_path(block_type, completecfg, REPO_TOP)
+        ip_hjson = get_ip_hjson_path(block_type, completecfg, REPO_TOP,
+                                     top_dir_of(args.completecfg))
         name_to_block[block_type] = IpBlock.from_path(str(ip_hjson), [])
         name_to_hjson[block_type] = ip_hjson
 

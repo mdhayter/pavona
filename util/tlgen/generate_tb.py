@@ -1,5 +1,6 @@
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -11,6 +12,8 @@ from pathlib import Path
 from mako import exceptions  # type: ignore
 from mako.template import Template  # type: ignore
 import importlib.resources
+
+from basegen.lib import display_path
 
 from .xbar import Xbar
 
@@ -53,6 +56,6 @@ def generate_tb(xbar: Xbar,
             try:
                 fout.write(
                     tpl.render(xbar=xbar, library_name=library_name,
-                               dv_filepath=dv_filepath.relative_to(REPO_TOP)))
+                               dv_filepath=display_path(dv_filepath, REPO_TOP)))
             except:  # noqa: E722 for general exception handling
                 log.error(exceptions.text_error_template().render())

@@ -1,5 +1,6 @@
 # Copyright lowRISC contributors (OpenTitan project).
 # Copyright zeroRISC Inc.
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -10,6 +11,21 @@ import re
 
 
 REPO_TOP = Path(__file__).parents[2].resolve()
+
+
+def display_path(path: Path, repotop: Path) -> Path:
+    """Return a path for generated file headers: relative to repotop, or, for a
+    path outside it, from the last "hw" directory on, so that a top kept
+    elsewhere gets the same headers as one in this repository.
+    """
+    path = Path(path).resolve()
+    if path.is_relative_to(repotop):
+        return path.relative_to(repotop)
+    parts = path.parts
+    if "hw" in parts:
+        last_hw = len(parts) - 1 - parts[::-1].index("hw")
+        return Path(*parts[last_hw:])
+    return path
 
 
 class Name:
