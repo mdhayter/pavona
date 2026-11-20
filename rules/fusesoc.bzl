@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -28,7 +29,13 @@ def _corefiles2rootarg(core):
 
 def _fusesoc_build_impl(ctx):
     build_dir = "build.{}".format(ctx.label.name)
-    out_dir = "{}/{}/{}".format(ctx.bin_dir.path, ctx.label.package, build_dir)
+
+    # Outputs of a target in another repository live under external/<repo>.
+    out_dir = "/".join([
+        p
+        for p in [ctx.bin_dir.path, ctx.label.workspace_root, ctx.label.package, build_dir]
+        if p
+    ])
     pre_system_flags = ctx.attr.pre_system_flags
     flags = [ctx.expand_location(f, ctx.attr.srcs) for f in ctx.attr.flags]
     outputs = []
