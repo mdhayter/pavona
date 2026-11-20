@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -219,24 +220,27 @@ def exec_env_to_top_map(exec_env):
       of the top's hjson created by topgen.
     - or the target name must start with "top_<topname>", e.g.
       top_egret_fpga_cw310_sival_rom_ext_no_hyper
+
+    Packages are compared as labels, so `//hw/top_egret:x`, `@//hw/top_egret:x`
+    and `@pavona_pavona//hw/top_egret:x` all match Egret, and a top registered
+    from another repository matches its own exec envs. An exec env is resolved
+    relative to the calling package; a top's hjson relative to Pavona unless it
+    is given as a Label or names its repository.
     """
     top_map = {}
     for top in ALL_TOPS:
-        # Extract the top's package from the hjson path.
-        suffix = "/data/autogen:top_{}.gen.hjson".format(top.name)
-        hjson = get_top_attr(top, "hjson")
-        if not hjson.endswith(suffix):
-            fail("top {}'s hjson does not end with the expected suffix".format(top.name))
-        pkg = hjson.removesuffix(suffix)
-        top_map[pkg] = top.name
+        # Extract the top's package from the hjson label.
+        hjson = Label(get_top_attr(top, "hjson"))
+        suffix = "/data/autogen"
+        if hjson.name != "top_{}.gen.hjson".format(top.name) or not hjson.package.endswith(suffix):
+            fail("top {}'s hjson is not <top dir>/data/autogen:top_{}.gen.hjson".format(top.name, top.name))
+        top_map[(hjson.repo_name, hjson.package.removesuffix(suffix))] = top.name
 
     ev_map = {}
     for env in exec_env:
-        (pkg, target) = env.split(":")
-
-        # Remove @ if starting with @//
-        if pkg.startswith("@//"):
-            pkg = pkg[1:]
+        env_label = native.package_relative_label(env)
+        target = env_label.name
+        pkg = (env_label.repo_name, env_label.package)
         if pkg in top_map:
             ev_map[env] = top_map[pkg]
         else:
