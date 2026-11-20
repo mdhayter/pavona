@@ -41,7 +41,7 @@ def check_countermeasures(completecfg: ConfigT, name_to_block: IpBlocksT,
 
 def get_blocks(completecfg: ConfigT, name_to_block: IpBlocksT,
                name_to_hjson: Dict[str, Path], args: argparse.Namespace) -> bool:
-    print("\n".join(name_to_block.keys()))
+    print("\n".join(name_to_hjson.keys()))
     return True
 
 
@@ -99,7 +99,10 @@ def main():
 
         ip_hjson = get_ip_hjson_path(block_type, completecfg, REPO_TOP,
                                      top_dir_of(args.completecfg))
-        name_to_block[block_type] = IpBlock.from_path(str(ip_hjson), [])
+        # Listing the blocks needs only their names. Their descriptions may not exist yet: the
+        # list of ipgen blocks is what generates them.
+        if args.func is not get_blocks:
+            name_to_block[block_type] = IpBlock.from_path(str(ip_hjson), [])
         name_to_hjson[block_type] = ip_hjson
 
     success = args.func(completecfg, name_to_block, name_to_hjson, args)
