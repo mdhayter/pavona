@@ -3,7 +3,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-load("//hw/top:defs.bzl", "pavona_if_instance", "pavona_if_ip", "pavona_if_top_attr", "pavona_require_top", "pavona_select_ips", "pavona_test_envs")
+load("//hw/top:defs.bzl", "pavona_if_instance", "pavona_if_ip", "pavona_if_top_attr", "pavona_require_top", "pavona_select_ips", "pavona_test_envs", "pavona_test_rom_envs")
 load(
     "//rules/pavona:defs.bzl",
     "PAVONA_CPU",
@@ -36,6 +36,9 @@ ld_library(
 pavona_binary(
     name = "test_rom",
     collect_code_coverage = 0,
+    # TODO: Consider moving the in-tree tops to the `test_rom_envs` attribute too, set in
+    # `pavona_top()` in hw/top_egret/defs.bzl and hw/top_dragonfly/defs.bzl, so that this list
+    # is only `pavona_test_rom_envs()`.
     exec_env = [
         "//hw/top_egret:fpga_cw310",
         "//hw/top_egret:fpga_cw305",
@@ -44,7 +47,7 @@ pavona_binary(
         "//hw/top_egret:sim_verilator_base",
         "//hw/top_dragonfly:sim_dv_base",
         "//hw/top_dragonfly:sim_verilator_base",
-    ],
+    ] + pavona_test_rom_envs(),
     features = ["use_lld"],
     kind = "rom",
     linker_script = ":linker_script",
