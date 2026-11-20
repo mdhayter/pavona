@@ -119,12 +119,12 @@ def certificate_template(name, template, cert_format = "x509"):
 
     if cert_format == "x509":
         runtime_deps = [
-            "@//sw/device/silicon_creator/lib/cert:asn1",
-            "@//sw/device/silicon_creator/lib/cert:template",
+            "@pavona_pavona//sw/device/silicon_creator/lib/cert:asn1",
+            "@pavona_pavona//sw/device/silicon_creator/lib/cert:template",
         ]
     else:
         runtime_deps = [
-            "@//sw/device/silicon_creator/lib/cert:cbor",
+            "@pavona_pavona//sw/device/silicon_creator/lib/cert:cbor",
         ]
 
     native.cc_library(

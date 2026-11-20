@@ -77,7 +77,7 @@ orchestrator_cw340_test_settings_transition(
         srcs = ["e2e_option_flags.sh"],
         data = [
             ":orchestrator_{}_zip".format(fpga),
-            "@//sw/host/provisioning/orchestrator/configs/skus:emulation.hjson",
+            "//sw/host/provisioning/orchestrator/configs/skus:emulation.hjson",
             "@python3",
         ],
         env = {
@@ -106,7 +106,7 @@ orchestrator_cw340_test_settings_transition(
         srcs = ["e2e_ate_individ.sh"],
         data = [
             ":orchestrator_{}_zip".format(fpga),
-            "@//sw/host/provisioning/orchestrator/configs/skus:emulation.hjson",
+            "//sw/host/provisioning/orchestrator/configs/skus:emulation.hjson",
             "@python3",
         ],
         env = {

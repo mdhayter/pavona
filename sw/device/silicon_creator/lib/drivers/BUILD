@@ -375,14 +375,14 @@ otp_image(
     overlays = pavona_select_top(
         {
             "egret": EGRET_STD_OTP_OVERLAYS_WITHOUT_SECRET_PARTITIONS + [
-                "@//hw/top_egret/data/otp:otp_json_secret0",
-                "@//hw/top_egret/data/otp:otp_json_secret1",
-                "@//hw/top_egret/data/otp:otp_json_secret2",
+                "//hw/top_egret/data/otp:otp_json_secret0",
+                "//hw/top_egret/data/otp:otp_json_secret1",
+                "//hw/top_egret/data/otp:otp_json_secret2",
             ],
             "dragonfly": DRAGONFLY_STD_OTP_OVERLAYS_WITHOUT_SECRET_PARTITIONS + [
-                "@//hw/top_dragonfly/data/otp:otp_json_secret0",
-                "@//hw/top_dragonfly/data/otp:otp_json_secret1",
-                "@//hw/top_dragonfly/data/otp:otp_json_secret2",
+                "//hw/top_dragonfly/data/otp:otp_json_secret0",
+                "//hw/top_dragonfly/data/otp:otp_json_secret1",
+                "//hw/top_dragonfly/data/otp:otp_json_secret2",
             ],
         },
         None,

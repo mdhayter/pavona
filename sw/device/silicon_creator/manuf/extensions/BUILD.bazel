@@ -15,13 +15,13 @@ cc_library(
     name = "default_perso_fw_ext",
     srcs = ["default_personalize_ext.c"],
     deps = [
-        "@//sw/device/lib/dif:flash_ctrl",
-        "@//sw/device/lib/testing/json:provisioning_data",
-        "@//sw/device/lib/testing/test_framework:status",
-        "@//sw/device/lib/testing/test_framework:ujson_ottf",
-        "@//sw/device/silicon_creator/lib/cert",
-        "@//sw/device/silicon_creator/manuf/base:personalize_ext",
-        "@//sw/device/silicon_creator/manuf/lib:flash_info_fields",
+        "@pavona_pavona//sw/device/lib/dif:flash_ctrl",
+        "@pavona_pavona//sw/device/lib/testing/json:provisioning_data",
+        "@pavona_pavona//sw/device/lib/testing/test_framework:status",
+        "@pavona_pavona//sw/device/lib/testing/test_framework:ujson_ottf",
+        "@pavona_pavona//sw/device/silicon_creator/lib/cert",
+        "@pavona_pavona//sw/device/silicon_creator/manuf/base:personalize_ext",
+        "@pavona_pavona//sw/device/silicon_creator/manuf/lib:flash_info_fields",
     ],
 )
 
@@ -30,8 +30,8 @@ rust_library(
     srcs = ["default_ft_ext_lib.rs"],
     crate_name = "ft_ext_lib",
     deps = [
-        "@//sw/host/provisioning/util_lib",
         "@crate_index//:anyhow",
         "@crate_index//:arrayvec",
+        "@pavona_pavona//sw/host/provisioning/util_lib",
     ],
 )
