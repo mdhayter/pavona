@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -6,7 +7,7 @@ load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
 load("//rules:fusesoc.bzl", "fusesoc_build")
 load("@ot_python_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_library")
-load("//hw/top:defs.bzl", "pavona_select_top_attr")
+load("//hw/top:defs.bzl", "pavona_select_top_attr", "pavona_select_top_label_list")
 
 # This configuration exposes fusesoc's "verilator_options" option to the
 # command line. This is intended to allow CI to specifically build a single
@@ -92,6 +93,17 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+# The top's own RTL and FuseSoC cores. A top in this repository is already in ":rtl_files", and
+# FuseSoC finds its cores under ":cores"; a top kept in another repository adds its RTL through
+# the top_rtl attribute and its cores through top_cores, a FuseSoC core file in the directory
+# FuseSoC should search (usually the top's directory).
+_TOP_RTL = pavona_select_top_label_list("top_rtl")
+
+_TOP_CORES = pavona_select_top_label_list(
+    "top_cores",
+    required = False,
+)
+
 fusesoc_build(
     name = "verilator_real",
     srcs = [
@@ -99,10 +111,10 @@ fusesoc_build(
         ":dv_common_files",
         ":rtl_files",
         ":verilator_files",
-    ],
+    ] + _TOP_RTL,
     cores = [
         ":cores",
-    ],
+    ] + _TOP_CORES,
     data = ["//hw/ip/acc:rtl_files"],
     make_options = ":make_options",
     output_groups = pavona_select_top_attr("top_verilator_binary"),

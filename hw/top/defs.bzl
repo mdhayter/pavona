@@ -211,6 +211,17 @@ def pavona_require_top(top):
     """
     return pavona_select_top({top: []}, ["@platforms//:incompatible"])
 
+def _label_list(label):
+    return [label]
+
+def pavona_select_top_label_list(attr_name, required = True):
+    """
+    Return a select expression giving a one-label list with a top's label attribute, for
+    attributes such as `srcs`. If `required` is `False`, tops without the attribute give an
+    empty list.
+    """
+    return pavona_select_top_attr(attr_name, required = required, default = [], fn = _label_list)
+
 def pavona_select_top_attr(attr_name, required = True, default = None, fn = None):
     """
     Return a select expression that gives access to a chosen top attribute. Specifically,
