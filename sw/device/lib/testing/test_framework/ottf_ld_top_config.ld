@@ -1,4 +1,5 @@
 /* Copyright lowRISC contributors (OpenTitan project). */
+/* Copyright Mark Hayter. */
 /* Licensed under the Apache License, Version 2.0, see LICENSE for details. */
 /* SPDX-License-Identifier: Apache-2.0 */
 
@@ -14,9 +15,13 @@ REGION_ALIAS("ottf_storage", ctn_ram)
 REGION_ALIAS("ottf_storage", eflash)
 #endif
 
-#ifdef OPENTITAN_IS_SCAFI_DEPRECATED
+/* TODO: Consider moving scafi_deprecated to the ottf_no_nv_storage attribute
+ * too, set in `pavona_top()` in hw/top_scafi_deprecated/defs.bzl, so that this
+ * condition names no top. */
+#if defined(OPENTITAN_IS_SCAFI_DEPRECATED) || defined(OTTF_NO_NV_STORAGE)
 /* Disable non-volatile scratch region and counters if building for
- * scafi_deprecated. This should appear before the linker script. */
+ * scafi_deprecated, or for a top that sets the ottf_no_nv_storage attribute
+ * (OTTF_NO_NV_STORAGE). This should appear before the linker script. */
 no_ottf_nv_scratch = 1
 no_ottf_nv_counter = 1
 #endif
