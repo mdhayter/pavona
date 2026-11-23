@@ -302,6 +302,1192 @@
       "subranges": {}
     }
   },
+  "per_top_used_regs": {
+    "otp_ctrl": {
+      "INTR_STATE": 0,
+      "INTR_ENABLE": 4,
+      "INTR_TEST": 8,
+      "ALERT_TEST": 12,
+      "STATUS": 16,
+      "PARTITION_STATUS_0": 20,
+      "ERR_CODE": {
+        "offset": 24,
+        "count": 27,
+        "stride": 4
+      },
+      "DIRECT_ACCESS_REGWEN": 132,
+      "DIRECT_ACCESS_CMD": 136,
+      "DIRECT_ACCESS_ADDRESS": 140,
+      "DIRECT_ACCESS_WDATA": {
+        "offset": 144,
+        "count": 2,
+        "stride": 4
+      },
+      "DIRECT_ACCESS_RDATA": {
+        "offset": 152,
+        "count": 2,
+        "stride": 4
+      },
+      "CHECK_TRIGGER_REGWEN": 160,
+      "CHECK_TRIGGER": 164,
+      "CHECK_REGWEN": 168,
+      "CHECK_TIMEOUT": 172,
+      "INTEGRITY_CHECK_PERIOD": 176,
+      "CONSISTENCY_CHECK_PERIOD": 180,
+      "VENDOR_TEST_READ_LOCK": 184,
+      "CREATOR_SW_CFG_READ_LOCK": 188,
+      "OWNER_SW_CFG_READ_LOCK": 192,
+      "OWNERSHIP_SLOT_STATE_READ_LOCK": 196,
+      "ROT_OWNER_AUTH_SLOT0_READ_LOCK": 200,
+      "ROT_OWNER_AUTH_SLOT1_READ_LOCK": 204,
+      "ROT_OWNER_AUTH_SLOT2_READ_LOCK": 208,
+      "ROT_OWNER_AUTH_SLOT3_READ_LOCK": 212,
+      "ROT_OWNER_AUTH_SLOT0_STATE_READ_LOCK": 216,
+      "ROT_OWNER_AUTH_SLOT1_STATE_READ_LOCK": 220,
+      "ROT_OWNER_AUTH_SLOT2_STATE_READ_LOCK": 224,
+      "ROT_OWNER_AUTH_SLOT3_STATE_READ_LOCK": 228,
+      "EXT_NVM_READ_LOCK": 232,
+      "ROM_PATCH_READ_LOCK": 236,
+      "SOC_FUSES_CP_READ_LOCK": 240,
+      "SOC_FUSES_FT_READ_LOCK": 244,
+      "SCRATCH_FUSES_READ_LOCK": 248,
+      "VENDOR_TEST_DIGEST": {
+        "offset": 252,
+        "count": 2,
+        "stride": 4
+      },
+      "CREATOR_SW_CFG_DIGEST": {
+        "offset": 260,
+        "count": 2,
+        "stride": 4
+      },
+      "OWNER_SW_CFG_DIGEST": {
+        "offset": 268,
+        "count": 2,
+        "stride": 4
+      },
+      "ROT_OWNER_AUTH_SLOT0_DIGEST": {
+        "offset": 276,
+        "count": 2,
+        "stride": 4
+      },
+      "ROT_OWNER_AUTH_SLOT1_DIGEST": {
+        "offset": 284,
+        "count": 2,
+        "stride": 4
+      },
+      "ROT_OWNER_AUTH_SLOT2_DIGEST": {
+        "offset": 292,
+        "count": 2,
+        "stride": 4
+      },
+      "ROT_OWNER_AUTH_SLOT3_DIGEST": {
+        "offset": 300,
+        "count": 2,
+        "stride": 4
+      },
+      "ROT_OWNER_AUTH_SLOT0_STATE_DIGEST": {
+        "offset": 308,
+        "count": 2,
+        "stride": 4
+      },
+      "ROT_OWNER_AUTH_SLOT1_STATE_DIGEST": {
+        "offset": 316,
+        "count": 2,
+        "stride": 4
+      },
+      "ROT_OWNER_AUTH_SLOT2_STATE_DIGEST": {
+        "offset": 324,
+        "count": 2,
+        "stride": 4
+      },
+      "ROT_OWNER_AUTH_SLOT3_STATE_DIGEST": {
+        "offset": 332,
+        "count": 2,
+        "stride": 4
+      },
+      "ROM_PATCH_DIGEST": {
+        "offset": 340,
+        "count": 2,
+        "stride": 4
+      },
+      "SOC_FUSES_CP_DIGEST": {
+        "offset": 348,
+        "count": 2,
+        "stride": 4
+      },
+      "SOC_FUSES_FT_DIGEST": {
+        "offset": 356,
+        "count": 2,
+        "stride": 4
+      },
+      "HW_CFG0_DIGEST": {
+        "offset": 364,
+        "count": 2,
+        "stride": 4
+      },
+      "HW_CFG1_DIGEST": {
+        "offset": 372,
+        "count": 2,
+        "stride": 4
+      },
+      "HW_CFG2_DIGEST": {
+        "offset": 380,
+        "count": 2,
+        "stride": 4
+      },
+      "SECRET0_DIGEST": {
+        "offset": 388,
+        "count": 2,
+        "stride": 4
+      },
+      "SECRET1_DIGEST": {
+        "offset": 396,
+        "count": 2,
+        "stride": 4
+      },
+      "SECRET2_DIGEST": {
+        "offset": 404,
+        "count": 2,
+        "stride": 4
+      },
+      "SECRET3_DIGEST": {
+        "offset": 412,
+        "count": 2,
+        "stride": 4
+      },
+      "SW_CFG_WINDOW": 32768
+    }
+  },
+  "otp_ctrl": {
+    "partitions": {
+      "VENDOR_TEST": {
+        "offset": 0,
+        "size": 72,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 56,
+          "size": 8
+        }
+      },
+      "CREATOR_SW_CFG": {
+        "offset": 72,
+        "size": 280,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 336,
+          "size": 8
+        }
+      },
+      "OWNER_SW_CFG": {
+        "offset": 352,
+        "size": 984,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 1320,
+          "size": 8
+        }
+      },
+      "OWNERSHIP_SLOT_STATE": {
+        "offset": 1336,
+        "size": 56,
+        "secret": false,
+        "hw_digest": false,
+        "digest": null
+      },
+      "ROT_OWNER_AUTH_SLOT0": {
+        "offset": 1392,
+        "size": 224,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 1600,
+          "size": 8
+        }
+      },
+      "ROT_OWNER_AUTH_SLOT1": {
+        "offset": 1616,
+        "size": 224,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 1824,
+          "size": 8
+        }
+      },
+      "ROT_OWNER_AUTH_SLOT2": {
+        "offset": 1840,
+        "size": 224,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 2048,
+          "size": 8
+        }
+      },
+      "ROT_OWNER_AUTH_SLOT3": {
+        "offset": 2064,
+        "size": 224,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 2272,
+          "size": 8
+        }
+      },
+      "ROT_OWNER_AUTH_SLOT0_STATE": {
+        "offset": 2288,
+        "size": 24,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 2304,
+          "size": 8
+        }
+      },
+      "ROT_OWNER_AUTH_SLOT1_STATE": {
+        "offset": 2312,
+        "size": 24,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 2328,
+          "size": 8
+        }
+      },
+      "ROT_OWNER_AUTH_SLOT2_STATE": {
+        "offset": 2336,
+        "size": 24,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 2352,
+          "size": 8
+        }
+      },
+      "ROT_OWNER_AUTH_SLOT3_STATE": {
+        "offset": 2360,
+        "size": 24,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 2376,
+          "size": 8
+        }
+      },
+      "EXT_NVM": {
+        "offset": 2384,
+        "size": 1032,
+        "secret": false,
+        "hw_digest": false,
+        "digest": null
+      },
+      "ROM_PATCH": {
+        "offset": 3416,
+        "size": 8208,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 11608,
+          "size": 8
+        }
+      },
+      "SOC_FUSES_CP": {
+        "offset": 11624,
+        "size": 392,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 12008,
+          "size": 8
+        }
+      },
+      "SOC_FUSES_FT": {
+        "offset": 12016,
+        "size": 4232,
+        "secret": false,
+        "hw_digest": false,
+        "digest": {
+          "offset": 16240,
+          "size": 8
+        }
+      },
+      "SCRATCH_FUSES": {
+        "offset": 16248,
+        "size": 3760,
+        "secret": false,
+        "hw_digest": false,
+        "digest": null
+      },
+      "HW_CFG0": {
+        "offset": 20008,
+        "size": 48,
+        "secret": false,
+        "hw_digest": true,
+        "digest": {
+          "offset": 20040,
+          "size": 8
+        }
+      },
+      "HW_CFG1": {
+        "offset": 20056,
+        "size": 24,
+        "secret": false,
+        "hw_digest": true,
+        "digest": {
+          "offset": 20064,
+          "size": 8
+        }
+      },
+      "HW_CFG2": {
+        "offset": 20080,
+        "size": 56,
+        "secret": false,
+        "hw_digest": true,
+        "digest": {
+          "offset": 20120,
+          "size": 8
+        }
+      },
+      "SECRET0": {
+        "offset": 20136,
+        "size": 48,
+        "secret": true,
+        "hw_digest": true,
+        "digest": {
+          "offset": 20168,
+          "size": 8
+        }
+      },
+      "SECRET1": {
+        "offset": 20184,
+        "size": 32,
+        "secret": true,
+        "hw_digest": true,
+        "digest": {
+          "offset": 20200,
+          "size": 8
+        }
+      },
+      "SECRET2": {
+        "offset": 20216,
+        "size": 128,
+        "secret": true,
+        "hw_digest": true,
+        "digest": {
+          "offset": 20328,
+          "size": 8
+        }
+      },
+      "SECRET3": {
+        "offset": 20344,
+        "size": 48,
+        "secret": true,
+        "hw_digest": true,
+        "digest": {
+          "offset": 20376,
+          "size": 8
+        }
+      },
+      "LIFE_CYCLE": {
+        "offset": 20392,
+        "size": 88,
+        "secret": false,
+        "hw_digest": false,
+        "digest": null
+      }
+    },
+    "items": {
+      "SCRATCH": {
+        "offset": 0,
+        "size": 56,
+        "partition": "VENDOR_TEST"
+      },
+      "VENDOR_TEST_DIGEST": {
+        "offset": 56,
+        "size": 8,
+        "partition": "VENDOR_TEST"
+      },
+      "VENDOR_TEST_ZER": {
+        "offset": 64,
+        "size": 8,
+        "partition": "VENDOR_TEST"
+      },
+      "CREATOR_SW_CFG_AST_CFG": {
+        "offset": 72,
+        "size": 124,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_AST_INIT_EN": {
+        "offset": 196,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_AST_INIT_SIZE": {
+        "offset": 200,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_SIGVERIFY_SPX_EN": {
+        "offset": 204,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_EN": {
+        "offset": 208,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_JITTER_EN": {
+        "offset": 212,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RET_RAM_RESET_MASK": {
+        "offset": 216,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_MANUF_STATE": {
+        "offset": 220,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_ROM_EXEC_EN": {
+        "offset": 224,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_CPUCTRL": {
+        "offset": 228,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_MIN_SEC_VER_ROM_EXT": {
+        "offset": 232,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_MIN_SEC_VER_BL0": {
+        "offset": 236,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_REPCNT_THRESHOLDS": {
+        "offset": 240,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_REPCNTS_THRESHOLDS": {
+        "offset": 244,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_ADAPTP_HI_THRESHOLDS": {
+        "offset": 248,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_ADAPTP_LO_THRESHOLDS": {
+        "offset": 252,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_BUCKET_THRESHOLDS": {
+        "offset": 256,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_MARKOV_HI_THRESHOLDS": {
+        "offset": 260,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_MARKOV_LO_THRESHOLDS": {
+        "offset": 264,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_EXTHT_HI_THRESHOLDS": {
+        "offset": 268,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_EXTHT_LO_THRESHOLDS": {
+        "offset": 272,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_ALERT_THRESHOLD": {
+        "offset": 276,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_RNG_HEALTH_CONFIG_DIGEST": {
+        "offset": 280,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_SRAM_KEY_RENEW_AND_INIT_EN": {
+        "offset": 284,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_IMMUTABLE_ROM_EXT_EN": {
+        "offset": 288,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_IMMUTABLE_ROM_EXT_START_OFFSET": {
+        "offset": 292,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_IMMUTABLE_ROM_EXT_LENGTH": {
+        "offset": 296,
+        "size": 4,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_IMMUTABLE_ROM_EXT_SHA256_HASH": {
+        "offset": 300,
+        "size": 32,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_DIGEST": {
+        "offset": 336,
+        "size": 8,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "CREATOR_SW_CFG_ZER": {
+        "offset": 344,
+        "size": 8,
+        "partition": "CREATOR_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ERROR_REPORTING": {
+        "offset": 352,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_CLASS_EN": {
+        "offset": 356,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_ESCALATION": {
+        "offset": 360,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_CLASSIFICATION": {
+        "offset": 364,
+        "size": 788,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_LOCAL_ALERT_CLASSIFICATION": {
+        "offset": 1152,
+        "size": 28,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_ACCUM_THRESH": {
+        "offset": 1180,
+        "size": 16,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_TIMEOUT_CYCLES": {
+        "offset": 1196,
+        "size": 16,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_PHASE_CYCLES": {
+        "offset": 1212,
+        "size": 64,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_DIGEST_PROD": {
+        "offset": 1276,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_DIGEST_PROD_END": {
+        "offset": 1280,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_DIGEST_DEV": {
+        "offset": 1284,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_ALERT_DIGEST_RMA": {
+        "offset": 1288,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_WATCHDOG_BITE_THRESHOLD_CYCLES": {
+        "offset": 1292,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_KEYMGR_OTP_MEAS_EN": {
+        "offset": 1296,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_MANUF_STATE": {
+        "offset": 1300,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_RSTMGR_INFO_EN": {
+        "offset": 1304,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_SRAM_READBACK_EN": {
+        "offset": 1308,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_PRESERVE_RESET_REASON_EN": {
+        "offset": 1312,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ROM_RESET_REASON_CHECK_VALUE": {
+        "offset": 1316,
+        "size": 4,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_DIGEST": {
+        "offset": 1320,
+        "size": 8,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNER_SW_CFG_ZER": {
+        "offset": 1328,
+        "size": 8,
+        "partition": "OWNER_SW_CFG"
+      },
+      "OWNERSHIP_SLOT_STATE_ROT_OWNER_AUTH": {
+        "offset": 1336,
+        "size": 16,
+        "partition": "OWNERSHIP_SLOT_STATE"
+      },
+      "OWNERSHIP_SLOT_STATE_PLAT_INTEG_AUTH": {
+        "offset": 1352,
+        "size": 16,
+        "partition": "OWNERSHIP_SLOT_STATE"
+      },
+      "OWNERSHIP_SLOT_STATE_PLAT_OWNER_AUTH": {
+        "offset": 1368,
+        "size": 16,
+        "partition": "OWNERSHIP_SLOT_STATE"
+      },
+      "OWNERSHIP_SLOT_STATE_ZER": {
+        "offset": 1384,
+        "size": 8,
+        "partition": "OWNERSHIP_SLOT_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT0_FIRMWARE_CODESIGN_KEY_TYPE": {
+        "offset": 1392,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT0"
+      },
+      "ROT_OWNER_AUTH_SLOT0_FIRMWARE_CODESIGN_ECDSA_KEY": {
+        "offset": 1396,
+        "size": 64,
+        "partition": "ROT_OWNER_AUTH_SLOT0"
+      },
+      "ROT_OWNER_AUTH_SLOT0_FIRMWARE_CODESIGN_SPX_KEY": {
+        "offset": 1460,
+        "size": 32,
+        "partition": "ROT_OWNER_AUTH_SLOT0"
+      },
+      "ROT_OWNER_AUTH_SLOT0_FIRMWARE_CODESIGN_SPX_KEY_CONFIG": {
+        "offset": 1492,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT0"
+      },
+      "ROT_OWNER_AUTH_SLOT0_ROM1_PATCH_SIGVERIFY_ECDSA_KEY": {
+        "offset": 1496,
+        "size": 64,
+        "partition": "ROT_OWNER_AUTH_SLOT0"
+      },
+      "ROT_OWNER_AUTH_SLOT0_ROM1_PATCH_SIGVERIFY_SPX_KEY": {
+        "offset": 1560,
+        "size": 32,
+        "partition": "ROT_OWNER_AUTH_SLOT0"
+      },
+      "ROT_OWNER_AUTH_SLOT0_ROM1_PATCH_SPX_KEY_CONFIG": {
+        "offset": 1592,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT0"
+      },
+      "ROT_OWNER_AUTH_SLOT0_DIGEST": {
+        "offset": 1600,
+        "size": 8,
+        "partition": "ROT_OWNER_AUTH_SLOT0"
+      },
+      "ROT_OWNER_AUTH_SLOT0_ZER": {
+        "offset": 1608,
+        "size": 8,
+        "partition": "ROT_OWNER_AUTH_SLOT0"
+      },
+      "ROT_OWNER_AUTH_SLOT1_FIRMWARE_CODESIGN_KEY_TYPE": {
+        "offset": 1616,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT1"
+      },
+      "ROT_OWNER_AUTH_SLOT1_FIRMWARE_CODESIGN_ECDSA_KEY": {
+        "offset": 1620,
+        "size": 64,
+        "partition": "ROT_OWNER_AUTH_SLOT1"
+      },
+      "ROT_OWNER_AUTH_SLOT1_FIRMWARE_CODESIGN_SPX_KEY": {
+        "offset": 1684,
+        "size": 32,
+        "partition": "ROT_OWNER_AUTH_SLOT1"
+      },
+      "ROT_OWNER_AUTH_SLOT1_FIRMWARE_CODESIGN_SPX_KEY_CONFIG": {
+        "offset": 1716,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT1"
+      },
+      "ROT_OWNER_AUTH_SLOT1_ROM1_PATCH_SIGVERIFY_ECDSA_KEY": {
+        "offset": 1720,
+        "size": 64,
+        "partition": "ROT_OWNER_AUTH_SLOT1"
+      },
+      "ROT_OWNER_AUTH_SLOT1_ROM1_PATCH_SIGVERIFY_SPX_KEY": {
+        "offset": 1784,
+        "size": 32,
+        "partition": "ROT_OWNER_AUTH_SLOT1"
+      },
+      "ROT_OWNER_AUTH_SLOT1_ROM1_PATCH_SPX_KEY_CONFIG": {
+        "offset": 1816,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT1"
+      },
+      "ROT_OWNER_AUTH_SLOT1_DIGEST": {
+        "offset": 1824,
+        "size": 8,
+        "partition": "ROT_OWNER_AUTH_SLOT1"
+      },
+      "ROT_OWNER_AUTH_SLOT1_ZER": {
+        "offset": 1832,
+        "size": 8,
+        "partition": "ROT_OWNER_AUTH_SLOT1"
+      },
+      "ROT_OWNER_AUTH_SLOT2_FIRMWARE_CODESIGN_KEY_TYPE": {
+        "offset": 1840,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT2"
+      },
+      "ROT_OWNER_AUTH_SLOT2_FIRMWARE_CODESIGN_ECDSA_KEY": {
+        "offset": 1844,
+        "size": 64,
+        "partition": "ROT_OWNER_AUTH_SLOT2"
+      },
+      "ROT_OWNER_AUTH_SLOT2_FIRMWARE_CODESIGN_SPX_KEY": {
+        "offset": 1908,
+        "size": 32,
+        "partition": "ROT_OWNER_AUTH_SLOT2"
+      },
+      "ROT_OWNER_AUTH_SLOT2_FIRMWARE_CODESIGN_SPX_KEY_CONFIG": {
+        "offset": 1940,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT2"
+      },
+      "ROT_OWNER_AUTH_SLOT2_ROM1_PATCH_SIGVERIFY_ECDSA_KEY": {
+        "offset": 1944,
+        "size": 64,
+        "partition": "ROT_OWNER_AUTH_SLOT2"
+      },
+      "ROT_OWNER_AUTH_SLOT2_ROM1_PATCH_SIGVERIFY_SPX_KEY": {
+        "offset": 2008,
+        "size": 32,
+        "partition": "ROT_OWNER_AUTH_SLOT2"
+      },
+      "ROT_OWNER_AUTH_SLOT2_ROM1_PATCH_SPX_KEY_CONFIG": {
+        "offset": 2040,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT2"
+      },
+      "ROT_OWNER_AUTH_SLOT2_DIGEST": {
+        "offset": 2048,
+        "size": 8,
+        "partition": "ROT_OWNER_AUTH_SLOT2"
+      },
+      "ROT_OWNER_AUTH_SLOT2_ZER": {
+        "offset": 2056,
+        "size": 8,
+        "partition": "ROT_OWNER_AUTH_SLOT2"
+      },
+      "ROT_OWNER_AUTH_SLOT3_FIRMWARE_CODESIGN_KEY_TYPE": {
+        "offset": 2064,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT3"
+      },
+      "ROT_OWNER_AUTH_SLOT3_FIRMWARE_CODESIGN_ECDSA_KEY": {
+        "offset": 2068,
+        "size": 64,
+        "partition": "ROT_OWNER_AUTH_SLOT3"
+      },
+      "ROT_OWNER_AUTH_SLOT3_FIRMWARE_CODESIGN_SPX_KEY": {
+        "offset": 2132,
+        "size": 32,
+        "partition": "ROT_OWNER_AUTH_SLOT3"
+      },
+      "ROT_OWNER_AUTH_SLOT3_FIRMWARE_CODESIGN_SPX_KEY_CONFIG": {
+        "offset": 2164,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT3"
+      },
+      "ROT_OWNER_AUTH_SLOT3_ROM1_PATCH_SIGVERIFY_ECDSA_KEY": {
+        "offset": 2168,
+        "size": 64,
+        "partition": "ROT_OWNER_AUTH_SLOT3"
+      },
+      "ROT_OWNER_AUTH_SLOT3_ROM1_PATCH_SIGVERIFY_SPX_KEY": {
+        "offset": 2232,
+        "size": 32,
+        "partition": "ROT_OWNER_AUTH_SLOT3"
+      },
+      "ROT_OWNER_AUTH_SLOT3_ROM1_PATCH_SPX_KEY_CONFIG": {
+        "offset": 2264,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT3"
+      },
+      "ROT_OWNER_AUTH_SLOT3_DIGEST": {
+        "offset": 2272,
+        "size": 8,
+        "partition": "ROT_OWNER_AUTH_SLOT3"
+      },
+      "ROT_OWNER_AUTH_SLOT3_ZER": {
+        "offset": 2280,
+        "size": 8,
+        "partition": "ROT_OWNER_AUTH_SLOT3"
+      },
+      "ROT_OWNER_AUTH_SLOT0_STATE_FIRMWARE_CODESIGN_ECDSA_KEY_STATE": {
+        "offset": 2288,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT0_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT0_STATE_FIRMWARE_CODESIGN_SPX_KEY_STATE": {
+        "offset": 2292,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT0_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT0_STATE_ROM1_PATCH_ECDSA_KEY_STATE": {
+        "offset": 2296,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT0_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT0_STATE_ROM1_PATCH_SPX_KEY_STATE": {
+        "offset": 2300,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT0_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT0_STATE_DIGEST": {
+        "offset": 2304,
+        "size": 8,
+        "partition": "ROT_OWNER_AUTH_SLOT0_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT1_STATE_FIRMWARE_CODESIGN_ECDSA_KEY_STATE": {
+        "offset": 2312,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT1_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT1_STATE_FIRMWARE_CODESIGN_SPX_KEY_STATE": {
+        "offset": 2316,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT1_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT1_STATE_ROM1_PATCH_ECDSA_KEY_STATE": {
+        "offset": 2320,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT1_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT1_STATE_ROM1_PATCH_SPX_KEY_STATE": {
+        "offset": 2324,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT1_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT1_STATE_DIGEST": {
+        "offset": 2328,
+        "size": 8,
+        "partition": "ROT_OWNER_AUTH_SLOT1_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT2_STATE_FIRMWARE_CODESIGN_ECDSA_KEY_STATE": {
+        "offset": 2336,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT2_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT2_STATE_FIRMWARE_CODESIGN_SPX_KEY_STATE": {
+        "offset": 2340,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT2_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT2_STATE_ROM1_PATCH_ECDSA_KEY_STATE": {
+        "offset": 2344,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT2_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT2_STATE_ROM1_PATCH_SPX_KEY_STATE": {
+        "offset": 2348,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT2_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT2_STATE_DIGEST": {
+        "offset": 2352,
+        "size": 8,
+        "partition": "ROT_OWNER_AUTH_SLOT2_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT3_STATE_FIRMWARE_CODESIGN_ECDSA_KEY_STATE": {
+        "offset": 2360,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT3_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT3_STATE_FIRMWARE_CODESIGN_SPX_KEY_STATE": {
+        "offset": 2364,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT3_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT3_STATE_ROM1_PATCH_ECDSA_KEY_STATE": {
+        "offset": 2368,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT3_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT3_STATE_ROM1_PATCH_SPX_KEY_STATE": {
+        "offset": 2372,
+        "size": 4,
+        "partition": "ROT_OWNER_AUTH_SLOT3_STATE"
+      },
+      "ROT_OWNER_AUTH_SLOT3_STATE_DIGEST": {
+        "offset": 2376,
+        "size": 8,
+        "partition": "ROT_OWNER_AUTH_SLOT3_STATE"
+      },
+      "EXT_NVM_ANTIREPLAY_FRESHNESS_CNT": {
+        "offset": 2384,
+        "size": 1024,
+        "partition": "EXT_NVM"
+      },
+      "EXT_NVM_ZER": {
+        "offset": 3408,
+        "size": 8,
+        "partition": "EXT_NVM"
+      },
+      "ROM_PATCH_DATA": {
+        "offset": 3416,
+        "size": 8192,
+        "partition": "ROM_PATCH"
+      },
+      "ROM_PATCH_DIGEST": {
+        "offset": 11608,
+        "size": 8,
+        "partition": "ROM_PATCH"
+      },
+      "ROM_PATCH_ZER": {
+        "offset": 11616,
+        "size": 8,
+        "partition": "ROM_PATCH"
+      },
+      "SOC_FUSES_CP1_DATA": {
+        "offset": 11624,
+        "size": 256,
+        "partition": "SOC_FUSES_CP"
+      },
+      "SOC_FUSES_CP2_DATA": {
+        "offset": 11880,
+        "size": 128,
+        "partition": "SOC_FUSES_CP"
+      },
+      "SOC_FUSES_CP_DIGEST": {
+        "offset": 12008,
+        "size": 8,
+        "partition": "SOC_FUSES_CP"
+      },
+      "SOC_FUSES_FT1_DATA": {
+        "offset": 12016,
+        "size": 384,
+        "partition": "SOC_FUSES_FT"
+      },
+      "SOC_FUSES_FT2_DATA": {
+        "offset": 12400,
+        "size": 3840,
+        "partition": "SOC_FUSES_FT"
+      },
+      "SOC_FUSES_FT_DIGEST": {
+        "offset": 16240,
+        "size": 8,
+        "partition": "SOC_FUSES_FT"
+      },
+      "SCRATCH_FUSES_DATA": {
+        "offset": 16248,
+        "size": 3752,
+        "partition": "SCRATCH_FUSES"
+      },
+      "SCRATCH_FUSES_ZER": {
+        "offset": 20000,
+        "size": 8,
+        "partition": "SCRATCH_FUSES"
+      },
+      "DEVICE_ID": {
+        "offset": 20008,
+        "size": 32,
+        "partition": "HW_CFG0"
+      },
+      "HW_CFG0_DIGEST": {
+        "offset": 20040,
+        "size": 8,
+        "partition": "HW_CFG0"
+      },
+      "HW_CFG0_ZER": {
+        "offset": 20048,
+        "size": 8,
+        "partition": "HW_CFG0"
+      },
+      "EN_SRAM_IFETCH": {
+        "offset": 20056,
+        "size": 1,
+        "partition": "HW_CFG1"
+      },
+      "EN_CSRNG_SW_APP_READ": {
+        "offset": 20057,
+        "size": 1,
+        "partition": "HW_CFG1"
+      },
+      "DIS_RV_DM_LATE_DEBUG": {
+        "offset": 20058,
+        "size": 1,
+        "partition": "HW_CFG1"
+      },
+      "HW_CFG1_DIGEST": {
+        "offset": 20064,
+        "size": 8,
+        "partition": "HW_CFG1"
+      },
+      "HW_CFG1_ZER": {
+        "offset": 20072,
+        "size": 8,
+        "partition": "HW_CFG1"
+      },
+      "SOC_DBG_STATE": {
+        "offset": 20080,
+        "size": 4,
+        "partition": "HW_CFG2"
+      },
+      "MANUF_STATE": {
+        "offset": 20084,
+        "size": 32,
+        "partition": "HW_CFG2"
+      },
+      "HW_CFG2_DIGEST": {
+        "offset": 20120,
+        "size": 8,
+        "partition": "HW_CFG2"
+      },
+      "HW_CFG2_ZER": {
+        "offset": 20128,
+        "size": 8,
+        "partition": "HW_CFG2"
+      },
+      "TEST_UNLOCK_TOKEN": {
+        "offset": 20136,
+        "size": 16,
+        "partition": "SECRET0"
+      },
+      "TEST_EXIT_TOKEN": {
+        "offset": 20152,
+        "size": 16,
+        "partition": "SECRET0"
+      },
+      "SECRET0_DIGEST": {
+        "offset": 20168,
+        "size": 8,
+        "partition": "SECRET0"
+      },
+      "SECRET0_ZER": {
+        "offset": 20176,
+        "size": 8,
+        "partition": "SECRET0"
+      },
+      "SRAM_DATA_KEY_SEED": {
+        "offset": 20184,
+        "size": 16,
+        "partition": "SECRET1"
+      },
+      "SECRET1_DIGEST": {
+        "offset": 20200,
+        "size": 8,
+        "partition": "SECRET1"
+      },
+      "SECRET1_ZER": {
+        "offset": 20208,
+        "size": 8,
+        "partition": "SECRET1"
+      },
+      "RMA_TOKEN": {
+        "offset": 20216,
+        "size": 16,
+        "partition": "SECRET2"
+      },
+      "CREATOR_ROOT_KEY_SHARE0": {
+        "offset": 20232,
+        "size": 32,
+        "partition": "SECRET2"
+      },
+      "CREATOR_ROOT_KEY_SHARE1": {
+        "offset": 20264,
+        "size": 32,
+        "partition": "SECRET2"
+      },
+      "CREATOR_SEED": {
+        "offset": 20296,
+        "size": 32,
+        "partition": "SECRET2"
+      },
+      "SECRET2_DIGEST": {
+        "offset": 20328,
+        "size": 8,
+        "partition": "SECRET2"
+      },
+      "SECRET2_ZER": {
+        "offset": 20336,
+        "size": 8,
+        "partition": "SECRET2"
+      },
+      "OWNER_SEED": {
+        "offset": 20344,
+        "size": 32,
+        "partition": "SECRET3"
+      },
+      "SECRET3_DIGEST": {
+        "offset": 20376,
+        "size": 8,
+        "partition": "SECRET3"
+      },
+      "SECRET3_ZER": {
+        "offset": 20384,
+        "size": 8,
+        "partition": "SECRET3"
+      },
+      "LC_TRANSITION_CNT": {
+        "offset": 20392,
+        "size": 48,
+        "partition": "LIFE_CYCLE"
+      },
+      "LC_STATE": {
+        "offset": 20440,
+        "size": 40,
+        "partition": "LIFE_CYCLE"
+      }
+    }
+  },
   "alert_handler": {
     "peripherals": {
       "External": 0,
