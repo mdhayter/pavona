@@ -392,6 +392,26 @@
       "ERR_CODE": 52
     }
   },
+  "per_top_used_fields": {
+    "rstmgr": {
+      "CPU_INFO_CTRL": {
+        "EN": {
+          "lsb": 0,
+          "width": 1
+        },
+        "INDEX": {
+          "lsb": 4,
+          "width": 4
+        }
+      },
+      "CPU_REGWEN": {
+        "EN": {
+          "lsb": 0,
+          "width": 1
+        }
+      }
+    }
+  },
   "pinmux": {
     "num_mio_pads": 47,
     "num_dio_pads": 14,
