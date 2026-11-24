@@ -8,7 +8,7 @@ files.
 """
 from typing import List, Dict
 
-from ipgen.clkmgr_gen import get_rg_srcs
+from ipgen.clkmgr_gen import config_clk_meas, get_all_srcs, get_rg_srcs
 
 
 class ClkmgrIpConfig:
@@ -61,3 +61,13 @@ class ClkmgrIpConfig:
         # Currently, the clkmgr measures every root-gated clock.
         rg_srcs = get_rg_srcs(self.param_values["typed_clocks"])
         return rg_srcs
+
+    def measurement_ref_cnt(self, clk: str) -> int:
+        """
+        Return the number of AON clock cycles the clkmgr measures a clock over:
+        the `RefCnt` the RTL template gets from `config_clk_meas()`.
+        """
+        all_srcs = get_all_srcs(self.param_values["src_clks"],
+                                self.param_values["derived_clks"])
+        _, ref_cnt, _ = config_clk_meas(clk, all_srcs)
+        return ref_cnt

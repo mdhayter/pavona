@@ -135,21 +135,15 @@ dif_result_t initialize_expected_counts(const dif_clkmgr_t *clkmgr) {
     // various clocks to the AON clock. For example, 48 Mhz / 200 kHz = 240.
     // Notice the ratios are small enough to fit a uint32_t, even if the Hz
     // number is in uint64_t.
-    uint32_t clk_count = cast_safely(
-        udiv64_slow(clk_freq_hz, aon_clk_freq_hz, /*rem_out=*/NULL));
-    // If the clock count is below 100, run for multiple reference clocks
-    // until the clock count is over 100. Notice this matches how the
-    // clock measurement RTL is configured.
-    if (clk_count < 100) {
-      uint32_t original_clk_count = clk_count;
-      for (int i = 1;; i++) {
-        clk_count <<= 1;
-        if (clk_count > 100) {
-          LOG_INFO("The original clock count was %d, and became %d, shift %d",
-                   original_clk_count, clk_count, i);
-          break;
-        }
-      }
+    // The clock manager measures over ref_cycles AON cycles that were set in
+    // the RTL from the design frequencies; the expected clk_count comes from
+    // the actual platform frequencies.
+    uint32_t ref_cycles =
+        dt_clkmgr_measurable_clock(clkmgr_dt, clk_idx).ref_cnt;
+    uint32_t clk_count = cast_safely(udiv64_slow(
+        clk_freq_hz * ref_cycles, aon_clk_freq_hz, /*rem_out=*/NULL));
+    if (ref_cycles > 1) {
+      LOG_INFO("Measuring over %d AON cycles: count %d", ref_cycles, clk_count);
     }
     uint32_t variability =
         get_count_variability(clk_count, kVariabilityPercentage);

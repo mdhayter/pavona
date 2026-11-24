@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 """This contains a class which is used to help generate the device tables (DT)
@@ -120,6 +121,7 @@ class ClkmgrExt(Extension):
         Name(["meas", "ctrl", "shadowed", "lo", "field"])
     MEASURABLE_CLOCK_CTRL_SHADOWED_OFF_HI_FIELD_NAME = \
         Name(["meas", "ctrl", "shadowed", "hi", "field"])
+    MEASURABLE_CLOCK_REF_CNT_FIELD_NAME = Name(["ref", "cnt"])
 
     def __init__(self, ip_helper: IpHelper):
         self.ip_helper = ip_helper
@@ -159,6 +161,11 @@ class ClkmgrExt(Extension):
             field_type = ScalarType("bitfield_field32_t"),
             docstring = "CTRL_SHADOWED_HI bitfield",
         )
+        self.measurable_clk_struct.add_field(
+            name = self.MEASURABLE_CLOCK_REF_CNT_FIELD_NAME,
+            field_type = ScalarType("uint32_t"),
+            docstring = "AON clock cycles the clock is measured over (RefCnt)",
+        )
 
         # For an invalid clock, use an invalid clock ID, empty bitfields and
         # invalid offsets.
@@ -170,6 +177,7 @@ class ClkmgrExt(Extension):
             self.MEASURABLE_CLOCK_CTRL_SHADOWED_OFF_FIELD_NAME: "0xdead",
             self.MEASURABLE_CLOCK_CTRL_SHADOWED_OFF_LO_FIELD_NAME: empty_bitfield,
             self.MEASURABLE_CLOCK_CTRL_SHADOWED_OFF_HI_FIELD_NAME: empty_bitfield,
+            self.MEASURABLE_CLOCK_REF_CNT_FIELD_NAME: "0",
         }
 
     @staticmethod
@@ -238,6 +246,8 @@ class ClkmgrExt(Extension):
                     reg_prefix + "SHADOWED_LO_FIELD",
                 self.MEASURABLE_CLOCK_CTRL_SHADOWED_OFF_HI_FIELD_NAME:
                     reg_prefix + "SHADOWED_HI_FIELD",
+                self.MEASURABLE_CLOCK_REF_CNT_FIELD_NAME:
+                    str(self.ipconfig.measurement_ref_cnt(clk)),
             }
 
         return {
