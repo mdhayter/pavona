@@ -707,6 +707,10 @@ pavona_test(
     name = "aon_timer_smoketest",
     srcs = ["aon_timer_smoketest.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = ["aon_timer"],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         DRAGONFLY_TEST_ENVS,
@@ -1216,6 +1220,10 @@ pavona_test(
     name = "clkmgr_smoketest",
     srcs = ["clkmgr_smoketest.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = ["clkmgr"],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         DRAGONFLY_TEST_ENVS,
@@ -2227,6 +2235,13 @@ pavona_test(
     name = "gpio_smoketest",
     srcs = ["gpio_smoketest.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "gpio",
+                "pinmux",
+            ],
+        ),
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         DRAGONFLY_TEST_ENVS,
         # Not compatible with the verilated top level.
@@ -3952,6 +3967,14 @@ pavona_test(
     name = "pwrmgr_smoketest",
     srcs = ["pwrmgr_smoketest.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "aon_timer",
+                "pwrmgr",
+                "rstmgr",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         {
@@ -4030,6 +4053,10 @@ pavona_test(
     name = "rstmgr_smoketest",
     srcs = ["rstmgr_smoketest.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = ["rstmgr"],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         DRAGONFLY_TEST_ENVS,
@@ -4160,6 +4187,13 @@ pavona_test(
     name = "rv_plic_smoketest",
     srcs = ["rv_plic_smoketest.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "rv_plic",
+                "uart",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         DRAGONFLY_TEST_ENVS,
@@ -4184,6 +4218,10 @@ pavona_test(
     name = "rv_timer_smoketest",
     srcs = ["rv_timer_smoketest.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = ["rv_timer"],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         DRAGONFLY_TEST_ENVS,
@@ -4276,6 +4314,13 @@ pavona_test(
     name = "spi_device_flash_smoketest",
     srcs = ["spi_device_flash_smoketest.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "rv_plic",
+                "spi_device",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
@@ -4837,6 +4882,10 @@ pavona_test(
     name = "sram_ctrl_smoketest",
     srcs = ["sram_ctrl_smoketest.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = ["sram_ctrl"],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         DRAGONFLY_TEST_ENVS,
@@ -4880,6 +4929,10 @@ pavona_test(
     name = "uart_smoketest",
     srcs = ["uart_smoketest.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = ["uart"],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         EGRET_CW340_TEST_ENVS,
@@ -5245,6 +5298,13 @@ pavona_test(
     name = "usbdev_mem_test",
     srcs = ["usbdev_mem_test.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "usbdev",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),

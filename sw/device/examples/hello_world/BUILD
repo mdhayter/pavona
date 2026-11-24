@@ -16,6 +16,7 @@ pavona_test(
         "-Wno-date-time",
     ],
     exec_env = pavona_test_envs([
+        "fpga_test_rom",
         "sim_dv",
         "sim_verilator",
     ]) | {

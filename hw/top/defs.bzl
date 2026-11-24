@@ -149,7 +149,7 @@ def pavona_test_rom_envs():
         envs.extend(top.attrs.get("test_rom_envs", []))
     return envs
 
-def pavona_test_envs(roles, value = None):
+def pavona_test_envs(roles, value = None, required_ips = []):
     """
     Return an `exec_env` dictionary for `pavona_test` with, for every registered
     top, its execution environment for each of the requested roles. A top names
@@ -159,9 +159,17 @@ def pavona_test_envs(roles, value = None):
     asks for roles instead of naming environments then also runs on tops added
     later, including tops registered outside this repository.
 
+    The roles are:
+    - `sim_dv`: the DV simulation;
+    - `sim_verilator`: the Verilator simulation;
+    - `fpga_test_rom`: the top's main FPGA board, booting from the test ROM.
+
     `value` is the value for each environment in the dictionary (the name of an
     override parameter, or `None`). Combine with explicitly named environments
     using `|`.
+
+    `required_ips` lists the IPs the test needs: tops without one of them get
+    nothing.
 
     Example:
     ```python
@@ -175,6 +183,9 @@ def pavona_test_envs(roles, value = None):
     """
     envs = {}
     for top in ALL_TOPS:
+        ips = [ip.name for ip in top.ips]
+        if not all([ip in ips for ip in required_ips]):
+            continue
         top_envs = top.attrs.get("test_envs", {})
         for role in roles:
             if role in top_envs:
