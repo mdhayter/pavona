@@ -344,6 +344,10 @@ cc_library(
         "i2c",
         ["HAS_I2C"],
         [],
+    ) + pavona_if_ip(
+        "usbdev",
+        ["HAS_USBDEV"],
+        [],
     ),
     target_compatible_with = [PAVONA_CPU],
     deps = [

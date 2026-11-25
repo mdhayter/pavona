@@ -22,6 +22,12 @@ const test_pinout_init_t kTestPinoutInit = {
     .straps = {kDtPadIoc0, kDtPadIoc1, kDtPadIoc2},
 };
 
+// VBUS sense on IOR0.
+const dt_pad_t kTestPinoutUsbdevSense = kDtPadIor0;
+
+// The chip level ties `usb_rx_d` to 0: no differential receiver.
+const bool kTestPinoutUsbdevHasDiffRcvr = false;
+
 void test_pinout_init_extra(dif_pinmux_t *pinmux) {}
 
 // Mapping of Chip IOs to the GPIO peripheral.

@@ -22,6 +22,12 @@ const test_pinout_init_t kTestPinoutInit = {
     .straps = {kDtPadIoc0, kDtPadIoc1, kDtPadIoc2},
 };
 
+// VBUS sense on IOC7.
+const dt_pad_t kTestPinoutUsbdevSense = kDtPadIoc7;
+
+// The chip level connects a USB differential receiver to `usb_rx_d`.
+const bool kTestPinoutUsbdevHasDiffRcvr = true;
+
 void test_pinout_init_extra(dif_pinmux_t *pinmux) {
   // Enable pull-ups on UART0 RX
   // Pull-ups are available only on certain platforms.

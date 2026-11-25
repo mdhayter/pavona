@@ -135,6 +135,25 @@ status_t test_pinout_i2c_pads(dt_i2c_t i2c_dt,
                               dt_pad_t *sda_pad, dt_pad_t *scl_pad);
 #endif  // HAS_I2C
 
+// HAS_USBDEV: defined on a top with a USB device (see test_pinout_intf).
+#ifdef HAS_USBDEV
+/**
+ * The pad that tests connect usbdev's VBUS sense input to. Only on a top with
+ * a USB device.
+ */
+extern const dt_pad_t kTestPinoutUsbdevSense;
+
+/**
+ * Whether the chip level connects a differential receiver to usbdev's
+ * `usb_rx_d` input, so that tests can set `use_diff_rcvr` in usbdev's
+ * PHY_CONFIG. Without one, usbdev must use its single-ended D+/D- inputs:
+ * with `use_diff_rcvr` set it would read a constant as receive data. This is
+ * a property of the chip level (which PHY it connects to usbdev), not of the
+ * board alone. Only on a top with a USB device.
+ */
+extern const bool kTestPinoutUsbdevHasDiffRcvr;
+#endif  // HAS_USBDEV
+
 /**
  * Pads of SPI host 1 when connected to the BoB.
  */
