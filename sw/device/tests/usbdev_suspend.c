@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -513,15 +514,7 @@ static usbdev_suspend_ctx_t suspend_ctx;
  * Are we observing physically-accurate timings?
  */
 static inline bool physical_timings(void) {
-  switch (kDeviceType) {
-    case kDeviceFpgaCw310:
-    case kDeviceFpgaCw340:
-    case kDeviceSilicon:
-      break;
-    default:
-      return false;
-  }
-  return true;
+  return kDeviceType == kDeviceSilicon || kDeviceType >= kDeviceFpgaBase;
 }
 
 // Return a timeout in microseconds, scaled for the test target; longer timeout
@@ -1823,9 +1816,8 @@ bool usbdev_suspend_test(usbdev_suspend_phase_t init_phase,
       break;
 
     default:
-      CHECK(kDeviceType == kDeviceFpgaCw310);
-      OT_FALLTHROUGH_INTENDED;
-    case kDeviceFpgaCw340:
+      // Any FPGA board.
+      CHECK(kDeviceType >= kDeviceFpgaBase);
       // FPGA host can be used to perform Bus Resets and (with hoop-jumping)
       // Suspend and Resume. With physical intervention or perhaps a capable
       // hub it can perform VBUS Disconnects; such hubs are a rare minority,

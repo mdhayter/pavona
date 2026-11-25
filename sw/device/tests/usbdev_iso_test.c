@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -174,10 +175,9 @@ bool test_main(void) {
     case kDeviceSilicon:
       transfer_bytes = TRANSFER_BYTES_SILICON;
       break;
-    case kDeviceFpgaCw340:
-      break;
     default:
-      CHECK(kDeviceType == kDeviceFpgaCw310);
+      // Any FPGA board.
+      CHECK(kDeviceType >= kDeviceFpgaBase);
       break;
   }
   transfer_bytes = (transfer_bytes + nstreams - 1) / nstreams;

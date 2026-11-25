@@ -48,21 +48,6 @@ typedef enum device_type {
    */
   kDeviceSimVerilator = 1,
   /**
-   * Represents the "ChipWhisperer CW310 FPGA" device, i.e., the particular
-   * FPGA board blessed for OpenTitan development, containing a Xilinx FPGA.
-   */
-  kDeviceFpgaCw310 = 2,
-  /**
-   * Represents the "ChipWhisperer CW305 FPGA" device, i.e., the smaller FPGA
-   * development board with SCA capability, containing a Xilinx FPGA.
-   */
-  kDeviceFpgaCw305 = 3,
-  /**
-   * Represents the "ChipWhisperer CW340 FPGA" device, i.e., the particular
-   * FPGA board blessed for OpenTitan development, containing a Xilinx FPGA.
-   */
-  kDeviceFpgaCw340 = 4,
-  /**
    * Represents the "Silicon" device, i.e., an instantiation of OpenTitan in
    * Silicon.
    */
@@ -73,9 +58,31 @@ typedef enum device_type {
    */
   kDeviceSimQemu = 6,
   /**
+   * The first FPGA board. Every FPGA board is numbered from here on, so
+   * `kDeviceType >= kDeviceFpgaBase` means "an FPGA board" and code can
+   * treat all FPGA boards alike without listing them. Simulators and
+   * silicon are numbered below it.
+   */
+  kDeviceFpgaBase = 0x10,
+  /**
+   * Represents the "ChipWhisperer CW310 FPGA" device, i.e., the particular
+   * FPGA board blessed for OpenTitan development, containing a Xilinx FPGA.
+   */
+  kDeviceFpgaCw310 = kDeviceFpgaBase,
+  /**
+   * Represents the "ChipWhisperer CW305 FPGA" device, i.e., the smaller FPGA
+   * development board with SCA capability, containing a Xilinx FPGA.
+   */
+  kDeviceFpgaCw305 = kDeviceFpgaBase + 1,
+  /**
+   * Represents the "ChipWhisperer CW340 FPGA" device, i.e., the particular
+   * FPGA board blessed for OpenTitan development, containing a Xilinx FPGA.
+   */
+  kDeviceFpgaCw340 = kDeviceFpgaBase + 2,
+  /**
    * Represents the "Digilent Genesys 2" device, a Kintex-7 FPGA board.
    */
-  kDeviceFpgaGenesys2 = 7,
+  kDeviceFpgaGenesys2 = kDeviceFpgaBase + 3,
 } device_type_t;
 
 /**
