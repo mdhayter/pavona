@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -28,6 +29,10 @@
 // host-side application support is required in this case - just a physical wire
 // to the host controller, and the OS/device layer will configure the device.
 
+#include "hw/top/dt/api.h"     // Generated.
+#include "hw/top/dt/pinmux.h"  // Generated.
+#include "hw/top/dt/rstmgr.h"  // Generated.
+#include "hw/top/dt/usbdev.h"  // Generated.
 #include "sw/device/lib/dif/dif_pinmux.h"
 #include "sw/device/lib/dif/dif_rstmgr.h"
 #include "sw/device/lib/runtime/ibex.h"
@@ -36,10 +41,9 @@
 #include "sw/device/lib/testing/pinmux_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
+#include "sw/device/lib/testing/test_pinout.h"
 #include "sw/device/lib/testing/usb_testutils.h"
 #include "sw/device/lib/testing/usb_testutils_controlep.h"
-
-#include "hw/top_egret/sw/autogen/top_egret.h"  // Generated.
 
 /**
  * Configuration values for USB.
@@ -88,14 +92,16 @@ OTTF_DEFINE_TEST_CONFIG();
 bool test_main(void) {
   LOG_INFO("Running USBDEV PINCFG test");
 
-  CHECK_DIF_OK(dif_pinmux_init(
-      mmio_region_from_addr(TOP_EGRET_PINMUX_AON_BASE_ADDR), &pinmux));
+  CHECK_DIF_OK(dif_pinmux_init_from_dt(kDtPinmuxAon, &pinmux));
   pinmux_testutils_init(&pinmux);
-  CHECK_DIF_OK(dif_pinmux_input_select(&pinmux,
-                                       kTopEgretPinmuxPeripheralInUsbdevSense,
-                                       kTopEgretPinmuxInselIoc7));
-  CHECK_DIF_OK(dif_rstmgr_init(
-      mmio_region_from_addr(TOP_EGRET_RSTMGR_AON_BASE_ADDR), &rstmgr));
+  CHECK_STATUS_OK(pinmux_testutils_connect(
+      &pinmux, dt_usbdev_periph_io(kDtUsbdev, kDtUsbdevPeriphIoSense),
+      kDtPeriphIoDirIn, kTestPinoutUsbdevSense));
+  CHECK_DIF_OK(dif_rstmgr_init_from_dt(kDtRstmgrAon, &rstmgr));
+  size_t usb_sw_reset;
+  CHECK_DIF_OK(dif_rstmgr_get_sw_reset_index(
+      kDtRstmgrAon, dt_usbdev_reset(kDtUsbdev, kDtUsbdevResetRst),
+      &usb_sw_reset));
 
   // Construct the test list appropriate to this target
   struct {
@@ -118,19 +124,29 @@ bool test_main(void) {
       }
       break;
 
-    case kDeviceFpgaCw340:
-    case kDeviceFpgaCw310:
-      // For the CW310/340 pin-flipping is only useful if the SBU signals of
+    // Verilator can operate with any pin/bus configuration because it has
+    // ready access to the configuration information.
+    case kDeviceSimVerilator:
+      ntests = 8U;
+      for (unsigned test = 0U; test < ntests; ++test) {
+        test_cfg[test].pinflip = ((test & 1U) != 0U);
+        test_cfg[test].en_diff_rcvr = ((test & 2U) != 0U);
+        test_cfg[test].tx_use_d_se0 = ((test & 4U) != 0U);
+      }
+      break;
+
+    default:
+      // Silicon or an FPGA board.
+      CHECK(kDeviceType == kDeviceSilicon || kDeviceType >= kDeviceFpgaBase);
+      // On an FPGA board pin-flipping is only useful if the SBU signals of
       // the USB-C connector are being driven; this is not the case we're
-      // testing.
-      OT_FALLTHROUGH_INTENDED;
-    case kDeviceSilicon:
-      // Silicon would require external pin-flipping in some form,
+      // testing. Silicon would require external pin-flipping in some form,
       // eg. configurable hardware or a reversible cable. Only the differential
-      // rcvr on/off may be exercised.
-      LOG_INFO(" - CW310/340/Teacup does not support pinflipping; ignoring");
-      LOG_INFO(" - CW310/340/Teacup employs only differential transmission");
-      ntests = 2U;
+      // rcvr on/off may be exercised, and on only if the chip level connects
+      // one.
+      LOG_INFO(" - This platform does not support pinflipping; ignoring");
+      LOG_INFO(" - This platform employs only differential transmission");
+      ntests = kTestPinoutUsbdevHasDiffRcvr ? 2U : 1U;
       for (unsigned test = 0U; test < ntests; ++test) {
         test_cfg[test].pinflip = false;
         test_cfg[test].en_diff_rcvr = ((test & 1U) != 0U);
@@ -140,18 +156,6 @@ bool test_main(void) {
       // Fine to employ verbose logging because behavior on FPGA is not
       // timing-sensitive.
       verbose = true;
-      break;
-
-    // Verilator can operate with any pin/bus configuration because it has
-    // ready access to the configuration information.
-    default:
-      CHECK(kDeviceType == kDeviceSimVerilator);
-      ntests = 8U;
-      for (unsigned test = 0U; test < ntests; ++test) {
-        test_cfg[test].pinflip = ((test & 1U) != 0U);
-        test_cfg[test].en_diff_rcvr = ((test & 2U) != 0U);
-        test_cfg[test].tx_use_d_se0 = ((test & 4U) != 0U);
-      }
       break;
   }
 
@@ -203,14 +207,12 @@ bool test_main(void) {
     if (verbose) {
       LOG_INFO(" - Hold reset");
     }
-    CHECK_DIF_OK(dif_rstmgr_software_reset(&rstmgr,
-                                           kTopEgretResetManagerSwResetsUsb,
+    CHECK_DIF_OK(dif_rstmgr_software_reset(&rstmgr, usb_sw_reset,
                                            kDifRstmgrSoftwareResetHold));
     if (verbose) {
       LOG_INFO(" - Release reset");
     }
-    CHECK_DIF_OK(dif_rstmgr_software_reset(&rstmgr,
-                                           kTopEgretResetManagerSwResetsUsb,
+    CHECK_DIF_OK(dif_rstmgr_software_reset(&rstmgr, usb_sw_reset,
                                            kDifRstmgrSoftwareResetRelease));
   }
 

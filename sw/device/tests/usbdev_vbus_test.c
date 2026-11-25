@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -10,6 +11,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "hw/top/dt/api.h"     // Generated.
+#include "hw/top/dt/pinmux.h"  // Generated.
+#include "hw/top/dt/usbdev.h"  // Generated.
 #include "sw/device/lib/base/status.h"
 #include "sw/device/lib/dif/dif_pinmux.h"
 #include "sw/device/lib/dif/dif_usbdev.h"
@@ -18,8 +22,7 @@
 #include "sw/device/lib/testing/pinmux_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
-
-#define USBDEV_BASE_ADDR TOP_EGRET_USBDEV_BASE_ADDR
+#include "sw/device/lib/testing/test_pinout.h"
 
 /**
  * Are we expecting VBUS to be low at the start of the test, ie. no connection
@@ -75,15 +78,13 @@ bool test_main(void) {
   }
 
   // Ensure that the VBUS/SENSE signal is routed through to the usbdev
-  CHECK_DIF_OK(dif_pinmux_init(
-      mmio_region_from_addr(TOP_EGRET_PINMUX_AON_BASE_ADDR), &pinmux));
+  CHECK_DIF_OK(dif_pinmux_init_from_dt(kDtPinmuxAon, &pinmux));
   pinmux_testutils_init(&pinmux);
-  CHECK_DIF_OK(dif_pinmux_input_select(&pinmux,
-                                       kTopEgretPinmuxPeripheralInUsbdevSense,
-                                       kTopEgretPinmuxInselIoc7));
+  CHECK_STATUS_OK(pinmux_testutils_connect(
+      &pinmux, dt_usbdev_periph_io(kDtUsbdev, kDtUsbdevPeriphIoSense),
+      kDtPeriphIoDirIn, kTestPinoutUsbdevSense));
 
-  CHECK_DIF_OK(
-      dif_usbdev_init(mmio_region_from_addr(USBDEV_BASE_ADDR), &usbdev));
+  CHECK_DIF_OK(dif_usbdev_init_from_dt(kDtUsbdev, &usbdev));
 
   // Initially the VBUS may be expected to be low; if so, ensure that this is
   // the case.

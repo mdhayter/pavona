@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -25,6 +26,8 @@
 // transfer, the CPU/test will stall until the receiving processes on the host
 // have collected all of the logging output.
 
+#include "hw/top/dt/api.h"        // Generated.
+#include "hw/top/dt/sram_ctrl.h"  // Generated.
 #include "sw/device/lib/runtime/log.h"
 #include "sw/device/lib/runtime/print.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
@@ -32,8 +35,6 @@
 
 // Presently we must reinstate the UART output manually.
 #include "sw/device/lib/dif/dif_uart.h"
-
-#include "hw/top_egret/sw/autogen/top_egret.h"  // Generated.
 
 /**
  * Number of concurrent logging streams to test.
@@ -84,8 +85,10 @@ bool test_main(void) {
   }
 
   // Just a quantity of data as ASCII hex...
-  const uint32_t kSramStart = TOP_EGRET_SRAM_CTRL_MAIN_RAM_BASE_ADDR;
-  const uint32_t kSramSize = TOP_EGRET_SRAM_CTRL_MAIN_RAM_SIZE_BYTES;
+  const uint32_t kSramStart =
+      dt_sram_ctrl_memory_base(kDtSramCtrlMain, kDtSramCtrlMemoryRam);
+  const uint32_t kSramSize =
+      dt_sram_ctrl_memory_size(kDtSramCtrlMain, kDtSramCtrlMemoryRam);
   base_hexdump((char *)kSramStart, kSramSize);
 
   CHECK_STATUS_OK(usb_logging_fin(true, true));

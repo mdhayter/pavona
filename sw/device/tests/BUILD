@@ -4963,6 +4963,14 @@ pavona_test(
     name = "usbdev_pincfg_test",
     srcs = ["usbdev_pincfg_test.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "rstmgr",
+                "usbdev",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
@@ -4981,13 +4989,14 @@ pavona_test(
     ),
     verilator = verilator_params(timeout = "long"),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:rstmgr",
         "//sw/device/lib/dif:usbdev",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing:usb_testutils",
         "//sw/device/lib/testing/test_framework:ottf_main",
     ],
@@ -4997,6 +5006,13 @@ pavona_test(
     name = "usbdev_vbus_test",
     srcs = ["usbdev_vbus_test.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "usbdev",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
@@ -5020,12 +5036,13 @@ pavona_test(
         test_harness = "//sw/host/tests/chip/usb:usb_harness",
     ),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:usbdev",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing/test_framework:ottf_main",
     ],
 )
@@ -5034,6 +5051,13 @@ pavona_test(
     name = "usbdev_pullup_test",
     srcs = ["usbdev_pullup_test.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "usbdev",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
@@ -5056,12 +5080,13 @@ pavona_test(
         test_harness = "//sw/host/tests/chip/usb:usb_harness",
     ),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:usbdev",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing/test_framework:ottf_main",
     ],
 )
@@ -5085,12 +5110,13 @@ pavona_test(
         test_harness = "//sw/host/tests/chip/usb:usbdev_aon_wake",
     ),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:usbdev",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing:usb_testutils",
         "//sw/device/lib/testing/test_framework:ottf_main",
     ],
@@ -5100,6 +5126,13 @@ pavona_test(
     name = "usbdev_aon_pullup_test",
     srcs = ["usbdev_aon_pullup_test.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "usbdev",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
@@ -5122,12 +5155,13 @@ pavona_test(
         test_harness = "//sw/host/tests/chip/usb:usb_harness",
     ),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:usbdev",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing/test_framework:ottf_main",
     ],
 )
@@ -5140,6 +5174,13 @@ pavona_test(
     name = "usbdev_aon_wake_reset_test",
     srcs = ["usbdev_aon_wake_reset_test.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "usbdev",
+            ],
+        ),
         dicts.omit(
             EGRET_TEST_ENVS,
             [
@@ -5167,12 +5208,13 @@ pavona_test(
         test_harness = "//sw/host/tests/chip/usb:usbdev_aon_wake",
     ),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:usbdev",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing:usb_testutils",
         "//sw/device/lib/testing/test_framework:ottf_main",
     ],
@@ -5182,6 +5224,13 @@ pavona_test(
     name = "usbdev_setuprx_test",
     srcs = ["usbdev_setuprx_test.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "usbdev",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
@@ -5206,12 +5255,13 @@ pavona_test(
     # Broken on Verilator. See #24182.
     verilator = verilator_params(tags = ["broken"]),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:usbdev",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing/test_framework:ottf_main",
     ],
 )
@@ -5220,6 +5270,13 @@ pavona_test(
     name = "usbdev_config_host_test",
     srcs = ["usbdev_config_host_test.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "usbdev",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
@@ -5247,12 +5304,13 @@ pavona_test(
         tags = ["broken"],
     ),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:usbdev",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing:usb_testutils",
         "//sw/device/lib/testing/test_framework:ottf_main",
     ],
@@ -5262,6 +5320,13 @@ pavona_test(
     name = "usbdev_test",
     srcs = ["usbdev_test.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "usbdev",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
@@ -5282,11 +5347,13 @@ pavona_test(
     ),
     verilator = verilator_params(timeout = "long"),
     deps = [
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:usbdev",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing:usb_testutils",
         "//sw/device/lib/testing:usb_testutils_simpleserial",
         "//sw/device/lib/testing/test_framework:ottf_main",
@@ -5326,6 +5393,13 @@ pavona_test(
         ":usbdev_stream_host_harness",
     ],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "usbdev",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
@@ -5349,11 +5423,12 @@ pavona_test(
     ),
     verilator = verilator_params(timeout = "long"),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing:usb_testutils",
         "//sw/device/lib/testing:usb_testutils_streams",
         "//sw/device/lib/testing/test_framework:ottf_main",
@@ -5367,6 +5442,13 @@ pavona_test(
         ":usbdev_stream_host_harness",
     ],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "usbdev",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
@@ -5390,11 +5472,12 @@ pavona_test(
     ),
     verilator = verilator_params(timeout = "long"),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing:usb_testutils",
         "//sw/device/lib/testing:usb_testutils_streams",
         "//sw/device/lib/testing/test_framework:ottf_main",
@@ -5408,6 +5491,13 @@ pavona_test(
         ":usbdev_stream_host_harness",
     ],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "usbdev",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
@@ -5431,11 +5521,12 @@ pavona_test(
     ),
     verilator = verilator_params(timeout = "long"),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing:usb_testutils",
         "//sw/device/lib/testing:usb_testutils_streams",
         "//sw/device/lib/testing/test_framework:ottf_main",
@@ -5446,6 +5537,13 @@ pavona_test(
     name = "usbdev_toggle_restore_test",
     srcs = ["usbdev_toggle_restore_test.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "usbdev",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
     ),
@@ -5468,11 +5566,12 @@ pavona_test(
         test_harness = "//sw/host/tests/chip/usb:usb_harness",
     ),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:usbdev",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:pinmux_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing/test_framework:ottf_main",
     ],
 )
@@ -5480,11 +5579,20 @@ pavona_test(
 pavona_test(
     name = "usbdev_logging_test",
     srcs = ["usbdev_logging_test.c"],
-    exec_env = {
-        "//hw/top_egret:fpga_cw310_test_rom": None,
-        "//hw/top_egret:sim_dv": None,
-        "//hw/top_egret:sim_verilator": None,
-    },
+    exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "uart",
+                "usbdev",
+            ],
+        ),
+        {
+            "//hw/top_egret:fpga_cw310_test_rom": None,
+            "//hw/top_egret:sim_dv": None,
+            "//hw/top_egret:sim_verilator": None,
+        },
+    ),
     fpga = fpga_params(
         timeout = "eternal",
         tags = [
@@ -5498,7 +5606,7 @@ pavona_test(
         tags = ["broken"],
     ),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
@@ -5516,7 +5624,7 @@ cc_library(
     hdrs = ["usbdev_suspend.h"],
     target_compatible_with = [PAVONA_CPU],
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:pwrmgr",
         "//sw/device/lib/dif:rstmgr",
@@ -5529,6 +5637,7 @@ cc_library(
         "//sw/device/lib/testing:rstmgr_testutils",
         "//sw/device/lib/testing:rv_plic_testutils",
         "//sw/device/lib/testing:sram_ctrl_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing:usb_testutils",
         "//sw/device/lib/testing:usb_testutils_streams",
         "//sw/device/lib/testing/test_framework:ottf_main",

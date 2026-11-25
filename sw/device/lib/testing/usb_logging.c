@@ -1,12 +1,17 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 #include "sw/device/lib/testing/usb_logging.h"
 
+#include "hw/top/dt/api.h"     // Generated.
+#include "hw/top/dt/pinmux.h"  // Generated.
+#include "hw/top/dt/usbdev.h"  // Generated.
 #include "sw/device/lib/runtime/ibex.h"
 #include "sw/device/lib/runtime/print.h"
 #include "sw/device/lib/testing/pinmux_testutils.h"
+#include "sw/device/lib/testing/test_pinout.h"
 #include "sw/device/lib/testing/usb_testutils.h"
 #include "sw/device/lib/testing/usb_testutils_controlep.h"
 
@@ -412,11 +417,11 @@ status_t usb_logging_init(usb_testutils_ctx_t *usbutils, uint8_t ep_first,
     ctx->usbutils = &usbdev;
     ep_first = 1u;
 
-    TRY(dif_pinmux_init(mmio_region_from_addr(TOP_EGRET_PINMUX_AON_BASE_ADDR),
-                        &pinmux));
+    TRY(dif_pinmux_init_from_dt(kDtPinmuxAon, &pinmux));
     pinmux_testutils_init(&pinmux);
-    TRY(dif_pinmux_input_select(&pinmux, kTopEgretPinmuxPeripheralInUsbdevSense,
-                                kTopEgretPinmuxInselIoc7));
+    TRY(pinmux_testutils_connect(
+        &pinmux, dt_usbdev_periph_io(kDtUsbdev, kDtUsbdevPeriphIoSense),
+        kDtPeriphIoDirIn, kTestPinoutUsbdevSense));
 
     // Total length of the configuration descriptor; validate caller buffer.
     size_t cfg_len = USB_CFG_DSCR_LEN +
@@ -451,7 +456,7 @@ status_t usb_logging_init(usb_testutils_ctx_t *usbutils, uint8_t ep_first,
     // simulation has finished all of the printing, which takes a while
     // if `--trace` was passed in.
     TRY(usb_testutils_init(ctx->usbutils, /*pinflip=*/false,
-                           /*en_diff_rcvr=*/true,
+                           /*en_diff_rcvr=*/kTestPinoutUsbdevHasDiffRcvr,
                            /*tx_use_d_se0=*/false));
     TRY(usb_testutils_controlep_init(&usbdev_control, ctx->usbutils, 0,
                                      config_descriptors, cfg_len, NULL,

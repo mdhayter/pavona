@@ -651,7 +651,9 @@ cc_library(
     target_compatible_with = [PAVONA_CPU],
     deps = [
         ":pinmux_testutils",
+        ":test_pinout_intf",
         ":usb_testutils",
+        "//hw/top/dt",
         "//sw/device/lib/testing/test_framework:check",
     ],
 )

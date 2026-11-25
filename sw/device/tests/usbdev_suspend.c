@@ -74,6 +74,9 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "hw/top/dt/api.h"        // Generated.
+#include "hw/top/dt/sram_ctrl.h"  // Generated.
+#include "hw/top/dt/usbdev.h"     // Generated.
 #include "sw/device/lib/dif/dif_pinmux.h"
 #include "sw/device/lib/dif/dif_pwrmgr.h"
 #include "sw/device/lib/dif/dif_rstmgr.h"
@@ -89,6 +92,7 @@
 #include "sw/device/lib/testing/sram_ctrl_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
+#include "sw/device/lib/testing/test_pinout.h"
 #include "sw/device/lib/testing/usb_testutils.h"
 #include "sw/device/lib/testing/usb_testutils_controlep.h"
 #include "sw/device/lib/testing/usb_testutils_streams.h"
@@ -343,16 +347,13 @@ typedef struct usbdev_suspend_ctx {
   usbdev_retn_state_t retn_state;
 } usbdev_suspend_ctx_t;
 
-enum {
-  /**
-   * Retention SRAM start address
-   */
-  kRetSramBaseAddr = TOP_EGRET_SRAM_CTRL_RET_AON_RAM_BASE_ADDR,
-  /**
-   * Retention SRAM address at which we may store some state.
-   */
-  kRetSramOwnerAddr = kRetSramBaseAddr + offsetof(retention_sram_t, owner),
-};
+/**
+ * Retention SRAM address at which we may store some state.
+ */
+static uintptr_t ret_sram_owner_addr(void) {
+  return dt_sram_ctrl_memory_base(kDtSramCtrlRetAon, kDtSramCtrlMemoryRam) +
+         offsetof(retention_sram_t, owner);
+}
 
 // Total length of the configuration descriptor.
 #define CFG_DSCR_TOTAL_LEN \
@@ -751,16 +752,17 @@ bool ottf_handle_irq(uint32_t *exc_info, dt_instance_id_t devid,
  * Simple Retention SRAM writing (from sram_ctrl_sleep_sram_ret_contents_test.c)
  */
 static void retention_sram_store(const usbdev_retn_state_t *state) {
-  sram_ctrl_testutils_write(kRetSramOwnerAddr, (sram_ctrl_testutils_data_t){
-                                                   .words = (uint32_t *)state,
-                                                   .len = sizeof(*state) / 4});
+  sram_ctrl_testutils_write(
+      ret_sram_owner_addr(),
+      (sram_ctrl_testutils_data_t){.words = (uint32_t *)state,
+                                   .len = sizeof(*state) / 4});
 }
 
 /**
  * Simple Retention SRAM reading (from sram_ctrl_sleep_sram_ret_contents_test.c)
  */
 static void retention_sram_load(usbdev_retn_state_t *state) {
-  memcpy(state, (uint8_t *)kRetSramOwnerAddr, sizeof(*state));
+  memcpy(state, (uint8_t *)ret_sram_owner_addr(), sizeof(*state));
 }
 
 static void phase_set(usbdev_suspend_ctx_t *ctx, usbdev_suspend_phase_t phase) {
@@ -1042,7 +1044,7 @@ static status_t software_init(usbdev_suspend_ctx_t *ctx) {
   // upon being able to set up the state of the endpoints and device
   // registers again, rather than retaining the full software state in SRAM
   TRY(usb_testutils_init(ctx->usbdev, /*pinflip=*/false,
-                         /*en_diff_rcvr=*/true,
+                         /*en_diff_rcvr=*/kTestPinoutUsbdevHasDiffRcvr,
                          /*tx_use_d_se0=*/false));
 
   // Register our interest in link events
@@ -1839,9 +1841,9 @@ bool usbdev_suspend_test(usbdev_suspend_phase_t init_phase,
   // Initialize pinmux.
   CHECK_DIF_OK(dif_pinmux_init_from_dt(kPinmuxDt, &pinmux));
   pinmux_testutils_init(&pinmux);
-  CHECK_DIF_OK(dif_pinmux_input_select(&pinmux,
-                                       kTopEgretPinmuxPeripheralInUsbdevSense,
-                                       kTopEgretPinmuxInselIoc7));
+  CHECK_STATUS_OK(pinmux_testutils_connect(
+      &pinmux, dt_usbdev_periph_io(kDtUsbdev, kDtUsbdevPeriphIoSense),
+      kDtPeriphIoDirIn, kTestPinoutUsbdevSense));
 
   // Initialize pwrmgr.
   CHECK_DIF_OK(dif_pwrmgr_init_from_dt(kPwrmgrDt, &pwrmgr));

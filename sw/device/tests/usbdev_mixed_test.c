@@ -29,18 +29,20 @@ Thoughts:
   randomize the sending, trying, receiving and max_packets
 */
 
+#include "hw/top/dt/api.h"     // Generated.
+#include "hw/top/dt/pinmux.h"  // Generated.
+#include "hw/top/dt/usbdev.h"  // Generated.
 #include "sw/device/lib/dif/dif_pinmux.h"
 #include "sw/device/lib/runtime/log.h"
 #include "sw/device/lib/runtime/print.h"
 #include "sw/device/lib/testing/pinmux_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
+#include "sw/device/lib/testing/test_pinout.h"
 #include "sw/device/lib/testing/usb_testutils.h"
 #include "sw/device/lib/testing/usb_testutils_controlep.h"
 #include "sw/device/lib/testing/usb_testutils_diags.h"
 #include "sw/device/lib/testing/usb_testutils_streams.h"
-
-#include "hw/top_egret/sw/autogen/top_egret.h"  // Generated.
 
 // Number of streams to be tested
 #ifndef NUM_STREAMS
@@ -195,12 +197,11 @@ bool test_main(void) {
   transfer_bytes = (transfer_bytes + nstreams - 1) / nstreams;
   LOG_INFO(" - %u stream(s), 0x%x bytes each", nstreams, transfer_bytes);
 
-  CHECK_DIF_OK(dif_pinmux_init(
-      mmio_region_from_addr(TOP_EGRET_PINMUX_AON_BASE_ADDR), &pinmux));
+  CHECK_DIF_OK(dif_pinmux_init_from_dt(kDtPinmuxAon, &pinmux));
   pinmux_testutils_init(&pinmux);
-  CHECK_DIF_OK(dif_pinmux_input_select(&pinmux,
-                                       kTopEgretPinmuxPeripheralInUsbdevSense,
-                                       kTopEgretPinmuxInselIoc7));
+  CHECK_STATUS_OK(pinmux_testutils_connect(
+      &pinmux, dt_usbdev_periph_io(kDtUsbdev, kDtUsbdevPeriphIoSense),
+      kDtPeriphIoDirIn, kTestPinoutUsbdevSense));
 
   // Construct the test/stream flags to be used
   test_flags = (kSending ? kUsbdevStreamFlagRetrieve : 0U) |

@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -13,6 +14,9 @@
 // The test configures USB Endpoint 1 as a simpleserial endpoint which should
 // appear as /dev/ttyUSBx on a Linux-based host.
 
+#include "hw/top/dt/api.h"     // Generated.
+#include "hw/top/dt/pinmux.h"  // Generated.
+#include "hw/top/dt/usbdev.h"  // Generated.
 #include "sw/device/lib/dif/dif_pinmux.h"
 #include "sw/device/lib/runtime/ibex.h"
 #include "sw/device/lib/runtime/log.h"
@@ -20,10 +24,9 @@
 #include "sw/device/lib/testing/pinmux_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
+#include "sw/device/lib/testing/test_pinout.h"
 #include "sw/device/lib/testing/usb_testutils.h"
 #include "sw/device/lib/testing/usb_testutils_controlep.h"
-
-#include "hw/top_egret/sw/autogen/top_egret.h"  // Generated.
 
 /**
  * Configuration values for USB.
@@ -66,19 +69,19 @@ bool test_main(void) {
     LOG_INFO("Awaiting configuration from the host");
   }
 
-  CHECK_DIF_OK(dif_pinmux_init(
-      mmio_region_from_addr(TOP_EGRET_PINMUX_AON_BASE_ADDR), &pinmux));
+  CHECK_DIF_OK(dif_pinmux_init_from_dt(kDtPinmuxAon, &pinmux));
   pinmux_testutils_init(&pinmux);
-  CHECK_DIF_OK(dif_pinmux_input_select(&pinmux,
-                                       kTopEgretPinmuxPeripheralInUsbdevSense,
-                                       kTopEgretPinmuxInselIoc7));
+  CHECK_STATUS_OK(pinmux_testutils_connect(
+      &pinmux, dt_usbdev_periph_io(kDtUsbdev, kDtUsbdevPeriphIoSense),
+      kDtPeriphIoDirIn, kTestPinoutUsbdevSense));
 
   // Call `usbdev_init` here so that DPI will not start until the
   // simulation has finished all of the printing, which takes a while
   // if `--trace` was passed in.
-  CHECK_STATUS_OK(usb_testutils_init(&usbdev, /*pinflip=*/false,
-                                     /*en_diff_rcvr=*/true,
-                                     /*tx_use_d_se0=*/false));
+  CHECK_STATUS_OK(
+      usb_testutils_init(&usbdev, /*pinflip=*/false,
+                         /*en_diff_rcvr=*/kTestPinoutUsbdevHasDiffRcvr,
+                         /*tx_use_d_se0=*/false));
   CHECK_STATUS_OK(usb_testutils_controlep_init(
       &usbdev_control, &usbdev, 0, config_descriptors,
       sizeof(config_descriptors), NULL, 0));
