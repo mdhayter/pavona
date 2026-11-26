@@ -348,6 +348,10 @@ cc_library(
         "usbdev",
         ["HAS_USBDEV"],
         [],
+    ) + pavona_if_ip(
+        "pwm",
+        ["HAS_PWM"],
+        [],
     ),
     target_compatible_with = [PAVONA_CPU],
     deps = [

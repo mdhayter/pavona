@@ -31,6 +31,12 @@ const bool kTestPinoutUsbdevHasDiffRcvr = true;
 // I2C2 on the Pmod pads.
 const dt_i2c_t kTestPinoutPmodI2c = kDtI2c2;
 
+// PWM out on IOA8, sample start on IOA7.
+const test_pinout_pwm_test_pads_t kTestPinoutPwmTestPads = {
+    .pwm = kDtPadIoa8,
+    .sample_start = kDtPadIoa7,
+};
+
 void test_pinout_init_extra(dif_pinmux_t *pinmux) {
   // Enable pull-ups on UART0 RX
   // Pull-ups are available only on certain platforms.

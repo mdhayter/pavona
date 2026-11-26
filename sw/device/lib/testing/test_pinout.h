@@ -160,6 +160,22 @@ extern const dt_pad_t kTestPinoutUsbdevSense;
 extern const bool kTestPinoutUsbdevHasDiffRcvr;
 #endif  // HAS_USBDEV
 
+// HAS_PWM: defined on a top with a PWM block (see test_pinout_intf).
+#ifdef HAS_PWM
+/**
+ * The pads of the PWM test (`pwm_smoketest`), which the host samples with
+ * GPIO bit-banging. Only on a top with a PWM block.
+ */
+typedef struct test_pinout_pwm_test_pads {
+  /** The pad that PWM channel 0 drives, which the host samples. */
+  dt_pad_t pwm;
+  /** The pad that the host drives low while it samples, read by GPIO 0. */
+  dt_pad_t sample_start;
+} test_pinout_pwm_test_pads_t;
+
+extern const test_pinout_pwm_test_pads_t kTestPinoutPwmTestPads;
+#endif  // HAS_PWM
+
 /**
  * Pads of SPI host 1 when connected to the BoB.
  */
