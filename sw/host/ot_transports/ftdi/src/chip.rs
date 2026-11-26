@@ -28,6 +28,10 @@ pub trait Chip {
     /// The channel wired to the FPGA's JTAG port, if the transport can load
     /// bitstreams. It must not be one of `INTERFACES`.
     const FPGA_JTAG: Option<JtagCable> = None;
+
+    /// Whether the MPSSE channels have a high GPIO byte (`xcbus0-7`, GPIOH0-7
+    /// in FTDI's datasheets). The FT2232H has one; the FT4232H has none.
+    const HAS_CBUS: bool = false;
 }
 
 pub struct Ft4232hq {}
@@ -45,7 +49,8 @@ impl Chip for Ft4232hq {
 }
 
 /// The FT2232H on a Digilent Genesys 2 (USB PROG port). Channel A's ADBUS0-3
-/// carry SPI and ADBUS4-7 are GPIOs. Channel B is the board's JTAG cable: it is
+/// carry SPI and ADBUS4-7 are GPIOs; ACBUS0-7 (the board's DPTI signals) are
+/// GPIOs too. Channel B is the board's JTAG cable: it is
 /// opened only to load a bitstream, so other JTAG tools can use it otherwise.
 /// The board's console UART is a separate FT232R.
 pub struct Ft2232hGenesys2 {}
@@ -56,6 +61,7 @@ impl Chip for Ft2232hGenesys2 {
     const INTERFACES: &'static [ftdi::Interface] = &[ftdi::Interface::A];
     const SPI_INTERFACE: ftdi::Interface = ftdi::Interface::A;
     const SPI_CS_PIN: &'static str = "adbus3";
+    const HAS_CBUS: bool = true;
     // Digilent's JTAG layout (OpenOCD `ftdi layout_init 0x00e8 0x60eb`).
     const FPGA_JTAG: Option<JtagCable> = Some(JtagCable {
         interface: ftdi::Interface::B,

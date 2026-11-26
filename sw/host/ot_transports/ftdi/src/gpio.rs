@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -21,10 +22,20 @@ enum PinType {
     None,
 }
 
+/// Where a pin is: its MPSSE channel, which GPIO byte (low: `xdbus`, high:
+/// `xcbus`) and its bit in that byte.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct PinLocation {
+    pub interface: ftdi::Interface,
+    pub upper: bool,
+    pub bit: u8,
+}
+
 pub struct Pin {
     pin: RefCell<PinType>,
     ftdi: Rc<HashMap<ftdi::Interface, ftdi_embedded_hal::FtHal<ftdi::Device>>>,
     pinname: String,
+    has_cbus: bool,
 }
 
 impl Pin {
@@ -36,61 +47,92 @@ impl Pin {
             pin: RefCell::new(PinType::None),
             ftdi: ftdi.clone(),
             pinname,
+            has_cbus: C::HAS_CBUS,
         })
     }
 
-    fn map_outpin(&self) -> Result<ftdi_embedded_hal::OutputPin<ftdi::Device>> {
+    /// The channel, byte and bit of the pin named `xdbusN` or `xcbusN`. The
+    /// high-byte names (`xcbus0-7`) exist only on chips that have them.
+    pub(crate) fn location(&self) -> Result<PinLocation> {
         let pinname = self.pinname.to_lowercase();
-        let interface = match &pinname[0..1] {
-            "a" => ftdi::Interface::A,
-            "b" => ftdi::Interface::B,
-            "c" => ftdi::Interface::C,
-            "d" => ftdi::Interface::D,
-            &_ => return Err(GpioError::InvalidPinName(pinname).into()),
+        let invalid = || GpioError::InvalidPinName(self.pinname.to_owned());
+        let interface = match pinname.get(0..1) {
+            Some("a") => ftdi::Interface::A,
+            Some("b") => ftdi::Interface::B,
+            Some("c") => ftdi::Interface::C,
+            Some("d") => ftdi::Interface::D,
+            _ => return Err(invalid().into()),
         };
-        let hal = self
+        let (upper, bitstr) = match pinname.get(1..) {
+            Some(rest) if rest.starts_with("dbus") => (false, &rest[4..]),
+            Some(rest) if rest.starts_with("cbus") && self.has_cbus => (true, &rest[4..]),
+            _ => return Err(invalid().into()),
+        };
+        // A single digit 0-7.
+        let bit = match bitstr.as_bytes() {
+            [digit @ b'0'..=b'7'] => digit - b'0',
+            _ => return Err(invalid().into()),
+        };
+        Ok(PinLocation {
+            interface,
+            upper,
+            bit,
+        })
+    }
+
+    fn hal(&self, interface: ftdi::Interface) -> Result<&ftdi_embedded_hal::FtHal<ftdi::Device>> {
+        Ok(self
             .ftdi
             .get(&interface)
-            .ok_or_else(|| GpioError::InvalidPinName(pinname.clone()))?;
+            .ok_or_else(|| GpioError::InvalidPinName(self.pinname.to_owned()))?)
+    }
 
-        let pin = match &pinname[1..] {
-            "dbus0" => hal.ad0(),
-            "dbus1" => hal.ad1(),
-            "dbus2" => hal.ad2(),
-            "dbus3" => hal.ad3(),
-            "dbus4" => hal.ad4(),
-            "dbus5" => hal.ad5(),
-            "dbus6" => hal.ad6(),
-            "dbus7" => hal.ad7(),
-            _ => return Err(GpioError::InvalidPinName(self.pinname.to_owned()).into()),
+    fn map_outpin(&self) -> Result<ftdi_embedded_hal::OutputPin<ftdi::Device>> {
+        let loc = self.location()?;
+        let hal = self.hal(loc.interface)?;
+        let pin = match (loc.upper, loc.bit) {
+            (false, 0) => hal.ad0(),
+            (false, 1) => hal.ad1(),
+            (false, 2) => hal.ad2(),
+            (false, 3) => hal.ad3(),
+            (false, 4) => hal.ad4(),
+            (false, 5) => hal.ad5(),
+            (false, 6) => hal.ad6(),
+            (false, 7) => hal.ad7(),
+            (true, 0) => hal.c0(),
+            (true, 1) => hal.c1(),
+            (true, 2) => hal.c2(),
+            (true, 3) => hal.c3(),
+            (true, 4) => hal.c4(),
+            (true, 5) => hal.c5(),
+            (true, 6) => hal.c6(),
+            (true, 7) => hal.c7(),
+            _ => unreachable!(),
         }?;
         Ok(pin)
     }
 
     fn map_inpin(&self) -> Result<ftdi_embedded_hal::InputPin<ftdi::Device>> {
-        let pinname = self.pinname.to_lowercase();
-        let interface = match &pinname[0..1] {
-            "a" => ftdi::Interface::A,
-            "b" => ftdi::Interface::B,
-            "c" => ftdi::Interface::C,
-            "d" => ftdi::Interface::D,
-            &_ => return Err(GpioError::InvalidPinName(pinname).into()),
-        };
-        let hal = self
-            .ftdi
-            .get(&interface)
-            .ok_or_else(|| GpioError::InvalidPinName(pinname.clone()))?;
-
-        let pin = match &pinname[1..] {
-            "dbus0" => hal.adi0(),
-            "dbus1" => hal.adi1(),
-            "dbus2" => hal.adi2(),
-            "dbus3" => hal.adi3(),
-            "dbus4" => hal.adi4(),
-            "dbus5" => hal.adi5(),
-            "dbus6" => hal.adi6(),
-            "dbus7" => hal.adi7(),
-            _ => return Err(GpioError::InvalidPinName(self.pinname.to_owned()).into()),
+        let loc = self.location()?;
+        let hal = self.hal(loc.interface)?;
+        let pin = match (loc.upper, loc.bit) {
+            (false, 0) => hal.adi0(),
+            (false, 1) => hal.adi1(),
+            (false, 2) => hal.adi2(),
+            (false, 3) => hal.adi3(),
+            (false, 4) => hal.adi4(),
+            (false, 5) => hal.adi5(),
+            (false, 6) => hal.adi6(),
+            (false, 7) => hal.adi7(),
+            (true, 0) => hal.ci0(),
+            (true, 1) => hal.ci1(),
+            (true, 2) => hal.ci2(),
+            (true, 3) => hal.ci3(),
+            (true, 4) => hal.ci4(),
+            (true, 5) => hal.ci5(),
+            (true, 6) => hal.ci6(),
+            (true, 7) => hal.ci7(),
+            _ => unreachable!(),
         }?;
         Ok(pin)
     }
