@@ -7515,6 +7515,15 @@ pavona_test(
     srcs = ["uart_tx_rx_test.c"],
     broken = fpga_params(tags = ["broken"]),
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "clkmgr",
+                "pinmux",
+                "rv_plic",
+                "uart",
+            ],
+        ),
         EGRET_TEST_ENVS,
         #EGRET_CW340_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
@@ -7538,6 +7547,11 @@ pavona_test(
         ]),
         test_harness = "//sw/host/tests/chip/uart:uart_tx_rx",
     ),
+    local_defines = pavona_if_ip(
+        "lc_ctrl",
+        ["HAS_LC_CTRL"],
+        [],
+    ),
     silicon = silicon_params(
         test_cmd = " ".join([
             "--bootstrap=\"{firmware}\"",
@@ -7550,12 +7564,10 @@ pavona_test(
     verilator = verilator_params(tags = ["manual"]),
     deps = [
         "//hw/top:clkmgr_c_regs",
-        "//hw/top:lc_ctrl_c_regs",
         "//hw/top:pinmux_c_regs",
         "//hw/top/dt",
         "//sw/device/lib/base:mmio",
         "//sw/device/lib/dif:clkmgr",
-        "//sw/device/lib/dif:lc_ctrl",
         "//sw/device/lib/dif:rv_plic",
         "//sw/device/lib/dif:uart",
         "//sw/device/lib/runtime:hart",
@@ -7566,7 +7578,14 @@ pavona_test(
         "//sw/device/lib/testing/test_framework:ottf_console",
         "//sw/device/lib/testing/test_framework:ottf_main",
         "//sw/device/lib/testing/test_framework:ottf_utils",
-    ],
+    ] + pavona_if_ip(
+        "lc_ctrl",
+        [
+            "//hw/top:lc_ctrl_c_regs",
+            "//sw/device/lib/dif:lc_ctrl",
+        ],
+        [],
+    ),
 )
 
 pavona_test(
@@ -7687,6 +7706,13 @@ pavona_test(
     srcs = ["uart_baud_rate_test.c"],
     broken = fpga_params(tags = ["broken"]),
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "uart",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         {
@@ -7712,7 +7738,7 @@ pavona_test(
     # in CI/nightlies.
     verilator = verilator_params(tags = ["manual"]),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/arch:device",
         "//sw/device/lib/base:mmio",
         "//sw/device/lib/dif:pinmux",
@@ -7730,6 +7756,13 @@ pavona_test(
     srcs = ["uart_loopback_test.c"],
     broken = fpga_params(tags = ["broken"]),
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "pinmux",
+                "uart",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         {
@@ -7759,9 +7792,10 @@ pavona_test(
     # in CI/nightlies.
     verilator = verilator_params(tags = ["manual"]),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/arch:device",
         "//sw/device/lib/base:mmio",
+        "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:uart",
         "//sw/device/lib/runtime:hart",
         "//sw/device/lib/testing:uart_testutils",
@@ -7816,6 +7850,13 @@ pavona_test(
     srcs = ["uart_parity_break_test.c"],
     broken = fpga_params(tags = ["broken"]),
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "rv_plic",
+                "uart",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         {
