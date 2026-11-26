@@ -10,6 +10,7 @@ package(default_visibility = ["//visibility:public"])
 rust_library(
     name = "ftdi",
     srcs = [
+        "src/bitbang.rs",
         "src/chip.rs",
         "src/fpga.rs",
         "src/gpio.rs",

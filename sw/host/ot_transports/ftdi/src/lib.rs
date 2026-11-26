@@ -3,7 +3,7 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::rc::Rc;
@@ -12,7 +12,7 @@ use anyhow::Result;
 use serialport::SerialPortType;
 
 use opentitanlib::backend::{Backend, BackendOpts, define_interface};
-use opentitanlib::io::gpio::{GpioPin, PinMode};
+use opentitanlib::io::gpio::{GpioBitbanging, GpioPin, PinMode};
 use opentitanlib::io::spi::Target;
 use opentitanlib::io::uart::flow::SoftwareFlowControl;
 use opentitanlib::io::uart::serial::SerialPortUart;
@@ -24,6 +24,7 @@ use opentitanlib::transport::{
 use opentitanlib::util::fs::builtin_file;
 use opentitanlib::util::parse_int::ParseInt;
 
+pub mod bitbang;
 pub mod chip;
 pub mod fpga;
 pub mod gpio;
@@ -34,13 +35,34 @@ use chip::{Chip, Ft2232hGenesys2, Ft4232hq};
 #[derive(Default)]
 struct Inner {
     spi: Option<Rc<dyn Target>>,
-    gpio: HashMap<String, Rc<dyn GpioPin>>,
     uart: HashMap<String, Rc<dyn Uart>>,
 }
 
+/// One open MPSSE channel.
+pub struct Channel {
+    pub(crate) hal: RefCell<ftdi_embedded_hal::FtHal<ftdi::Device>>,
+    /// The transport's copy of the direction (1: output) of the low and high
+    /// GPIO bytes, saved after each change made through the HAL, which keeps
+    /// its own private. Bit-banging needs it to drive the pins it is not given
+    /// and to restore them afterwards.
+    pub(crate) saved_direction: Cell<[u8; 2]>,
+}
+
+/// The open MPSSE channels.
+pub(crate) type Channels = Rc<HashMap<ftdi::Interface, Channel>>;
+
+/// The MPSSE settings the channels are opened with, and restored to after
+/// bit-banging.
+pub(crate) fn mpsse_settings() -> ftdi_mpsse::MpsseSettings {
+    ftdi_mpsse::MpsseSettings {
+        clock_frequency: Some(8_000_000),
+        ..Default::default()
+    }
+}
+
 pub struct Ftdi<C: Chip> {
-    pub(crate) ftdi_interfaces:
-        Rc<HashMap<ftdi::Interface, ftdi_embedded_hal::FtHal<ftdi::Device>>>,
+    pub(crate) ftdi_interfaces: Channels,
+    gpio: bitbang::Pins,
     inner: RefCell<Inner>,
     phantom: std::marker::PhantomData<C>,
 }
@@ -54,12 +76,16 @@ impl<C: Chip> Ftdi<C> {
                 .open()?;
             ftdi_interfaces.insert(
                 *interface,
-                ftdi_embedded_hal::FtHal::init_freq(device, 8_000_000)?,
+                Channel {
+                    hal: RefCell::new(ftdi_embedded_hal::FtHal::init(device, &mpsse_settings())?),
+                    saved_direction: Cell::new([0, 0]),
+                },
             );
         }
 
         let ftdi_dev = Ftdi {
             ftdi_interfaces: Rc::new(ftdi_interfaces),
+            gpio: Rc::default(),
             inner: RefCell::default(),
             phantom: std::marker::PhantomData,
         };
@@ -106,7 +132,11 @@ impl<C: Chip> Ftdi<C> {
 impl<C: Chip> Transport for Ftdi<C> {
     fn capabilities(&self) -> Result<Capabilities> {
         Ok(Capabilities::new(
-            Capability::SPI | Capability::GPIO | Capability::UART | Capability::UART_NONBLOCKING,
+            Capability::SPI
+                | Capability::GPIO
+                | Capability::GPIO_BITBANGING
+                | Capability::UART
+                | Capability::UART_NONBLOCKING,
         ))
     }
 
@@ -120,8 +150,8 @@ impl<C: Chip> Transport for Ftdi<C> {
     }
 
     fn gpio_pin(&self, pinname: &str) -> Result<Rc<dyn GpioPin>> {
-        let mut inner = self.inner.borrow_mut();
-        Ok(match inner.gpio.entry(pinname.to_string()) {
+        let mut gpio = self.gpio.borrow_mut();
+        Ok(match gpio.entry(pinname.to_string()) {
             Entry::Vacant(v) => v
                 .insert(Rc::new(gpio::Pin::open::<C>(
                     &self.ftdi_interfaces,
@@ -144,6 +174,13 @@ impl<C: Chip> Transport for Ftdi<C> {
             )?));
         }
         Ok(inner.spi.as_ref().unwrap().clone())
+    }
+
+    fn gpio_bitbanging(&self) -> Result<Rc<dyn GpioBitbanging>> {
+        Ok(Rc::new(bitbang::Bitbanging::new(
+            &self.ftdi_interfaces,
+            &self.gpio,
+        )))
     }
 
     fn fpga_ops(&self) -> Result<&dyn FpgaOps> {

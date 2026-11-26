@@ -3,16 +3,14 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::rc::Rc;
+use std::cell::{Cell, RefCell};
 
 use anyhow::Result;
 use embedded_hal::digital::{InputPin, OutputPin};
 
 use opentitanlib::io::gpio::{GpioError, GpioPin, PinMode, PullMode};
 
-use super::Chip;
+use super::{Channel, Channels, Chip};
 
 #[derive(Default)]
 enum PinType {
@@ -33,18 +31,17 @@ pub(crate) struct PinLocation {
 
 pub struct Pin {
     pin: RefCell<PinType>,
-    ftdi: Rc<HashMap<ftdi::Interface, ftdi_embedded_hal::FtHal<ftdi::Device>>>,
+    mode: Cell<Option<PinMode>>,
+    ftdi: Channels,
     pinname: String,
     has_cbus: bool,
 }
 
 impl Pin {
-    pub fn open<C: Chip>(
-        ftdi: &Rc<HashMap<ftdi::Interface, ftdi_embedded_hal::FtHal<ftdi::Device>>>,
-        pinname: String,
-    ) -> Result<Self> {
+    pub fn open<C: Chip>(ftdi: &Channels, pinname: String) -> Result<Self> {
         Ok(Self {
             pin: RefCell::new(PinType::None),
+            mode: Cell::new(None),
             ftdi: ftdi.clone(),
             pinname,
             has_cbus: C::HAS_CBUS,
@@ -80,16 +77,38 @@ impl Pin {
         })
     }
 
-    fn hal(&self, interface: ftdi::Interface) -> Result<&ftdi_embedded_hal::FtHal<ftdi::Device>> {
+    /// The mode last set with `set_mode`, if any.
+    pub(crate) fn mode(&self) -> Option<PinMode> {
+        self.mode.get()
+    }
+
+    fn channel(&self, interface: ftdi::Interface) -> Result<&Channel> {
         Ok(self
             .ftdi
             .get(&interface)
             .ok_or_else(|| GpioError::InvalidPinName(self.pinname.to_owned()))?)
     }
 
+    /// Saves the pin's direction in the channel's copy, after the HAL has set
+    /// it on the chip.
+    fn save_direction(&self, loc: PinLocation, output: bool) {
+        let mask = 1 << loc.bit;
+        self.ftdi[&loc.interface]
+            .saved_direction
+            .update(|mut saved| {
+                let byte = &mut saved[loc.upper as usize];
+                if output {
+                    *byte |= mask;
+                } else {
+                    *byte &= !mask;
+                }
+                saved
+            });
+    }
+
     fn map_outpin(&self) -> Result<ftdi_embedded_hal::OutputPin<ftdi::Device>> {
         let loc = self.location()?;
-        let hal = self.hal(loc.interface)?;
+        let hal = self.channel(loc.interface)?.hal.borrow();
         let pin = match (loc.upper, loc.bit) {
             (false, 0) => hal.ad0(),
             (false, 1) => hal.ad1(),
@@ -109,12 +128,13 @@ impl Pin {
             (true, 7) => hal.c7(),
             _ => unreachable!(),
         }?;
+        self.save_direction(loc, true);
         Ok(pin)
     }
 
     fn map_inpin(&self) -> Result<ftdi_embedded_hal::InputPin<ftdi::Device>> {
         let loc = self.location()?;
-        let hal = self.hal(loc.interface)?;
+        let hal = self.channel(loc.interface)?.hal.borrow();
         let pin = match (loc.upper, loc.bit) {
             (false, 0) => hal.adi0(),
             (false, 1) => hal.adi1(),
@@ -134,6 +154,7 @@ impl Pin {
             (true, 7) => hal.ci7(),
             _ => unreachable!(),
         }?;
+        self.save_direction(loc, false);
         Ok(pin)
     }
 }
@@ -149,26 +170,38 @@ impl GpioPin for Pin {
 
     fn write(&self, value: bool) -> Result<()> {
         let mut pin = self.pin.borrow_mut();
-        if let PinType::Output(ref mut pin) = *pin {
-            if value {
-                pin.set_high()?;
-            } else {
-                pin.set_low()?;
+        match *pin {
+            PinType::Output(ref mut pin) => {
+                if value {
+                    pin.set_high()?;
+                } else {
+                    pin.set_low()?;
+                }
+                Ok(())
             }
-            return Ok(());
-        };
-        Err(GpioError::InvalidPinMode(0).into())
+            // An open-drain pin is released (an input) outside bit-banging,
+            // which chooses each pin's direction for a whole waveform.
+            PinType::Input(_) if self.mode.get() == Some(PinMode::OpenDrain) => {
+                if value {
+                    Ok(())
+                } else {
+                    Err(GpioError::UnsupportedPinMode(PinMode::OpenDrain).into())
+                }
+            }
+            _ => Err(GpioError::InvalidPinMode(0).into()),
+        }
     }
 
     fn set_mode(&self, mode: PinMode) -> Result<()> {
         let mut pin = self.pin.borrow_mut();
         *pin = match (&*pin, mode) {
-            (PinType::None, PinMode::Input) => PinType::Input(self.map_inpin()?),
-            (PinType::None, PinMode::PushPull | PinMode::OpenDrain) => {
-                PinType::Output(self.map_outpin()?)
+            (PinType::None, PinMode::Input | PinMode::OpenDrain) => {
+                PinType::Input(self.map_inpin()?)
             }
+            (PinType::None, PinMode::PushPull) => PinType::Output(self.map_outpin()?),
             _ => return Ok(()),
         };
+        self.mode.set(Some(mode));
         Ok(())
     }
 

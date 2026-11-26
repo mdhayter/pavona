@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::rc::Rc;
 
 use anyhow::Result;
@@ -14,21 +13,24 @@ use opentitanlib::io::gpio;
 use opentitanlib::io::spi::{AssertChipSelect, MaxSizes, SpiError, Target, Transfer, TransferMode};
 use opentitanlib::transport::TransportError;
 
+use crate::Channels;
+
 pub struct Spi<T> {
     spi: Rc<RefCell<ftdi_embedded_hal::Spi<ftdi::Device>>>,
     cs: T,
 }
 
 impl<T: gpio::GpioPin> Spi<T> {
-    pub fn open(
-        ftdi_interfaces: &Rc<HashMap<ftdi::Interface, ftdi_embedded_hal::FtHal<ftdi::Device>>>,
-        interface: ftdi::Interface,
-        cs: T,
-    ) -> Result<Self> {
-        let hal = ftdi_interfaces
+    pub fn open(ftdi_interfaces: &Channels, interface: ftdi::Interface, cs: T) -> Result<Self> {
+        let channel = ftdi_interfaces
             .get(&interface)
             .ok_or_else(|| SpiError::InvalidOption("spi interface".to_owned()))?;
-        let spi = hal.spi()?;
+        let spi = channel.hal.borrow().spi()?;
+        // The HAL has made ADBUS0 (SCK) and ADBUS1 (MOSI) outputs, ADBUS2
+        // (MISO) an input: save that in the channel's copy.
+        channel
+            .saved_direction
+            .update(|[lower, upper]| [(lower & !0x07) | 0x03, upper]);
         Ok(Spi {
             spi: Rc::new(RefCell::new(spi)),
             cs,
