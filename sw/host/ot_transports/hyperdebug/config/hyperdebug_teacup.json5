@@ -76,6 +76,16 @@
       "name": "IOA8",
       "alias_of": "CN7_2"
     },
+    // The pins of pwm_smoketest, where Egret's test pinout puts them
+    // (kTestPinoutPwmTestPads).
+    {
+      "name": "PWM_OUT",
+      "alias_of": "IOA8"
+    },
+    {
+      "name": "PWM_SAMPLE_START",
+      "alias_of": "IOA7"
+    },
     {
       "name": "IOB0",
       "alias_of": "CN9_25"

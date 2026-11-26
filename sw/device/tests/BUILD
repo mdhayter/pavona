@@ -3411,6 +3411,14 @@ pavona_test(
     name = "pwm_smoketest",
     srcs = ["pwm_smoketest.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "gpio",
+                "pinmux",
+                "pwm",
+            ],
+        ),
         EGRET_TEST_ENVS,
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         {
@@ -3433,7 +3441,9 @@ pavona_test(
         test_harness = "//sw/host/tests/chip/pwm_smoketest",
     ),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top:test_pinout",
+        "//hw/top/dt",
+        "//sw/device/lib/arch:device",
         "//sw/device/lib/dif:gpio",
         "//sw/device/lib/dif:pinmux",
         "//sw/device/lib/dif:pwm",
@@ -3441,6 +3451,7 @@ pavona_test(
         "//sw/device/lib/runtime:ibex",
         "//sw/device/lib/runtime:irq",
         "//sw/device/lib/runtime:log",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing/test_framework:ottf_main",
         "//sw/device/lib/testing/test_framework:ottf_utils",
     ],

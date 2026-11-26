@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -121,8 +122,11 @@ fn main() -> Result<()> {
     let clocks = test_utils::object::symbol_data(&object, "kClocksHz")?;
     let duty_cycles = test_utils::object::symbol_data(&object, "kDutyCycles")?;
 
-    //The device uses IOA8 for the pwm, and the host uses the IOA7 to let the device know when the sampling started.
-    let gpio_pins = transport.gpio_pins(&["IOA8", "IOA7"].map(str::to_owned))?;
+    // The device drives PWM_OUT with the pwm, and the host drives
+    // PWM_SAMPLE_START to let the device know when the sampling started. The
+    // transport configuration aliases them to the pads in the top's test
+    // pinout (kTestPinoutPwmTestPads).
+    let gpio_pins = transport.gpio_pins(&["PWM_OUT", "PWM_SAMPLE_START"].map(str::to_owned))?;
     for pin in &gpio_pins {
         pin.set_mode(PinMode::OpenDrain)?;
     }
