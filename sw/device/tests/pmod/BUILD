@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright Mark Hayter.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -17,6 +18,7 @@ load(
     "fpga_cw310",
 )
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
+load("//hw/top:defs.bzl", "pavona_test_envs")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -350,6 +352,14 @@ pavona_test(
     name = "i2c_host_hdc1080_humidity_temp_test",
     srcs = ["i2c_host_hdc1080_humidity_temp_test.c"],
     exec_env = dicts.add(
+        pavona_test_envs(
+            ["fpga_test_rom"],
+            required_ips = [
+                "i2c",
+                "pinmux",
+                "rv_core_ibex",
+            ],
+        ),
         EGRET_SILICON_OWNER_ROM_EXT_ENVS,
         {":top_egret_fpga_cw310_sival_rom_ext_no_hyper": None},
     ),
@@ -363,16 +373,19 @@ pavona_test(
         tags = ["pmod"],  # Requires the PMOD::BoB.
     ),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/arch:device",
         "//sw/device/lib/base:memory",
         "//sw/device/lib/base:mmio",
         "//sw/device/lib/dif:i2c",
+        "//sw/device/lib/dif:pinmux",
+        "//sw/device/lib/dif:rv_core_ibex",
         "//sw/device/lib/runtime:hart",
         "//sw/device/lib/runtime:log",
         "//sw/device/lib/runtime:print",
         "//sw/device/lib/testing:i2c_testutils",
         "//sw/device/lib/testing:rv_core_ibex_testutils",
+        "//sw/device/lib/testing:test_pinout_intf",
         "//sw/device/lib/testing/test_framework:ottf_main",
     ],
 )

@@ -1,8 +1,12 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright Mark Hayter.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 #include <assert.h>
 
+#include "hw/top/dt/i2c.h"
+#include "hw/top/dt/pinmux.h"
+#include "hw/top/dt/rv_core_ibex.h"
 #include "sw/device/lib/arch/device.h"
 #include "sw/device/lib/base/macros.h"
 #include "sw/device/lib/base/memory.h"
@@ -16,9 +20,9 @@
 #include "sw/device/lib/testing/rv_core_ibex_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
+#include "sw/device/lib/testing/test_pinout.h"
 
 #include "hw/top/i2c_regs.h"  // Generated.
-#include "hw/top_egret/sw/autogen/top_egret.h"
 
 OTTF_DEFINE_TEST_CONFIG();
 
@@ -100,18 +104,12 @@ static status_t read_humidity(void) {
 }
 
 static status_t test_init(void) {
-  mmio_region_t base_addr =
-      mmio_region_from_addr(TOP_EGRET_RV_CORE_IBEX_CFG_BASE_ADDR);
+  TRY(dif_rv_core_ibex_init_from_dt(kDtRvCoreIbex, &rv_core_ibex));
+  TRY(dif_i2c_init_from_dt(kTestPinoutPmodI2c, &i2c));
+  TRY(dif_pinmux_init_from_dt(kDtPinmuxAon, &pinmux));
 
-  TRY(dif_rv_core_ibex_init(base_addr, &rv_core_ibex));
-
-  base_addr = mmio_region_from_addr(TOP_EGRET_I2C2_BASE_ADDR);
-  TRY(dif_i2c_init(base_addr, &i2c));
-
-  base_addr = mmio_region_from_addr(TOP_EGRET_PINMUX_AON_BASE_ADDR);
-  TRY(dif_pinmux_init(base_addr, &pinmux));
-
-  TRY(i2c_testutils_select_pinmux(&pinmux, 2, I2cPinmuxPlatformIdCw310Pmod));
+  TRY(i2c_testutils_select_pinmux(&pinmux, (uint8_t)kTestPinoutPmodI2c,
+                                  I2cPinmuxPlatformIdCw310Pmod));
 
   TRY(dif_i2c_host_set_enabled(&i2c, kDifToggleEnabled));
 
