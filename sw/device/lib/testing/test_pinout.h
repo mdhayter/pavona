@@ -133,6 +133,12 @@ OT_WARN_UNUSED_RESULT
 status_t test_pinout_i2c_pads(dt_i2c_t i2c_dt,
                               i2c_pinmux_platform_id_t platform,
                               dt_pad_t *sda_pad, dt_pad_t *scl_pad);
+
+/**
+ * The I2C instance that tests use for a device on the board's I2C Pmod
+ * (`I2cPinmuxPlatformIdCw310Pmod` pads). Only on a top with I2C.
+ */
+extern const dt_i2c_t kTestPinoutPmodI2c;
 #endif  // HAS_I2C
 
 // HAS_USBDEV: defined on a top with a USB device (see test_pinout_intf).

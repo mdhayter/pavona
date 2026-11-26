@@ -77,6 +77,9 @@ status_t test_pinout_i2c_pads(dt_i2c_t i2c_dt,
   return OK_STATUS();
 }
 
+// I2C0, Dragonfly's only I2C, on its dedicated pads.
+const dt_i2c_t kTestPinoutPmodI2c = kDtI2c0;
+
 status_t test_pinout_spi_host1_pads(spi_pinmux_platform_id_t platform_id,
                                     test_pinout_spi_host1_pads_t *pads) {
   return UNIMPLEMENTED();

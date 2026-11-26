@@ -28,6 +28,9 @@ const dt_pad_t kTestPinoutUsbdevSense = kDtPadIoc7;
 // The chip level connects a USB differential receiver to `usb_rx_d`.
 const bool kTestPinoutUsbdevHasDiffRcvr = true;
 
+// I2C2 on the Pmod pads.
+const dt_i2c_t kTestPinoutPmodI2c = kDtI2c2;
+
 void test_pinout_init_extra(dif_pinmux_t *pinmux) {
   // Enable pull-ups on UART0 RX
   // Pull-ups are available only on certain platforms.
