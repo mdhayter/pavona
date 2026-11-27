@@ -4451,7 +4451,6 @@ cc_library(
     hdrs = ["spi_host_flash_test_impl.h"],
     target_compatible_with = [PAVONA_CPU],
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
         "//sw/device/lib/arch:device",
         "//sw/device/lib/base:memory",
         "//sw/device/lib/base:mmio",

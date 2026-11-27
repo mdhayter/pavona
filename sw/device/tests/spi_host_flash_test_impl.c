@@ -15,8 +15,6 @@
 #include "sw/device/lib/testing/spi_flash_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 
-#include "hw/top_egret/sw/autogen/top_egret.h"
-
 #define MODULE_ID MAKE_MODULE_ID('s', 'h', 'f')
 
 // A data pattern to program into the chip:
