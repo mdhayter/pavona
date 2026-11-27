@@ -4537,6 +4537,31 @@ pavona_test(
 )
 
 pavona_test(
+    name = "spi_host_spansion_flash_test",
+    srcs = ["spi_host_spansion_flash_test.c"],
+    exec_env = pavona_test_envs(
+        ["fpga_test_rom"],
+        required_ips = ["spi_host"],
+    ),
+    # Requires a Spansion S25FL-S flash on spi_host0, and erases the bottom of
+    # it (on the Genesys 2, the board's configuration flash).
+    fpga = fpga_params(tags = ["manual"]),
+    deps = [
+        ":spi_host_flash_test_impl",
+        "//hw/top/dt",
+        "//sw/device/lib/arch:device",
+        "//sw/device/lib/base:bitfield",
+        "//sw/device/lib/base:macros",
+        "//sw/device/lib/base:memory",
+        "//sw/device/lib/dif:spi_host",
+        "//sw/device/lib/runtime:log",
+        "//sw/device/lib/testing:spi_device_testutils",
+        "//sw/device/lib/testing:spi_flash_testutils",
+        "//sw/device/lib/testing/test_framework:ottf_main",
+    ],
+)
+
+pavona_test(
     name = "spi_host_config_test",
     srcs = ["spi_host_config_test.c"],
     exec_env = dicts.add(
